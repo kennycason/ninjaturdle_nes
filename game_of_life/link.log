@@ -1,0 +1,292 @@
+Modules list:
+-------------
+crt0.o:
+    CODE              Offs=000000  Size=000DCF  Align=00001  Fill=0000
+    ZEROPAGE          Offs=000000  Size=00002C  Align=00001  Fill=0000
+    HEADER            Offs=000000  Size=000010  Align=00001  Fill=0000
+    STARTUP           Offs=000000  Size=0000C2  Align=00001  Fill=0000
+    VECTORS           Offs=000000  Size=000006  Align=00001  Fill=0000
+game_of_life.o:
+    CODE              Offs=000DCF  Size=000670  Align=00001  Fill=0000
+    RODATA            Offs=000000  Size=000024  Align=00001  Fill=0000
+    BSS               Offs=000000  Size=000007  Align=00001  Fill=0000
+    DATA              Offs=000000  Size=0001C6  Align=00001  Fill=0000
+chr_rom.o:
+    CHRROM            Offs=000000  Size=001000  Align=00001  Fill=0000
+/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(add.o):
+    CODE              Offs=00143F  Size=00001C  Align=00001  Fill=0000
+/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(bneg.o):
+    CODE              Offs=00145B  Size=00000E  Align=00001  Fill=0000
+/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(condes.o):
+    CODE              Offs=001469  Size=00000C  Align=00001  Fill=0000
+    DATA              Offs=0001C6  Size=000025  Align=00001  Fill=0000
+    ONCE              Offs=000000  Size=00000C  Align=00001  Fill=0000
+/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(copydata.o):
+    CODE              Offs=001475  Size=00002D  Align=00001  Fill=0000
+/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(decsp4.o):
+    CODE              Offs=0014A2  Size=00000D  Align=00001  Fill=0000
+/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(incsp2.o):
+    CODE              Offs=0014AF  Size=000016  Align=00001  Fill=0000
+/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(mod.o):
+    CODE              Offs=0014C5  Size=000011  Align=00001  Fill=0000
+/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(mul8.o):
+    CODE              Offs=0014D6  Size=00003A  Align=00001  Fill=0000
+/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(mulax9.o):
+    CODE              Offs=001510  Size=000017  Align=00001  Fill=0000
+/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(negabs.o):
+    CODE              Offs=001527  Size=000012  Align=00001  Fill=0000
+/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(popa.o):
+    CODE              Offs=001539  Size=00000C  Align=00001  Fill=0000
+/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(popptr1.o):
+    CODE              Offs=001545  Size=00000E  Align=00001  Fill=0000
+/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(pusha.o):
+    CODE              Offs=001553  Size=000016  Align=00001  Fill=0000
+/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(pushax.o):
+    CODE              Offs=001569  Size=00001A  Align=00001  Fill=0000
+/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(shelp.o):
+    CODE              Offs=001583  Size=000020  Align=00001  Fill=0000
+/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(udiv.o):
+    CODE              Offs=0015A3  Size=00004F  Align=00001  Fill=0000
+/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(zerobss.o):
+    CODE              Offs=0015F2  Size=000023  Align=00001  Fill=0000
+/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(zeropage.o):
+    ZEROPAGE          Offs=00002C  Size=00001A  Align=00001  Fill=0000
+
+
+Segment list:
+-------------
+Name                   Start     End    Size  Align
+----------------------------------------------------
+CHRROM                000000  000FFF  001000  00001
+HEADER                000000  00000F  000010  00001
+ZEROPAGE              000000  000045  000046  00001
+BSS                   000400  000406  000007  00001
+DATA                  000407  0005F1  0001EB  00001
+STARTUP               008000  0080C1  0000C2  00001
+CODE                  0080C2  0096D6  001615  00001
+RODATA                0096D7  0096FA  000024  00001
+ONCE                  0096FB  009706  00000C  00001
+VECTORS               00FFFA  00FFFF  000006  00001
+
+
+Exports list by name:
+---------------------
+NES_CHR_BANKS             000001 REA    NES_MAPPER                000000 REA    
+NES_MIRRORING             000000 REA    NES_PRG_BANKS             000002 REA    
+__BSS_RUN__               000400 RLA    __BSS_SIZE__              000007 REA    
+__CONSTRUCTOR_COUNT__     000000 REA    __CONSTRUCTOR_TABLE__     000000 RLA    
+__DATA_LOAD__             009707 RLA    __DATA_RUN__              000407 RLA    
+__DATA_SIZE__             0001EB REA    __DESTRUCTOR_COUNT__      000000 REA    
+__DESTRUCTOR_TABLE__      0096FB RLA    __RAM_SIZE__              000300 REA    
+__RAM_START__             000400 RLA    __STARTUP__               000001 REA    
+_main                     0094C7 RLA    _oam_clear                008410 RLA    
+_oam_spr                  008430 RLA    _pad_trigger              00862C RLA    
+_pal_spr                  008397 RLA    _ppu_on_all               0083EB RLA    
+_ppu_wait_frame           0084B3 RLA    _rand8                    008651 RLA    
+bnega                     009521 RLA    copydata                  009537 RLA    
+decsp4                    009564 RLA    incsp2                    009579 RLA    
+initlib                   0096FB RLA    mulax9                    0095D2 RLA    
+negax                     0095ED RLA    popa                      0095FB RLA    
+popax                     009571 RLA    popptr1                   009607 RLA    
+popsargsudiv16            009645 RLA    ptr1                      000034 RLZ    
+ptr2                      000036 RLZ    ptr4                      00003A RLZ    
+pusha                     009619 RLA    pusha0                    00962D RLA    
+pushax                    00962F RLA    sp                        00002C RLZ    
+sreg                      00002E RLZ    tmp1                      00003C RLZ    
+tmp2                      00003D RLZ    tosaddax                  009503 RLA    
+tosmoda0                  009587 RLA    tosmula0                  009598 RLA    
+udiv16                    009676 RLA    zerobss                   0096B4 RLA    
+
+
+
+Exports list by value:
+----------------------
+__CONSTRUCTOR_COUNT__     000000 REA    __DESTRUCTOR_COUNT__      000000 REA    
+NES_MAPPER                000000 REA    NES_MIRRORING             000000 REA    
+__CONSTRUCTOR_TABLE__     000000 RLA    __STARTUP__               000001 REA    
+NES_CHR_BANKS             000001 REA    NES_PRG_BANKS             000002 REA    
+__BSS_SIZE__              000007 REA    sp                        00002C RLZ    
+sreg                      00002E RLZ    ptr1                      000034 RLZ    
+ptr2                      000036 RLZ    ptr4                      00003A RLZ    
+tmp1                      00003C RLZ    tmp2                      00003D RLZ    
+__DATA_SIZE__             0001EB REA    __RAM_SIZE__              000300 REA    
+__BSS_RUN__               000400 RLA    __RAM_START__             000400 RLA    
+__DATA_RUN__              000407 RLA    _pal_spr                  008397 RLA    
+_ppu_on_all               0083EB RLA    _oam_clear                008410 RLA    
+_oam_spr                  008430 RLA    _ppu_wait_frame           0084B3 RLA    
+_pad_trigger              00862C RLA    _rand8                    008651 RLA    
+_main                     0094C7 RLA    tosaddax                  009503 RLA    
+bnega                     009521 RLA    copydata                  009537 RLA    
+decsp4                    009564 RLA    popax                     009571 RLA    
+incsp2                    009579 RLA    tosmoda0                  009587 RLA    
+tosmula0                  009598 RLA    mulax9                    0095D2 RLA    
+negax                     0095ED RLA    popa                      0095FB RLA    
+popptr1                   009607 RLA    pusha                     009619 RLA    
+pusha0                    00962D RLA    pushax                    00962F RLA    
+popsargsudiv16            009645 RLA    udiv16                    009676 RLA    
+zerobss                   0096B4 RLA    initlib                   0096FB RLA    
+__DESTRUCTOR_TABLE__      0096FB RLA    __DATA_LOAD__             009707 RLA    
+
+
+
+Imports list:
+-------------
+NES_CHR_BANKS ([linker generated]):
+    crt0.o                    ../neslib/crt0.s:24
+NES_MAPPER ([linker generated]):
+    crt0.o                    ../neslib/crt0.s:24
+NES_MIRRORING ([linker generated]):
+    crt0.o                    ../neslib/crt0.s:24
+NES_PRG_BANKS ([linker generated]):
+    crt0.o                    ../neslib/crt0.s:24
+__BSS_RUN__ ([linker generated]):
+    zerobss.o                 common/zerobss.s:8
+__BSS_SIZE__ ([linker generated]):
+    zerobss.o                 common/zerobss.s:8
+__CONSTRUCTOR_COUNT__ ([linker generated]):
+    condes.o                  runtime/condes.s:18
+__CONSTRUCTOR_TABLE__ ([linker generated]):
+    condes.o                  runtime/condes.s:18
+__DATA_LOAD__ ([linker generated]):
+    copydata.o                common/copydata.s:8
+__DATA_RUN__ ([linker generated]):
+    copydata.o                common/copydata.s:8
+__DATA_SIZE__ ([linker generated]):
+    copydata.o                common/copydata.s:8
+__DESTRUCTOR_COUNT__ ([linker generated]):
+    condes.o                  runtime/condes.s:19
+__DESTRUCTOR_TABLE__ ([linker generated]):
+    condes.o                  runtime/condes.s:19
+__RAM_SIZE__ ([linker generated]):
+    crt0.o                    ../neslib/crt0.s:19
+__RAM_START__ ([linker generated]):
+    crt0.o                    ../neslib/crt0.s:19
+__STARTUP__ (crt0.o):
+    game_of_life.o            game_of_life.s:13
+_main (game_of_life.o):
+    crt0.o                    ../neslib/crt0.s:16
+_oam_clear (crt0.o):
+    game_of_life.o            game_of_life.s:17
+_oam_spr (crt0.o):
+    game_of_life.o            game_of_life.s:18
+_pad_trigger (crt0.o):
+    game_of_life.o            game_of_life.s:19
+_pal_spr (crt0.o):
+    game_of_life.o            game_of_life.s:14
+_ppu_on_all (crt0.o):
+    game_of_life.o            game_of_life.s:16
+_ppu_wait_frame (crt0.o):
+    game_of_life.o            game_of_life.s:15
+_rand8 (crt0.o):
+    game_of_life.o            game_of_life.s:20
+bnega (bneg.o):
+    game_of_life.o            game_of_life.s:1730
+    game_of_life.o            game_of_life.s:1730
+copydata (copydata.o):
+    crt0.o                    ../neslib/crt0.s:16
+decsp4 (decsp4.o):
+    game_of_life.o            game_of_life.s:1730
+incsp2 (incsp2.o):
+    popptr1.o                 runtime/popptr1.s:8
+    game_of_life.o            game_of_life.s:1730
+    game_of_life.o            game_of_life.s:1730
+    game_of_life.o            game_of_life.s:1730
+initlib (condes.o):
+    crt0.o                    ../neslib/crt0.s:16
+mulax9 (mulax9.o):
+    game_of_life.o            game_of_life.s:1730
+negax (negabs.o):
+    shelp.o                   runtime/shelp.s:11
+    mod.o                     runtime/mod.s:11
+popa (popa.o):
+    crt0.o                    ../neslib/crt0.s:16
+popax (incsp2.o):
+    shelp.o                   runtime/shelp.s:11
+    crt0.o                    ../neslib/crt0.s:16
+popptr1 (popptr1.o):
+    udiv.o                    runtime/udiv.s:9
+    mul8.o                    runtime/mul8.s:9
+popsargsudiv16 (shelp.o):
+    mod.o                     runtime/mod.s:11
+ptr1 (zeropage.o):
+    zerobss.o                 common/zerobss.s:9
+    udiv.o                    runtime/udiv.s:10
+    shelp.o                   runtime/shelp.s:12
+    popptr1.o                 runtime/popptr1.s:9
+    mulax9.o                  runtime/mulax9.s:10
+    mul8.o                    runtime/mul8.s:10
+    copydata.o                common/copydata.s:9
+    game_of_life.o            game_of_life.s:11
+ptr2 (zeropage.o):
+    copydata.o                common/copydata.s:9
+ptr4 (zeropage.o):
+    udiv.o                    runtime/udiv.s:10
+    shelp.o                   runtime/shelp.s:12
+    mul8.o                    runtime/mul8.s:10
+pusha (pusha.o):
+    game_of_life.o            game_of_life.s:1730
+    game_of_life.o            game_of_life.s:1730
+    game_of_life.o            game_of_life.s:1730
+    game_of_life.o            game_of_life.s:1730
+    game_of_life.o            game_of_life.s:1730
+pusha0 (pushax.o):
+    game_of_life.o            game_of_life.s:1730
+    game_of_life.o            game_of_life.s:1730
+    game_of_life.o            game_of_life.s:1730
+    game_of_life.o            game_of_life.s:1730
+    game_of_life.o            game_of_life.s:1730
+    game_of_life.o            game_of_life.s:1730
+    game_of_life.o            game_of_life.s:1730
+pushax (pushax.o):
+    game_of_life.o            game_of_life.s:1730
+    game_of_life.o            game_of_life.s:1730
+    game_of_life.o            game_of_life.s:1730
+    game_of_life.o            game_of_life.s:1730
+    game_of_life.o            game_of_life.s:1730
+    game_of_life.o            game_of_life.s:1730
+    game_of_life.o            game_of_life.s:1730
+    game_of_life.o            game_of_life.s:1730
+sp (zeropage.o):
+    pushax.o                  runtime/pushax.s:8
+    pusha.o                   runtime/pusha.s:8
+    popptr1.o                 runtime/popptr1.s:9
+    popa.o                    runtime/popa.s:8
+    incsp2.o                  runtime/incsp2.s:8
+    decsp4.o                  runtime/decsp4.s:8
+    add.o                     runtime/add.s:12
+    game_of_life.o            game_of_life.s:10
+    crt0.o                    /Users/kennycason/code/nes/tools/cc65/asminc/zeropage.inc:11
+sreg (zeropage.o):
+    udiv.o                    runtime/udiv.s:10
+    mod.o                     runtime/mod.s:12
+tmp1 (zeropage.o):
+    shelp.o                   runtime/shelp.s:12
+    mod.o                     runtime/mod.s:12
+    copydata.o                common/copydata.s:9
+    add.o                     runtime/add.s:12
+tmp2 (zeropage.o):
+    shelp.o                   runtime/shelp.s:12
+tosaddax (add.o):
+    game_of_life.o            game_of_life.s:1730
+    game_of_life.o            game_of_life.s:1730
+    game_of_life.o            game_of_life.s:1730
+    game_of_life.o            game_of_life.s:1730
+    game_of_life.o            game_of_life.s:1730
+    game_of_life.o            game_of_life.s:1730
+    game_of_life.o            game_of_life.s:1730
+    game_of_life.o            game_of_life.s:1730
+tosmoda0 (mod.o):
+    game_of_life.o            game_of_life.s:1730
+tosmula0 (mul8.o):
+    game_of_life.o            game_of_life.s:1730
+    game_of_life.o            game_of_life.s:1730
+    game_of_life.o            game_of_life.s:1730
+    game_of_life.o            game_of_life.s:1730
+    game_of_life.o            game_of_life.s:1730
+    game_of_life.o            game_of_life.s:1730
+    game_of_life.o            game_of_life.s:1730
+udiv16 (udiv.o):
+    shelp.o                   runtime/shelp.s:11
+zerobss (zerobss.o):
+    crt0.o                    ../neslib/crt0.s:16
+
