@@ -1,0 +1,183 @@
+Modules list:
+-------------
+crt0.o:
+    CODE              Offs=000000  Size=000DCF  Align=00001  Fill=0000
+    ZEROPAGE          Offs=000000  Size=00002C  Align=00001  Fill=0000
+    HEADER            Offs=000000  Size=000010  Align=00001  Fill=0000
+    STARTUP           Offs=000000  Size=0000C2  Align=00001  Fill=0000
+    VECTORS           Offs=000000  Size=000006  Align=00001  Fill=0000
+spritesheet_demo.o:
+    CODE              Offs=000DCF  Size=0000B8  Align=00001  Fill=0000
+    RODATA            Offs=000000  Size=000020  Align=00001  Fill=0000
+    BSS               Offs=000000  Size=000002  Align=00001  Fill=0000
+chr_rom.o:
+    CHRROM            Offs=000000  Size=001000  Align=00001  Fill=0000
+/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(addysp.o):
+    CODE              Offs=000E87  Size=00000E  Align=00001  Fill=0000
+/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(condes.o):
+    CODE              Offs=000E95  Size=00000C  Align=00001  Fill=0000
+    DATA              Offs=000000  Size=000025  Align=00001  Fill=0000
+    ONCE              Offs=000000  Size=00000C  Align=00001  Fill=0000
+/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(copydata.o):
+    CODE              Offs=000EA1  Size=00002D  Align=00001  Fill=0000
+/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(decsp4.o):
+    CODE              Offs=000ECE  Size=00000D  Align=00001  Fill=0000
+/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(decsp6.o):
+    CODE              Offs=000EDB  Size=00000D  Align=00001  Fill=0000
+/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(incsp2.o):
+    CODE              Offs=000EE8  Size=000016  Align=00001  Fill=0000
+/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(incsp6.o):
+    CODE              Offs=000EFE  Size=000005  Align=00001  Fill=0000
+/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(popa.o):
+    CODE              Offs=000F03  Size=00000C  Align=00001  Fill=0000
+/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(zerobss.o):
+    CODE              Offs=000F0F  Size=000023  Align=00001  Fill=0000
+/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(zeropage.o):
+    ZEROPAGE          Offs=00002C  Size=00001A  Align=00001  Fill=0000
+
+
+Segment list:
+-------------
+Name                   Start     End    Size  Align
+----------------------------------------------------
+CHRROM                000000  000FFF  001000  00001
+HEADER                000000  00000F  000010  00001
+ZEROPAGE              000000  000045  000046  00001
+BSS                   000400  000401  000002  00001
+DATA                  000402  000426  000025  00001
+STARTUP               008000  0080C1  0000C2  00001
+CODE                  0080C2  008FF3  000F32  00001
+RODATA                008FF4  009013  000020  00001
+ONCE                  009014  00901F  00000C  00001
+VECTORS               00FFFA  00FFFF  000006  00001
+
+
+Exports list by name:
+---------------------
+NES_CHR_BANKS             000001 REA    NES_MAPPER                000000 REA    
+NES_MIRRORING             000000 REA    NES_PRG_BANKS             000002 REA    
+__BSS_RUN__               000400 RLA    __BSS_SIZE__              000002 REA    
+__CONSTRUCTOR_COUNT__     000000 REA    __CONSTRUCTOR_TABLE__     000000 RLA    
+__DATA_LOAD__             009020 RLA    __DATA_RUN__              000402 RLA    
+__DATA_SIZE__             000025 REA    __DESTRUCTOR_COUNT__      000000 REA    
+__DESTRUCTOR_TABLE__      009014 RLA    __RAM_SIZE__              000300 REA    
+__RAM_START__             000400 RLA    __STARTUP__               000001 REA    
+_main                     008F33 RLA    _oam_clear                008410 RLA    
+_oam_spr                  008430 RLA    _pad_poll                 0085EC RLA    
+_pal_spr                  008397 RLA    _ppu_on_all               0083EB RLA    
+_ppu_wait_frame           0084B3 RLA    addysp                    008F4A RLA    
+copydata                  008F63 RLA    decsp4                    008F90 RLA    
+decsp6                    008F9D RLA    incsp6                    008FC0 RLA    
+initlib                   009014 RLA    popa                      008FC5 RLA    
+popax                     008FAA RLA    ptr1                      000034 RLZ    
+ptr2                      000036 RLZ    sp                        00002C RLZ    
+tmp1                      00003C RLZ    zerobss                   008FD1 RLA    
+
+
+
+Exports list by value:
+----------------------
+__CONSTRUCTOR_COUNT__     000000 REA    NES_MIRRORING             000000 REA    
+NES_MAPPER                000000 REA    __CONSTRUCTOR_TABLE__     000000 RLA    
+__DESTRUCTOR_COUNT__      000000 REA    __STARTUP__               000001 REA    
+NES_CHR_BANKS             000001 REA    __BSS_SIZE__              000002 REA    
+NES_PRG_BANKS             000002 REA    __DATA_SIZE__             000025 REA    
+sp                        00002C RLZ    ptr1                      000034 RLZ    
+ptr2                      000036 RLZ    tmp1                      00003C RLZ    
+__RAM_SIZE__              000300 REA    __BSS_RUN__               000400 RLA    
+__RAM_START__             000400 RLA    __DATA_RUN__              000402 RLA    
+_pal_spr                  008397 RLA    _ppu_on_all               0083EB RLA    
+_oam_clear                008410 RLA    _oam_spr                  008430 RLA    
+_ppu_wait_frame           0084B3 RLA    _pad_poll                 0085EC RLA    
+_main                     008F33 RLA    addysp                    008F4A RLA    
+copydata                  008F63 RLA    decsp4                    008F90 RLA    
+decsp6                    008F9D RLA    popax                     008FAA RLA    
+incsp6                    008FC0 RLA    popa                      008FC5 RLA    
+zerobss                   008FD1 RLA    __DESTRUCTOR_TABLE__      009014 RLA    
+initlib                   009014 RLA    __DATA_LOAD__             009020 RLA    
+
+
+
+Imports list:
+-------------
+NES_CHR_BANKS ([linker generated]):
+    crt0.o                    ../neslib/crt0.s:24
+NES_MAPPER ([linker generated]):
+    crt0.o                    ../neslib/crt0.s:24
+NES_MIRRORING ([linker generated]):
+    crt0.o                    ../neslib/crt0.s:24
+NES_PRG_BANKS ([linker generated]):
+    crt0.o                    ../neslib/crt0.s:24
+__BSS_RUN__ ([linker generated]):
+    zerobss.o                 common/zerobss.s:8
+__BSS_SIZE__ ([linker generated]):
+    zerobss.o                 common/zerobss.s:8
+__CONSTRUCTOR_COUNT__ ([linker generated]):
+    condes.o                  runtime/condes.s:18
+__CONSTRUCTOR_TABLE__ ([linker generated]):
+    condes.o                  runtime/condes.s:18
+__DATA_LOAD__ ([linker generated]):
+    copydata.o                common/copydata.s:8
+__DATA_RUN__ ([linker generated]):
+    copydata.o                common/copydata.s:8
+__DATA_SIZE__ ([linker generated]):
+    copydata.o                common/copydata.s:8
+__DESTRUCTOR_COUNT__ ([linker generated]):
+    condes.o                  runtime/condes.s:19
+__DESTRUCTOR_TABLE__ ([linker generated]):
+    condes.o                  runtime/condes.s:19
+__RAM_SIZE__ ([linker generated]):
+    crt0.o                    ../neslib/crt0.s:19
+__RAM_START__ ([linker generated]):
+    crt0.o                    ../neslib/crt0.s:19
+__STARTUP__ (crt0.o):
+    spritesheet_demo.o        spritesheet_demo.s:13
+_main (spritesheet_demo.o):
+    crt0.o                    ../neslib/crt0.s:16
+_oam_clear (crt0.o):
+    spritesheet_demo.o        spritesheet_demo.s:17
+_oam_spr (crt0.o):
+    spritesheet_demo.o        spritesheet_demo.s:18
+_pad_poll (crt0.o):
+    spritesheet_demo.o        spritesheet_demo.s:19
+_pal_spr (crt0.o):
+    spritesheet_demo.o        spritesheet_demo.s:14
+_ppu_on_all (crt0.o):
+    spritesheet_demo.o        spritesheet_demo.s:16
+_ppu_wait_frame (crt0.o):
+    spritesheet_demo.o        spritesheet_demo.s:15
+addysp (addysp.o):
+    incsp6.o                  runtime/incsp6.s:8
+copydata (copydata.o):
+    crt0.o                    ../neslib/crt0.s:16
+decsp4 (decsp4.o):
+    spritesheet_demo.o        spritesheet_demo.s:257
+decsp6 (decsp6.o):
+    spritesheet_demo.o        spritesheet_demo.s:257
+incsp6 (incsp6.o):
+    spritesheet_demo.o        spritesheet_demo.s:257
+initlib (condes.o):
+    crt0.o                    ../neslib/crt0.s:16
+popa (popa.o):
+    crt0.o                    ../neslib/crt0.s:16
+popax (incsp2.o):
+    crt0.o                    ../neslib/crt0.s:16
+ptr1 (zeropage.o):
+    zerobss.o                 common/zerobss.s:9
+    copydata.o                common/copydata.s:9
+    spritesheet_demo.o        spritesheet_demo.s:11
+ptr2 (zeropage.o):
+    copydata.o                common/copydata.s:9
+sp (zeropage.o):
+    addysp.o                  runtime/addysp.s:8
+    popa.o                    runtime/popa.s:8
+    incsp2.o                  runtime/incsp2.s:8
+    decsp6.o                  runtime/decsp6.s:8
+    decsp4.o                  runtime/decsp4.s:8
+    spritesheet_demo.o        spritesheet_demo.s:10
+    crt0.o                    /Users/kennycason/code/nes/tools/cc65/asminc/zeropage.inc:11
+tmp1 (zeropage.o):
+    copydata.o                common/copydata.s:9
+zerobss (zerobss.o):
+    crt0.o                    ../neslib/crt0.s:16
+

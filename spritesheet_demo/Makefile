@@ -1,4 +1,4 @@
-PROJECT_NAME = game_of_life
+PROJECT_NAME = spritesheet_demo
 ROM = $(PROJECT_NAME).nes
 
 CC65_ROOT = ../tools/cc65
