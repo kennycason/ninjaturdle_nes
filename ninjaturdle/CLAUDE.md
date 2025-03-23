@@ -18,6 +18,7 @@ make          # Build the game
 ### Custom Sprites
 - **masks.png**: 23x72 pixels, 8 sprites in 1 column, 8 rows
 - **mouth.png**: 7x12 pixels, 3 sprites in 1 column, 3 rows
+- **eyes.png**: 9x12 pixels, 4 sprites in 1 column, 4 rows
 - **ninja_walking_sheet.png**: 72x32 pixels, 3 sprites in 3 columns, 1 row
 - **rolling.png**: 20x20 pixels, 1 sprite
 

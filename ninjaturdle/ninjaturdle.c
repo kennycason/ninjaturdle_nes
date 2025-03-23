@@ -8,7 +8,7 @@
  
 #include "LIB/neslib.h"
 #include "LIB/nesdoug.h"
-#include "Sprites.h" // holds our metasprite data
+#include "Sprites.h"
 #include "ninjaturdle.h"
 #include "level_data.c"
 
