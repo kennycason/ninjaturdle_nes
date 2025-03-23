@@ -12,7 +12,7 @@ from PIL import Image
 CURRENT_DIR = Path(os.path.dirname(os.path.realpath(__file__)))
 PROJECT_DIR = CURRENT_DIR.parent
 TOOLS_DIR = PROJECT_DIR.parent / "tools"
-OUTPUT_DIR = PROJECT_DIR / "chr_output"
+OUTPUT_DIR = PROJECT_DIR / "sprites"
 
 # Ensure output directory exists
 os.makedirs(OUTPUT_DIR, exist_ok=True)

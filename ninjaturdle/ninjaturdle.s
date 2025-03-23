@@ -600,20 +600,20 @@ _title:
 	.byte	$32
 	.byte	$30
 	.byte	$32
-	.byte	$33
+	.byte	$35
 	.byte	$00
 	.byte	$00
-	.byte	$44
-	.byte	$6F
-	.byte	$75
-	.byte	$67
-	.byte	$00
-	.byte	$46
-	.byte	$72
-	.byte	$61
-	.byte	$6B
+	.byte	$4B
 	.byte	$65
-	.byte	$72
+	.byte	$6E
+	.byte	$6E
+	.byte	$79
+	.byte	$00
+	.byte	$43
+	.byte	$61
+	.byte	$73
+	.byte	$6F
+	.byte	$6E
 	.byte	$00
 	.byte	$01
 	.byte	$FE
