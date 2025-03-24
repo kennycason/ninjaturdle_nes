@@ -432,36 +432,36 @@ _title_color_rotate:
 	.byte	$30
 	.byte	$37
 _palette_bg:
-	.byte	$22
+	.byte	$0F
 	.byte	$16
 	.byte	$26
 	.byte	$06
-	.byte	$22
+	.byte	$0F
 	.byte	$17
 	.byte	$19
 	.byte	$29
-	.byte	$22
+	.byte	$0F
 	.byte	$17
 	.byte	$07
 	.byte	$10
-	.byte	$22
+	.byte	$0F
 	.byte	$08
 	.byte	$19
 	.byte	$29
 _palette_sp:
-	.byte	$22
+	.byte	$0F
 	.byte	$01
 	.byte	$11
 	.byte	$10
-	.byte	$22
+	.byte	$0F
 	.byte	$17
 	.byte	$28
 	.byte	$38
-	.byte	$22
+	.byte	$0F
 	.byte	$0C
 	.byte	$2C
 	.byte	$30
-	.byte	$22
+	.byte	$0F
 	.byte	$03
 	.byte	$13
 	.byte	$33
