@@ -1097,11 +1097,8 @@ void update_turds(void) {
             turd_y[index] += turd_vel_y[index];
             
             // Apply gravity to all turds (reduced gravity amount)
-            // Use integer value instead of floating point
-            if ((index & 1) == 0) { // Only apply gravity every other frame for slower effect
-                turd_vel_y[index] += 1; // Integer gravity
-            }
-            
+            turd_vel_y[index] += 1; // Integer gravity
+          
             // Cap falling speed
             if (turd_vel_y[index] > 3) {
                 turd_vel_y[index] = 3;
@@ -1125,7 +1122,7 @@ void update_turds(void) {
             }
             
             // Check collision with enemies
-            for(index2 = 0; index2 < MAX_ENEMY; ++index2) {
+            for (index2 = 0; index2 < MAX_ENEMY; ++index2) {
                 if (enemy_active[index2]) {
                     Generic2.x = enemy_x[index2];
                     Generic2.y = enemy_y[index2];
