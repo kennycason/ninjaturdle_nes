@@ -6,6 +6,23 @@ static u8 pixel(const u8 *const data, const u32 x, const u32 y, const u32 w) {
     return data[y * w + x];
 }
 
+static u8 rgb_to_palette_index(const u8 r, const u8 g, const u8 b) {
+    // Check for black/background color
+    if (r < 20 && g < 20 && b < 20) return 0;
+    
+    // Check for color1 (red/orange) - rgb(248,56,0)
+    if (r > 200 && g < 100 && b < 50) return 1;
+    
+    // Check for color2 (light orange) - rgb(252,160,68)
+    if (r > 200 && g > 120 && b < 100) return 2;
+    
+    // Check for color3 (brown) - rgb(172,124,0)
+    if (r > 120 && r < 200 && g > 80 && g < 150 && b < 50) return 3;
+    
+    // Default to background if no match
+    return 0;
+}
+
 static void savechr(FILE *f, const u8 *const data, const u32 w, const u32 h) {
     const u32 rows = h / 8;
     const u32 cols = w / 8;
@@ -86,21 +103,32 @@ int main(int argc, char **argv) {
     if (imgw % 8 != 0 || imgh % 8 != 0)
         die("Image is not divisible by 8\n");
 
-    if (type != PNG_COLOR_TYPE_PALETTE)
-        die("Input must be a paletted PNG, got %u\n", type);
+    if (type != PNG_COLOR_TYPE_PALETTE && type != PNG_COLOR_TYPE_RGB)
+        die("Input must be a paletted or RGB PNG, got %u\n", type);
 
     if (depth != 8)
         die("Depth not 8 (%u) - maybe you have old libpng?\n", depth);
 
     const u32 rowbytes = png_get_rowbytes(png_ptr, info);
-    if (rowbytes != imgw)
-        die("Packing failed, row was %u instead of %u\n", rowbytes, imgw);
+    const u32 expected_rowbytes = (type == PNG_COLOR_TYPE_RGB) ? imgw * 3 : imgw;
+    
+    if (rowbytes != expected_rowbytes)
+        die("Packing failed, row was %u instead of %u\n", rowbytes, expected_rowbytes);
 
     u8 *const data = calloc(imgw, imgh);
     u32 i;
     for (i = 0; i < imgh; i++) {
         u8 *const target = data + imgw * i;
-        memcpy(target, &rows[i][0], imgw);
+        if (type == PNG_COLOR_TYPE_PALETTE) {
+            memcpy(target, &rows[i][0], imgw);
+        } else {
+            for (u32 j = 0; j < imgw; j++) {
+                u8 r = rows[i][j*3];
+                u8 g = rows[i][j*3+1];
+                u8 b = rows[i][j*3+2];
+                target[j] = rgb_to_palette_index(r, g, b);
+            }
+        }
     }
 
     fclose(f);

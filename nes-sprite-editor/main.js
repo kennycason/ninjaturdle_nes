@@ -80,14 +80,14 @@ window.addEventListener('DOMContentLoaded', function() {
     downloadNes.addEventListener('click', function(){
         var name = document.getElementById('nesfilename').value;
         spriteRomData = canvasToNES(imageData);
-        download(name || 'sprite.chr', spriteRomData, 'octect/stream');
+        downloadBinary(name || 'sprite.chr', spriteRomData, 'application/octet-stream');
     });
 
     var downloadChr = document.getElementById('chr');
     downloadChr.addEventListener('click', function(){
         var name = document.getElementById('nesfilename').value;
         spriteRomData = canvasToNES(imageData);
-        download(name || 'sprite.chr', spriteRomData, 'application/octet-stream');
+        downloadBinary(name || 'sprite.chr', spriteRomData, 'application/octet-stream');
     });
 
     var uploadNes = document.getElementById('nesfile')
@@ -103,8 +103,28 @@ window.addEventListener('DOMContentLoaded', function() {
 
     var savePng = document.getElementById('image');
     savePng.addEventListener('click', function(){
-        var image = canvas.toDataURL("image/png");
-        download(name || 'sprite.png', image, 'image/png');
+        // Create a new canvas with the exact sprite dimensions (not scaled)
+        var exportCanvas = document.createElement('canvas');
+        exportCanvas.width = width;
+        exportCanvas.height = height;
+        var exportCtx = exportCanvas.getContext('2d');
+        
+        // Draw the sprite data at 1:1 scale
+        exportCtx.putImageData(imageData, 0, 0);
+        
+        // Add a version indicator (small text in corner)
+        exportCtx.font = '8px Arial';
+        exportCtx.fillStyle = 'rgba(255,255,255,0.5)';
+        exportCtx.fillText('v2', 2, 8);
+        
+        // Convert to PNG (this will be a visual reference only)
+        var name = document.getElementById('nesfilename').value || 'sprite';
+        var dataURL = exportCanvas.toDataURL('image/png');
+        
+        // Download the PNG (for visual reference)
+        downloadFile(name + '.png', dataURL);
+        
+        console.log("PNG exported with version marker v2");
     });
 
     var grid = document.getElementById('grid');
@@ -498,32 +518,44 @@ window.addEventListener('DOMContentLoaded', function() {
 
     /// Download utilities
 
-    function download(filename, data, type) {
-        var blob;
-        if (type === 'application/octet-stream') {
-            // Handle binary data
-            blob = new Blob([data], {type: type});
-        } else {
-            // Handle data URLs (like PNG)
-            var byteString = atob(data.split(',')[1]);
-            var ab = new ArrayBuffer(byteString.length);
-            var ia = new Uint8Array(ab);
-            
-            for (var i = 0; i < byteString.length; i++) {
-                ia[i] = byteString.charCodeAt(i);
-            }
-            
-            blob = new Blob([ab], {type: type});
-        }
-        
+    function downloadFile(filename, dataURL) {
         var link = document.createElement('a');
-        link.href = window.URL.createObjectURL(blob);
+        link.href = dataURL;
         link.download = filename;
         
-        // Append to the document, click, and remove
+        // This is important to ensure the download works consistently
         document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        
+        // Trigger click programmatically
+        setTimeout(function() {
+            link.click();
+            // Clean up
+            setTimeout(function() {
+                document.body.removeChild(link);
+            }, 100);
+        }, 0);
+    }
+
+    function downloadBinary(filename, data, type) {
+        var blob = new Blob([data], {type: type});
+        var url = window.URL.createObjectURL(blob);
+        
+        var link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        
+        // This is important to ensure the download works consistently
+        document.body.appendChild(link);
+        
+        // Trigger click programmatically
+        setTimeout(function() {
+            link.click();
+            // Clean up
+            setTimeout(function() {
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url); // Free up memory
+            }, 100);
+        }, 0);
     }
 
     /// Upload utilities
