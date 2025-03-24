@@ -10732,9 +10732,9 @@ L000A:	rts
 ;
 	lda     #$00
 	sta     _index
-L001F:	lda     _index
+L002B:	lda     _index
 	cmp     #$04
-	bcc     L0026
+	bcc     L0035
 ;
 ; }
 ;
@@ -10742,9 +10742,9 @@ L001F:	lda     _index
 ;
 ; if(!turd_active[index]) {
 ;
-L0026:	ldy     _index
+L0035:	ldy     _index
 	lda     _turd_active,y
-	jne     L0022
+	jne     L0030
 ;
 ; turd_active[index] = 1;
 ;
@@ -10752,33 +10752,65 @@ L0026:	ldy     _index
 	lda     #$01
 	sta     _turd_active,y
 ;
-; turd_x[index] = high_byte(BoxGuy1.x);
+; if(direction == LEFT) {
 ;
-	ldy     _index
-	lda     _BoxGuy1+1
-	sta     _turd_x,y
+	lda     _direction
+	bne     L0009
 ;
-; turd_y[index] = high_byte(BoxGuy1.y) + 4; // Adjust to fire from middle
+; turd_x[index] = high_byte(BoxGuy1.x) - 4; // Slightly in front when facing left
 ;
-	lda     #<(_turd_y)
-	ldx     #>(_turd_y)
+	lda     #<(_turd_x)
+	ldx     #>(_turd_x)
 	clc
 	adc     _index
 	bcc     L000A
 	inx
 L000A:	sta     ptr1
 	stx     ptr1+1
-	lda     _BoxGuy1+3
+	lda     _BoxGuy1+1
+	sec
+	sbc     #$04
+;
+; } else {
+;
+	jmp     L0031
+;
+; turd_x[index] = high_byte(BoxGuy1.x) + 12; // Slightly in front when facing right
+;
+L0009:	lda     #<(_turd_x)
+	ldx     #>(_turd_x)
 	clc
-	adc     #$04
-	ldy     #$00
+	adc     _index
+	bcc     L000D
+	inx
+L000D:	sta     ptr1
+	stx     ptr1+1
+	lda     _BoxGuy1+1
+	clc
+	adc     #$0C
+L0031:	ldy     #$00
+	sta     (ptr1),y
+;
+; turd_y[index] = high_byte(BoxGuy1.y) - 2; // From upper body
+;
+	lda     #<(_turd_y)
+	ldx     #>(_turd_y)
+	clc
+	adc     _index
+	bcc     L000F
+	inx
+L000F:	sta     ptr1
+	stx     ptr1+1
+	lda     _BoxGuy1+3
+	sec
+	sbc     #$02
 	sta     (ptr1),y
 ;
 ; if(pad1 & PAD_UP) {
 ;
 	lda     _pad1
 	and     #$08
-	beq     L0020
+	beq     L002D
 ;
 ; turd_direction[index] = TURD_UP;
 ;
@@ -10786,23 +10818,36 @@ L000A:	sta     ptr1
 	lda     #$02
 	sta     _turd_direction,y
 ;
-; turd_vel_x[index] = 0;
+; turd_vel_x[index] = (direction == LEFT) ? -1 : 1; // Slight horizontal movement
+;
+	lda     #<(_turd_vel_x)
+	ldx     #>(_turd_vel_x)
+	clc
+	adc     _index
+	bcc     L0013
+	inx
+L0013:	sta     ptr1
+	stx     ptr1+1
+	lda     _direction
+	bne     L002C
+	lda     #$FF
+	jmp     L0015
+L002C:	lda     #$01
+L0015:	cmp     #$80
+	ldy     #$00
+	sta     (ptr1),y
+;
+; turd_vel_y[index] = -4; // Faster upward velocity
 ;
 	ldy     _index
-	lda     #$00
-	sta     _turd_vel_x,y
-;
-; turd_vel_y[index] = -TURD_SPEED;
-;
-	ldy     _index
-	lda     #$FD
+	lda     #$FC
 ;
 ; else if(pad1 & PAD_DOWN) {
 ;
-	jmp     L001E
-L0020:	lda     _pad1
+	jmp     L002A
+L002D:	lda     _pad1
 	and     #$04
-	beq     L0021
+	beq     L002F
 ;
 ; turd_direction[index] = TURD_DOWN;
 ;
@@ -10810,22 +10855,35 @@ L0020:	lda     _pad1
 	lda     #$03
 	sta     _turd_direction,y
 ;
-; turd_vel_x[index] = 0;
+; turd_vel_x[index] = (direction == LEFT) ? -1 : 1; // Slight horizontal movement
 ;
-	ldy     _index
-	lda     #$00
-	sta     _turd_vel_x,y
+	lda     #<(_turd_vel_x)
+	ldx     #>(_turd_vel_x)
+	clc
+	adc     _index
+	bcc     L001B
+	inx
+L001B:	sta     ptr1
+	stx     ptr1+1
+	lda     _direction
+	bne     L002E
+	lda     #$FF
+	jmp     L001D
+L002E:	lda     #$01
+L001D:	cmp     #$80
+	ldy     #$00
+	sta     (ptr1),y
 ;
-; turd_vel_y[index] = TURD_SPEED;
+; turd_vel_y[index] = 3; // Downward velocity
 ;
 	ldy     _index
 	lda     #$03
 ;
 ; else if(direction == LEFT) {
 ;
-	jmp     L001E
-L0021:	lda     _direction
-	bne     L0016
+	jmp     L002A
+L002F:	lda     _direction
+	bne     L0021
 ;
 ; turd_direction[index] = TURD_LEFT;
 ;
@@ -10833,32 +10891,32 @@ L0021:	lda     _direction
 	lda     #$01
 	sta     _turd_direction,y
 ;
-; turd_vel_x[index] = -TURD_SPEED;
+; turd_vel_x[index] = -3; // Horizontal speed
 ;
 	ldy     _index
 	lda     #$FD
 ;
 ; else { // RIGHT
 ;
-	jmp     L0025
+	jmp     L0034
 ;
 ; turd_direction[index] = TURD_RIGHT;
 ;
-L0016:	ldy     _index
+L0021:	ldy     _index
 	lda     #$00
 	sta     _turd_direction,y
 ;
-; turd_vel_x[index] = TURD_SPEED;
+; turd_vel_x[index] = 3; // Horizontal speed
 ;
 	ldy     _index
 	lda     #$03
-L0025:	sta     _turd_vel_x,y
+L0034:	sta     _turd_vel_x,y
 ;
-; turd_vel_y[index] = 0;
+; turd_vel_y[index] = -1; // Slight initial upward arc
 ;
 	ldy     _index
-	lda     #$00
-L001E:	sta     _turd_vel_y,y
+	lda     #$FF
+L002A:	sta     _turd_vel_y,y
 ;
 ; sfx_play(SFX_NOISE, 0); // Play sound effect
 ;
@@ -10869,8 +10927,8 @@ L001E:	sta     _turd_vel_y,y
 ;
 ; for(index = 0; index < MAX_TURDS; ++index) {
 ;
-L0022:	inc     _index
-	jmp     L001F
+L0030:	inc     _index
+	jmp     L002B
 
 .endproc
 
@@ -10891,7 +10949,7 @@ L0022:	inc     _index
 	sta     _index
 L002F:	lda     _index
 	cmp     #$04
-	bcc     L003B
+	bcc     L0039
 ;
 ; }
 ;
@@ -10899,9 +10957,9 @@ L002F:	lda     _index
 ;
 ; if(turd_active[index]) {
 ;
-L003B:	ldy     _index
+L0039:	ldy     _index
 	lda     _turd_active,y
-	jeq     L003A
+	jeq     L0038
 ;
 ; turd_x[index] += turd_vel_x[index];
 ;
@@ -10954,81 +11012,80 @@ L0031:	jsr     ldaidx
 	adc     sreg
 	sta     (ptr2),y
 ;
-; if(turd_direction[index] == TURD_LEFT || turd_direction[index] == TURD_RIGHT) {
+; if((index & 1) == 0) { // Only apply gravity every other frame for slower effect
 ;
-	ldy     _index
-	lda     _turd_direction,y
-	cmp     #$01
-	beq     L0033
-	ldy     _index
-	lda     _turd_direction,y
+	lda     _index
+	and     #$01
 	bne     L000C
 ;
-; turd_vel_y[index] += TURD_GRAVITY;
+; turd_vel_y[index] += 1; // Integer gravity
 ;
-L0033:	lda     #<(_turd_vel_y)
+	lda     #<(_turd_vel_y)
 	ldx     #>(_turd_vel_y)
 	clc
 	adc     _index
-	bcc     L0011
+	bcc     L000E
 	inx
-L0011:	sta     sreg
+L000E:	sta     sreg
 	stx     sreg+1
-	ldy     #$00
 	jsr     ldaidx
 	clc
 	adc     #$01
 	sta     (sreg),y
 ;
-; turd_y[index] += turd_vel_y[index];
+; if(turd_vel_y[index] > 3) {
 ;
-	lda     #<(_turd_y)
-	ldx     #>(_turd_y)
-	clc
-	adc     _index
-	bcc     L0012
-	inx
-L0012:	sta     ptr2
-	stx     ptr2+1
-	sta     ptr1
-	stx     ptr1+1
-	lda     (ptr1),y
-	sta     sreg
-	lda     #<(_turd_vel_y)
+L000C:	lda     #<(_turd_vel_y)
 	ldx     #>(_turd_vel_y)
 	clc
 	adc     _index
-	bcc     L0034
+	bcc     L0032
 	inx
-L0034:	jsr     ldaidx
-	clc
-	adc     sreg
-	sta     (ptr2),y
+L0032:	jsr     ldaidx
+	sec
+	sbc     #$04
+	bvs     L0011
+	eor     #$80
+L0011:	bpl     L000F
 ;
-; if(turd_x[index] > 250 || turd_y[index] > 240) {
+; turd_vel_y[index] = 3;
 ;
-L000C:	ldy     _index
+	ldy     _index
+	lda     #$03
+	sta     _turd_vel_y,y
+;
+; if(turd_x[index] > 250 || turd_y[index] > 240 || turd_x[index] < 5 || turd_y[index] < 5) {
+;
+L000F:	ldy     _index
 	lda     _turd_x,y
 	cmp     #$FB
-	bcs     L0035
+	bcs     L0033
 	ldy     _index
 	lda     _turd_y,y
 	cmp     #$F1
-	bcc     L0014
+	bcs     L0033
+	ldy     _index
+	lda     _turd_x,y
+	cmp     #$05
+	bcc     L0033
+	ldy     _index
+	lda     _turd_y,y
+	cmp     #$05
+	bcs     L0013
 ;
 ; turd_active[index] = 0;
 ;
-L0035:	ldy     _index
+L0033:	ldy     _index
 	lda     #$00
 	sta     _turd_active,y
 ;
 ; continue;
 ;
-	jmp     L003A
+	jmp     L0038
 ;
 ; Generic.x = turd_x[index];
 ;
-L0014:	ldy     _index
+L0013:	ldy     _index
 	lda     _turd_x,y
 	sta     _Generic
 ;
@@ -11051,39 +11108,39 @@ L0014:	ldy     _index
 ;
 	jsr     _bg_coll_L
 	tax
-	bne     L001D
+	bne     L001E
 	jsr     _bg_coll_R
 	tax
-	bne     L001D
+	bne     L001E
 	jsr     _bg_coll_U
 	tax
-	bne     L001D
+	bne     L001E
 	jsr     _bg_coll_D
 	tax
-	beq     L0037
+	beq     L0035
 ;
 ; turd_active[index] = 0;
 ;
-L001D:	ldy     _index
+L001E:	ldy     _index
 	lda     #$00
 	sta     _turd_active,y
 ;
 ; continue;
 ;
-	jmp     L003A
+	jmp     L0038
 ;
 ; for(index2 = 0; index2 < MAX_ENEMY; ++index2) {
 ;
-L0037:	sta     _index2
-L0038:	lda     _index2
+L0035:	sta     _index2
+L0036:	lda     _index2
 	cmp     #$10
-	bcs     L003A
+	bcs     L0038
 ;
 ; if(enemy_active[index2]) {
 ;
 	ldy     _index2
 	lda     _enemy_active,y
-	beq     L0039
+	beq     L0037
 ;
 ; Generic2.x = enemy_x[index2];
 ;
@@ -11115,7 +11172,7 @@ L0038:	lda     _index2
 	ldx     #>(_Generic2)
 	jsr     _check_collision
 	tax
-	beq     L0039
+	beq     L0037
 ;
 ; enemy_y[index2] = TURN_OFF;
 ;
@@ -11134,25 +11191,25 @@ L0038:	lda     _index2
 	ldy     _index
 	sta     _turd_active,y
 ;
-; sfx_play(SFX_NOISE, 0);
+; sfx_play(SFX_DING, 0); // Play hit sound
 ;
-	lda     #$02
+	lda     #$01
 	jsr     pusha
 	lda     #$00
 	jsr     _sfx_play
 ;
 ; break;
 ;
-	jmp     L003A
+	jmp     L0038
 ;
 ; for(index2 = 0; index2 < MAX_ENEMY; ++index2) {
 ;
-L0039:	inc     _index2
-	jmp     L0038
+L0037:	inc     _index2
+	jmp     L0036
 ;
 ; for(index = 0; index < MAX_TURDS; ++index) {
 ;
-L003A:	inc     _index
+L0038:	inc     _index
 	jmp     L002F
 
 .endproc

@@ -1072,94 +1072,104 @@ void sprite_obj_init(void){
 
 // New function to fire a turd
 void fire_turd(void) {
-	// Find an inactive turd slot
-	for(index = 0; index < MAX_TURDS; ++index) {
-		if(!turd_active[index]) {
-			turd_active[index] = 1;
-			
-			// Set initial position based on player position
-			turd_x[index] = high_byte(BoxGuy1.x);
-			turd_y[index] = high_byte(BoxGuy1.y) + 4; // Adjust to fire from middle
-			
-			// Set direction based on d-pad
-			if(pad1 & PAD_UP) {
-				turd_direction[index] = TURD_UP;
-				turd_vel_x[index] = 0;
-				turd_vel_y[index] = -TURD_SPEED;
-			}
-			else if(pad1 & PAD_DOWN) {
-				turd_direction[index] = TURD_DOWN;
-				turd_vel_x[index] = 0;
-				turd_vel_y[index] = TURD_SPEED;
-			}
-			else if(direction == LEFT) {
-				turd_direction[index] = TURD_LEFT;
-				turd_vel_x[index] = -TURD_SPEED;
-				turd_vel_y[index] = 0;
-			}
-			else { // RIGHT
-				turd_direction[index] = TURD_RIGHT;
-				turd_vel_x[index] = TURD_SPEED;
-				turd_vel_y[index] = 0;
-			}
-			
-			sfx_play(SFX_NOISE, 0); // Play sound effect
-			break;
-		}
-	}
+    // Find an inactive turd slot
+    for(index = 0; index < MAX_TURDS; ++index) {
+        if(!turd_active[index]) {
+            turd_active[index] = 1;
+            
+            // Set initial position based on player position and direction
+            // Adjust to fire from top half and front of ninja
+            if(direction == LEFT) {
+                turd_x[index] = high_byte(BoxGuy1.x) - 4; // Slightly in front when facing left
+            } else {
+                turd_x[index] = high_byte(BoxGuy1.x) + 12; // Slightly in front when facing right
+            }
+            turd_y[index] = high_byte(BoxGuy1.y) - 2; // From upper body
+            
+            // Set direction based on d-pad
+            if(pad1 & PAD_UP) {
+                turd_direction[index] = TURD_UP;
+                turd_vel_x[index] = (direction == LEFT) ? -1 : 1; // Slight horizontal movement
+                turd_vel_y[index] = -4; // Faster upward velocity
+            }
+            else if(pad1 & PAD_DOWN) {
+                turd_direction[index] = TURD_DOWN;
+                turd_vel_x[index] = (direction == LEFT) ? -1 : 1; // Slight horizontal movement
+                turd_vel_y[index] = 3; // Downward velocity
+            }
+            else if(direction == LEFT) {
+                turd_direction[index] = TURD_LEFT;
+                turd_vel_x[index] = -3; // Horizontal speed
+                turd_vel_y[index] = -1; // Slight initial upward arc
+            }
+            else { // RIGHT
+                turd_direction[index] = TURD_RIGHT;
+                turd_vel_x[index] = 3; // Horizontal speed
+                turd_vel_y[index] = -1; // Slight initial upward arc
+            }
+            
+            sfx_play(SFX_NOISE, 0); // Play sound effect
+            break;
+        }
+    }
 }
 
 // New function to update turd positions
 void update_turds(void) {
-	for(index = 0; index < MAX_TURDS; ++index) {
-		if(turd_active[index]) {
-			// Move turd
-			turd_x[index] += turd_vel_x[index];
-			turd_y[index] += turd_vel_y[index];
-			
-			// Apply gravity to horizontal shots
-			if(turd_direction[index] == TURD_LEFT || turd_direction[index] == TURD_RIGHT) {
-				turd_vel_y[index] += TURD_GRAVITY;
-				turd_y[index] += turd_vel_y[index];
-			}
-			
-			// Check if turd is off screen
-			if(turd_x[index] > 250 || turd_y[index] > 240) {
-				turd_active[index] = 0;
-				continue;
-			}
-			
-			// Check collision with background
-			Generic.x = turd_x[index];
-			Generic.y = turd_y[index];
-			Generic.width = TURD_WIDTH;
-			Generic.height = TURD_HEIGHT;
-			
-			if(bg_coll_L() || bg_coll_R() || bg_coll_U() || bg_coll_D()) {
-				turd_active[index] = 0;
-				continue;
-			}
-			
-			// Check collision with enemies
-			for(index2 = 0; index2 < MAX_ENEMY; ++index2) {
-				if(enemy_active[index2]) {
-					Generic2.x = enemy_x[index2];
-					Generic2.y = enemy_y[index2];
-					Generic2.width = ENEMY_WIDTH;
-					Generic2.height = ENEMY_HEIGHT;
-					
-					if(check_collision(&Generic, &Generic2)) {
-						// Hit enemy
-						enemy_y[index2] = TURN_OFF;
-						enemy_active[index2] = 0;
-						turd_active[index] = 0;
-						sfx_play(SFX_NOISE, 0);
-						break;
-					}
-				}
-			}
-		}
-	}
+    for(index = 0; index < MAX_TURDS; ++index) {
+        if(turd_active[index]) {
+            // Move turd
+            turd_x[index] += turd_vel_x[index];
+            turd_y[index] += turd_vel_y[index];
+            
+            // Apply gravity to all turds (reduced gravity amount)
+            // Use integer value instead of floating point
+            if((index & 1) == 0) { // Only apply gravity every other frame for slower effect
+                turd_vel_y[index] += 1; // Integer gravity
+            }
+            
+            // Cap falling speed
+            if(turd_vel_y[index] > 3) {
+                turd_vel_y[index] = 3;
+            }
+            
+            // Check if turd is off screen
+            if(turd_x[index] > 250 || turd_y[index] > 240 || turd_x[index] < 5 || turd_y[index] < 5) {
+                turd_active[index] = 0;
+                continue;
+            }
+            
+            // Check collision with background
+            Generic.x = turd_x[index];
+            Generic.y = turd_y[index];
+            Generic.width = TURD_WIDTH;
+            Generic.height = TURD_HEIGHT;
+            
+            if(bg_coll_L() || bg_coll_R() || bg_coll_U() || bg_coll_D()) {
+                turd_active[index] = 0;
+                continue;
+            }
+            
+            // Check collision with enemies
+            for(index2 = 0; index2 < MAX_ENEMY; ++index2) {
+                if(enemy_active[index2]) {
+                    Generic2.x = enemy_x[index2];
+                    Generic2.y = enemy_y[index2];
+                    Generic2.width = ENEMY_WIDTH;
+                    Generic2.height = ENEMY_HEIGHT;
+                    
+                    if(check_collision(&Generic, &Generic2)) {
+                        // Hit enemy
+                        enemy_y[index2] = TURN_OFF;
+                        enemy_active[index2] = 0;
+                        turd_active[index] = 0;
+                        sfx_play(SFX_DING, 0); // Play hit sound
+                        break;
+                    }
+                }
+            }
+        }
+    }
 }
 
 // New function to draw turds
