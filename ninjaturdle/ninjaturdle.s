@@ -212,37 +212,37 @@ _RoundSprL:
 	.byte	$FF
 	.byte	$FC
 	.byte	$02
-	.byte	$00
+	.byte	$01
 	.byte	$07
 	.byte	$FC
 	.byte	$03
-	.byte	$00
+	.byte	$01
 	.byte	$FF
 	.byte	$04
 	.byte	$12
-	.byte	$00
+	.byte	$01
 	.byte	$07
 	.byte	$04
 	.byte	$13
-	.byte	$00
+	.byte	$01
 	.byte	$80
 _RoundSprR:
 	.byte	$FF
 	.byte	$FC
 	.byte	$00
-	.byte	$00
+	.byte	$01
 	.byte	$07
 	.byte	$FC
 	.byte	$01
-	.byte	$00
+	.byte	$01
 	.byte	$FF
 	.byte	$04
 	.byte	$10
-	.byte	$00
+	.byte	$01
 	.byte	$07
 	.byte	$04
 	.byte	$11
-	.byte	$00
+	.byte	$01
 	.byte	$80
 _CoinSpr:
 	.byte	$FF
