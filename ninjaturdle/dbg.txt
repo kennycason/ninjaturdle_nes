@@ -7,7 +7,7 @@ file	id=3,name="LIB/nesdoug.s",size=11667,mtime=0x67E041EC,mod=0
 file	id=4,name="MUSIC/famitone2.s",size=27594,mtime=0x67E041EC,mod=0
 file	id=5,name="MUSIC/TestMusic3.s",size=4204,mtime=0x67E041EC,mod=0
 file	id=6,name="MUSIC/SoundFx.s",size=693,mtime=0x67E041EC,mod=0
-file	id=7,name="ninjaturdle.chr",size=8192,mtime=0x67E0BBD1,mod=0
+file	id=7,name="ninjaturdle.chr",size=8192,mtime=0x67E0C22F,mod=0
 file	id=8,name="ninjaturdle.s",size=142981,mtime=0x67E08FEE,mod=1
 file	id=9,name="/Users/kennycason/code/nes/tools/cc65/asminc/longbranch.mac",size=2632,mtime=0x67DF989E,mod=1
 file	id=10,name="/Users/kennycason/code/nes/tools/cc65/asminc/cpu.mac",size=922,mtime=0x67DF989E,mod=5+6+7+8+9
