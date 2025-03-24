@@ -188,7 +188,7 @@ window.addEventListener('DOMContentLoaded', function() {
         setElementColor('color2', c2.r, c2.g, c2.b);
         setElementColor('color3', c3.r, c3.g, c3.b);
 
-        document.getElementById('current').textContent = 'Palette String:' + [bgColor.nes, c1.nes, c2.nes, c3.nes].join(',').replace(/0x/g, '$');
+        document.getElementById('current').textContent = 'Palette String: ' + [bgColor.nes, c1.nes, c2.nes, c3.nes].join(', ').replace(/0x/g, '$');
 
         document.getElementById('brush').style.color = getWhiteOrBlack(palette[selectedPalette]);
         document.getElementById('background').style.color = getWhiteOrBlack(bgColor);
