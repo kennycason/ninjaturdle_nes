@@ -36,6 +36,14 @@ void main (void) {
 	set_scroll_x(scroll_x);
 	//level = 2; // debugging, start on level...
 	
+	has_turd_power = 1; // Default to having turd power
+	turd_cooldown = 0;
+	
+	// Initialize turd projectiles
+	for(index = 0; index < MAX_TURDS; ++index) {
+		turd_active[index] = 0;
+	}
+	
 	while (1){
 		while(game_mode == MODE_TITLE){
 			ppu_wait_nmi();
@@ -365,6 +373,9 @@ void draw_sprites(void){
 	temp2 = (coins % 10) + 0xf0;
 	oam_spr(0x20, 0x17, temp1, 1);
 	oam_spr(0x28, 0x17, temp2, 1);
+
+	// Draw turds
+	draw_turds();
 }
 	
 
@@ -535,6 +546,19 @@ void movement(void){
 			BoxGuy1.x = 0xf100;
 		}
 	}
+
+	// Handle turd firing
+	if(turd_cooldown > 0) {
+		--turd_cooldown;
+	}
+	
+	if(has_turd_power && pad1_new & PAD_B && turd_cooldown == 0) {
+		fire_turd();
+		turd_cooldown = TURD_COOLDOWN;
+	}
+	
+	// Update active turds
+	update_turds();
 }	
 
 
@@ -1036,6 +1060,114 @@ void sprite_obj_init(void){
 	
 	for(++index;index < MAX_ENEMY; ++index){
 		enemy_y[index] = TURN_OFF;
+	}
+}
+
+
+
+
+
+
+
+
+// New function to fire a turd
+void fire_turd(void) {
+	// Find an inactive turd slot
+	for(index = 0; index < MAX_TURDS; ++index) {
+		if(!turd_active[index]) {
+			turd_active[index] = 1;
+			
+			// Set initial position based on player position
+			turd_x[index] = high_byte(BoxGuy1.x);
+			turd_y[index] = high_byte(BoxGuy1.y) + 4; // Adjust to fire from middle
+			
+			// Set direction based on d-pad
+			if(pad1 & PAD_UP) {
+				turd_direction[index] = TURD_UP;
+				turd_vel_x[index] = 0;
+				turd_vel_y[index] = -TURD_SPEED;
+			}
+			else if(pad1 & PAD_DOWN) {
+				turd_direction[index] = TURD_DOWN;
+				turd_vel_x[index] = 0;
+				turd_vel_y[index] = TURD_SPEED;
+			}
+			else if(direction == LEFT) {
+				turd_direction[index] = TURD_LEFT;
+				turd_vel_x[index] = -TURD_SPEED;
+				turd_vel_y[index] = 0;
+			}
+			else { // RIGHT
+				turd_direction[index] = TURD_RIGHT;
+				turd_vel_x[index] = TURD_SPEED;
+				turd_vel_y[index] = 0;
+			}
+			
+			sfx_play(SFX_NOISE, 0); // Play sound effect
+			break;
+		}
+	}
+}
+
+// New function to update turd positions
+void update_turds(void) {
+	for(index = 0; index < MAX_TURDS; ++index) {
+		if(turd_active[index]) {
+			// Move turd
+			turd_x[index] += turd_vel_x[index];
+			turd_y[index] += turd_vel_y[index];
+			
+			// Apply gravity to horizontal shots
+			if(turd_direction[index] == TURD_LEFT || turd_direction[index] == TURD_RIGHT) {
+				turd_vel_y[index] += TURD_GRAVITY;
+				turd_y[index] += turd_vel_y[index];
+			}
+			
+			// Check if turd is off screen
+			if(turd_x[index] > 250 || turd_y[index] > 240) {
+				turd_active[index] = 0;
+				continue;
+			}
+			
+			// Check collision with background
+			Generic.x = turd_x[index];
+			Generic.y = turd_y[index];
+			Generic.width = TURD_WIDTH;
+			Generic.height = TURD_HEIGHT;
+			
+			if(bg_coll_L() || bg_coll_R() || bg_coll_U() || bg_coll_D()) {
+				turd_active[index] = 0;
+				continue;
+			}
+			
+			// Check collision with enemies
+			for(index2 = 0; index2 < MAX_ENEMY; ++index2) {
+				if(enemy_active[index2]) {
+					Generic2.x = enemy_x[index2];
+					Generic2.y = enemy_y[index2];
+					Generic2.width = ENEMY_WIDTH;
+					Generic2.height = ENEMY_HEIGHT;
+					
+					if(check_collision(&Generic, &Generic2)) {
+						// Hit enemy
+						enemy_y[index2] = TURN_OFF;
+						enemy_active[index2] = 0;
+						turd_active[index] = 0;
+						sfx_play(SFX_NOISE, 0);
+						break;
+					}
+				}
+			}
+		}
+	}
+}
+
+// New function to draw turds
+void draw_turds(void) {
+	for(index = 0; index < MAX_TURDS; ++index) {
+		if(turd_active[index]) {
+			oam_meta_spr(turd_x[index], turd_y[index], TurdSpr);
+		}
 	}
 }
 

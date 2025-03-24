@@ -71,9 +71,10 @@ const unsigned char EnemyBounceSpr2[]={
 //	EnemyChaseSpr, EnemyBounceSpr, EnemyBounceSpr2
 //}
 
-
-
-
-
+// Using a simple 8x8 sprite for the turd projectile
+const unsigned char TurdSpr[]={
+    0, 0, 0x03, 1,  // Changed to use tile 0x03 (part of the ninja sprite) with palette 1
+    128
+};
 
 
