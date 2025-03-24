@@ -145,7 +145,20 @@ window.addEventListener('DOMContentLoaded', function() {
     }
 
     // Handle hotkeys
+    let lastKeyTime = 0;
+    const KEY_DELAY = 100; // milliseconds
+
     window.addEventListener('keydown', function(evt){
+        const now = Date.now();
+        
+        // For undo/redo, add debouncing
+        if (evt.key === 'u' || evt.key === 'r') {
+            if (now - lastKeyTime < KEY_DELAY) {
+                return; // Skip if too soon after last key press
+            }
+            lastKeyTime = now;
+        }
+        
         if(evt.keyCode == 49){
             selectedPalette = 'background'
         }
@@ -161,6 +174,15 @@ window.addEventListener('DOMContentLoaded', function() {
         if(evt.keyCode == 52){
             selectedPalette = 'color3'
         }
+        
+        if(evt.key === 'u') {
+            undo();
+        }
+        
+        if(evt.key === 'r') {
+            redo();
+        }
+        
         updatePallet();
     });
 
@@ -248,8 +270,53 @@ window.addEventListener('DOMContentLoaded', function() {
 
     /// Drawing utilities
 
+    var pixelHistory = [];
+    var historyIndex = -1;
+    const MAX_HISTORY = 500;
+
     function putPixel(x, y, palette, paletteColor, imageData) {
-        var canvasImageOffset = (x  + imageData.width * y) * 4;
+        var canvasImageOffset = (x + imageData.width * y) * 4;
+        
+        // Get the current color before changing it
+        var oldColor = null;
+        for (var key in mapping) {
+            var palKey = mapping[key];
+            var palColor = palette[palKey];
+            if (imageData.data[canvasImageOffset] === palColor.r && 
+                imageData.data[canvasImageOffset + 1] === palColor.g && 
+                imageData.data[canvasImageOffset + 2] === palColor.b) {
+                oldColor = palKey;
+                break;
+            }
+        }
+        
+        // Skip if we're setting the same color (no change)
+        if (oldColor === paletteColor) {
+            return;
+        }
+        
+        // If we're not at the end of history, truncate forward history
+        if (historyIndex < pixelHistory.length - 1) {
+            pixelHistory = pixelHistory.slice(0, historyIndex + 1);
+        }
+        
+        // Add to history
+        pixelHistory.push({
+            x: x,
+            y: y,
+            oldColor: oldColor,
+            newColor: paletteColor
+        });
+        
+        // Maintain maximum history size
+        if (pixelHistory.length > MAX_HISTORY) {
+            pixelHistory.shift();
+            historyIndex--;
+        }
+        
+        historyIndex = pixelHistory.length - 1;
+        
+        // Apply the new color
         var color = palette[paletteColor];
         imageData.data[canvasImageOffset + 0] = color.r;
         imageData.data[canvasImageOffset + 1] = color.g;
@@ -523,4 +590,35 @@ window.addEventListener('DOMContentLoaded', function() {
     });
 
     xhr.send();
+
+    // Add undo function
+    function undo() {
+        if (historyIndex >= 0) {
+            var action = pixelHistory[historyIndex];
+            if (action.oldColor) {
+                putPixelNoHistory(action.x, action.y, palette, action.oldColor, imageData);
+            }
+            historyIndex--;
+            paintCanvas();
+        }
+    }
+
+    // Add redo function
+    function redo() {
+        if (historyIndex < pixelHistory.length - 1) {
+            historyIndex++;
+            var action = pixelHistory[historyIndex];
+            putPixelNoHistory(action.x, action.y, palette, action.newColor, imageData);
+            paintCanvas();
+        }
+    }
+
+    // Add a version of putPixel that doesn't modify history
+    function putPixelNoHistory(x, y, palette, paletteColor, imageData) {
+        var canvasImageOffset = (x + imageData.width * y) * 4;
+        var color = palette[paletteColor];
+        imageData.data[canvasImageOffset + 0] = color.r;
+        imageData.data[canvasImageOffset + 1] = color.g;
+        imageData.data[canvasImageOffset + 2] = color.b;
+    }
 });
