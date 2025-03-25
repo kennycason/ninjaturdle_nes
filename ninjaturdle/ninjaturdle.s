@@ -41,6 +41,7 @@
 	.import		_check_collision
 	.import		_pal_fade_to
 	.import		_set_scroll_x
+	.import		_set_scroll_y
 	.import		_get_ppu_addr
 	.import		_set_data_pointer
 	.import		_set_mt_pointer
@@ -56,6 +57,7 @@
 	.export		_EnemyBounceSpr
 	.export		_EnemyBounceSpr2
 	.export		_TurdSpr
+	.export		_TurdLifeSpr
 	.export		_pad1
 	.export		_pad1_new
 	.export		_collision
@@ -164,6 +166,8 @@
 	.export		_fire_turd
 	.export		_update_turds
 	.export		_draw_turds
+	.export		_player_health
+	.export		_damage_cooldown
 	.export		_level_1_coins
 	.export		_level_2_coins
 	.export		_level_3_coins
@@ -359,7 +363,13 @@ _EnemyBounceSpr2:
 _TurdSpr:
 	.byte	$00
 	.byte	$00
-	.byte	$03
+	.byte	$10
+	.byte	$01
+	.byte	$80
+_TurdLifeSpr:
+	.byte	$00
+	.byte	$00
+	.byte	$40
 	.byte	$01
 	.byte	$80
 _shuffle_array:
@@ -484,15 +494,15 @@ _palette_sp:
 	.byte	$13
 	.byte	$33
 _END_TEXT:
-	.byte	$54,$68,$65,$20,$65,$6E,$64,$20,$6F,$66,$20,$74,$68,$65,$20,$67
-	.byte	$61,$6D,$65,$2E,$00
-_END_TEXT2:
-	.byte	$49,$20,$67,$75,$65,$73,$73,$20,$79,$6F,$75,$20,$77,$6F,$6E,$3F
+	.byte	$43,$6F,$6E,$67,$72,$61,$74,$75,$6C,$61,$74,$69,$6F,$6E,$73,$21
 	.byte	$00
+_END_TEXT2:
+	.byte	$59,$6F,$75,$20,$73,$61,$76,$65,$64,$20,$53,$74,$65,$76,$65,$2C
+	.byte	$20,$61,$67,$61,$69,$6E,$2E,$00
 _END_TEXT3:
 	.byte	$43,$6F,$69,$6E,$73,$3A,$20,$00
 _DEAD_TEXT:
-	.byte	$59,$6F,$75,$20,$64,$69,$65,$64,$2E,$00
+	.byte	$47,$61,$6D,$65,$20,$4F,$76,$65,$72,$00
 _title:
 	.byte	$01
 	.byte	$00
@@ -6990,6 +7000,10 @@ _has_turd_power:
 	.res	1,$00
 _turd_cooldown:
 	.res	1,$00
+_player_health:
+	.res	1,$00
+_damage_cooldown:
+	.res	1,$00
 
 ; ---------------------------------------------------------------
 ; void __near__ load_title (void)
@@ -7300,6 +7314,16 @@ L001B:	adc     #<(_Levels_list)
 ;
 	sta     _map_loaded
 ;
+; player_health = MAX_HEALTH;
+;
+	lda     #$0A
+	sta     _player_health
+;
+; damage_cooldown = 0;
+;
+	lda     #$00
+	sta     _damage_cooldown
+;
 ; }
 ;
 	rts
@@ -7329,20 +7353,20 @@ L001B:	adc     #<(_Levels_list)
 ; if (temp_x > 0xfc) temp_x = 1;
 ;
 	cmp     #$FD
-	bcc     L0028
+	bcc     L002A
 	lda     #$01
 	sta     _temp_x
 ;
 ; if (temp_x == 0) temp_x = 1;
 ;
-L0028:	lda     _temp_x
-	bne     L0029
+L002A:	lda     _temp_x
+	bne     L002B
 	lda     #$01
 	sta     _temp_x
 ;
 ; if (direction == LEFT) {
 ;
-L0029:	lda     _direction
+L002B:	lda     _direction
 	bne     L0004
 ;
 ; oam_meta_spr(temp_x, high_byte(BoxGuy1.y), RoundSprL);
@@ -7359,7 +7383,7 @@ L0029:	lda     _direction
 ;
 ; else {
 ;
-	jmp     L0025
+	jmp     L0027
 ;
 ; oam_meta_spr(temp_x, high_byte(BoxGuy1.y), RoundSprR);
 ;
@@ -7372,13 +7396,13 @@ L0004:	jsr     decsp2
 	sta     (sp),y
 	lda     #<(_RoundSprR)
 	ldx     #>(_RoundSprR)
-L0025:	jsr     _oam_meta_spr
+L0027:	jsr     _oam_meta_spr
 ;
-; for(index = 0; index < MAX_COINS; ++index) {
+; for (index = 0; index < MAX_COINS; ++index) {
 ;
 	lda     #$00
 	sta     _index
-L002A:	lda     _index
+L002C:	lda     _index
 	cmp     #$10
 	jcs     L0007
 ;
@@ -7391,13 +7415,13 @@ L002A:	lda     _index
 ; if (temp_y == TURN_OFF) continue;
 ;
 	cmp     #$FF
-	beq     L002B
+	beq     L002D
 ;
 ; if (!coin_active[index]) continue;
 ;
 	ldy     _index
 	lda     _coin_active,y
-	beq     L002B
+	beq     L002D
 ;
 ; temp_x = coin_x[index];
 ;
@@ -7408,7 +7432,7 @@ L002A:	lda     _index
 ; if (temp_x > 0xf0) continue;
 ;
 	cmp     #$F1
-	bcs     L002B
+	bcs     L002D
 ;
 ; temp1 = get_frame_count();
 ;
@@ -7437,7 +7461,7 @@ L002A:	lda     _index
 ; if (temp_y < 0xf0) {
 ;
 	cmp     #$F0
-	bcs     L002B
+	bcs     L002D
 ;
 ; if (coin_type[index] == COIN_REG) {
 ;
@@ -7459,7 +7483,7 @@ L002A:	lda     _index
 ;
 ; else {
 ;
-	jmp     L0026
+	jmp     L0028
 ;
 ; oam_meta_spr(temp_x, temp_y, BigCoinSpr);
 ;
@@ -7472,12 +7496,12 @@ L0012:	jsr     decsp2
 	sta     (sp),y
 	lda     #<(_BigCoinSpr)
 	ldx     #>(_BigCoinSpr)
-L0026:	jsr     _oam_meta_spr
+L0028:	jsr     _oam_meta_spr
 ;
-; for(index = 0; index < MAX_COINS; ++index) {
+; for (index = 0; index < MAX_COINS; ++index) {
 ;
-L002B:	inc     _index
-	jmp     L002A
+L002D:	inc     _index
+	jmp     L002C
 ;
 ; offset = get_frame_count() & 3;
 ;
@@ -7493,11 +7517,11 @@ L0007:	jsr     _get_frame_count
 	asl     a
 	sta     _offset
 ;
-; for(index = 0; index < MAX_ENEMY; ++index) {
+; for (index = 0; index < MAX_ENEMY; ++index) {
 ;
 	lda     #$00
 	sta     _index
-L002C:	lda     _index
+L002E:	lda     _index
 	cmp     #$10
 	bcs     L0016
 ;
@@ -7520,13 +7544,13 @@ L002C:	lda     _index
 ; if (temp_y == TURN_OFF) continue;
 ;
 	cmp     #$FF
-	beq     L002E
+	beq     L0030
 ;
 ; if (!enemy_active[index2]) continue;
 ;
 	ldy     _index2
 	lda     _enemy_active,y
-	beq     L002E
+	beq     L0030
 ;
 ; temp_x = enemy_x[index2];
 ;
@@ -7537,21 +7561,21 @@ L002C:	lda     _index
 ; if (temp_x == 0) temp_x = 1; // problems with x = 0
 ;
 	lda     _temp_x
-	bne     L002D
+	bne     L002F
 	lda     #$01
 	sta     _temp_x
 ;
 ; if (temp_x > 0xf0) continue;
 ;
-L002D:	lda     _temp_x
+L002F:	lda     _temp_x
 	cmp     #$F1
-	bcs     L002E
+	bcs     L0030
 ;
 ; if (temp_y < 0xf0) {
 ;
 	lda     _temp_y
 	cmp     #$F0
-	bcs     L002E
+	bcs     L0030
 ;
 ; oam_meta_spr(temp_x, temp_y, enemy_anim[index2]);
 ;
@@ -7565,10 +7589,10 @@ L002D:	lda     _temp_x
 	ldx     #$00
 	lda     _index2
 	asl     a
-	bcc     L0027
+	bcc     L0029
 	inx
 	clc
-L0027:	adc     #<(_enemy_anim)
+L0029:	adc     #<(_enemy_anim)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_anim)
@@ -7580,25 +7604,92 @@ L0027:	adc     #<(_enemy_anim)
 	lda     (ptr1),y
 	jsr     _oam_meta_spr
 ;
-; for(index = 0; index < MAX_ENEMY; ++index) {
+; for (index = 0; index < MAX_ENEMY; ++index) {
 ;
-L002E:	inc     _index
-	jmp     L002C
+L0030:	inc     _index
+	jmp     L002E
 ;
-; oam_meta_spr(0x10, 0x0f, CoinHud);
+; draw_turds();
 ;
-L0016:	jsr     decsp2
-	lda     #$10
+L0016:	jsr     _draw_turds
+;
+; oam_meta_spr(0x08, 0x10, TurdLifeSpr);
+;
+	jsr     decsp2
+	lda     #$08
 	ldy     #$01
 	sta     (sp),y
-	lda     #$0F
+	lda     #$10
 	dey
 	sta     (sp),y
-	lda     #<(_CoinHud)
-	ldx     #>(_CoinHud)
+	lda     #<(_TurdLifeSpr)
+	ldx     #>(_TurdLifeSpr)
 	jsr     _oam_meta_spr
 ;
-; temp1 = (coins / 10) + 0xf0;
+; temp1 = (player_health / 10) + 0xF0;
+;
+	lda     _player_health
+	jsr     pusha0
+	lda     #$0A
+	jsr     tosudiva0
+	clc
+	adc     #$F0
+	sta     _temp1
+;
+; temp2 = (player_health % 10) + 0xF0;
+;
+	lda     _player_health
+	jsr     pusha0
+	lda     #$0A
+	jsr     tosumoda0
+	clc
+	adc     #$F0
+	sta     _temp2
+;
+; oam_spr(0x16, 0x10, temp1, 1); // Tens digit
+;
+	jsr     decsp3
+	lda     #$16
+	ldy     #$02
+	sta     (sp),y
+	lda     #$10
+	dey
+	sta     (sp),y
+	lda     _temp1
+	dey
+	sta     (sp),y
+	lda     #$01
+	jsr     _oam_spr
+;
+; oam_spr(0x1F, 0x10, temp2, 1); // Ones digit
+;
+	jsr     decsp3
+	lda     #$1F
+	ldy     #$02
+	sta     (sp),y
+	lda     #$10
+	dey
+	sta     (sp),y
+	lda     _temp2
+	dey
+	sta     (sp),y
+	lda     #$01
+	jsr     _oam_spr
+;
+; oam_meta_spr(0xDD, 0x0D, CoinSpr);
+;
+	jsr     decsp2
+	lda     #$DD
+	ldy     #$01
+	sta     (sp),y
+	lda     #$0D
+	dey
+	sta     (sp),y
+	lda     #<(_CoinSpr)
+	ldx     #>(_CoinSpr)
+	jsr     _oam_meta_spr
+;
+; temp1 = (coins / 10) + 0xF0; // Convert to tile number
 ;
 	lda     _coins
 	jsr     pusha0
@@ -7608,7 +7699,7 @@ L0016:	jsr     decsp2
 	adc     #$F0
 	sta     _temp1
 ;
-; temp2 = (coins % 10) + 0xf0;
+; temp2 = (coins % 10) + 0xF0;
 ;
 	lda     _coins
 	jsr     pusha0
@@ -7618,13 +7709,13 @@ L0016:	jsr     decsp2
 	adc     #$F0
 	sta     _temp2
 ;
-; oam_spr(0x20, 0x17, temp1, 1);
+; oam_spr(0xE8, 0x10, temp1, 1); // Tens digit
 ;
 	jsr     decsp3
-	lda     #$20
+	lda     #$E8
 	ldy     #$02
 	sta     (sp),y
-	lda     #$17
+	lda     #$10
 	dey
 	sta     (sp),y
 	lda     _temp1
@@ -7633,24 +7724,20 @@ L0016:	jsr     decsp2
 	lda     #$01
 	jsr     _oam_spr
 ;
-; oam_spr(0x28, 0x17, temp2, 1);
+; oam_spr(0xF0, 0x10, temp2, 1); // Ones digit
 ;
 	jsr     decsp3
-	lda     #$28
+	lda     #$F0
 	ldy     #$02
 	sta     (sp),y
-	lda     #$17
+	lda     #$10
 	dey
 	sta     (sp),y
 	lda     _temp2
 	dey
 	sta     (sp),y
 	lda     #$01
-	jsr     _oam_spr
-;
-; draw_turds();
-;
-	jmp     _draw_turds
+	jmp     _oam_spr
 
 .endproc
 
@@ -9405,96 +9492,77 @@ L002C:	rts
 .segment	"CODE"
 
 ;
-; Generic.x = high_byte(BoxGuy1.x);
+; if (damage_cooldown > 0) {
 ;
-	lda     _BoxGuy1+1
-	sta     _Generic
+	lda     _damage_cooldown
+	beq     L001A
 ;
-; Generic.y = high_byte(BoxGuy1.y);
+; --damage_cooldown;
 ;
-	lda     _BoxGuy1+3
-	sta     _Generic+1
+	dec     _damage_cooldown
 ;
-; Generic.width = HERO_WIDTH;
-;
-	lda     #$0D
-	sta     _Generic+2
-;
-; Generic.height = HERO_HEIGHT;
-;
-	lda     #$0B
-	sta     _Generic+3
-;
-; for(index = 0; index < MAX_COINS; ++index) {
+; for (index = 0; index < MAX_COINS; ++index) {
 ;
 	lda     #$00
-	sta     _index
-L0020:	lda     _index
+L001A:	sta     _index
+L001B:	lda     _index
 	cmp     #$10
-	bcs     L0023
+	bcs     L001D
 ;
 ; if (coin_active[index]) {
 ;
 	ldy     _index
 	lda     _coin_active,y
-	beq     L0022
+	beq     L001C
 ;
-; if (coin_type[index] == COIN_REG) {
-;
-	ldy     _index
-	lda     _coin_type,y
-	bne     L0021
-;
-; Generic2.width = COIN_WIDTH;
-;
-	lda     #$07
-	sta     _Generic2+2
-;
-; Generic2.height = COIN_HEIGHT;
-;
-	lda     #$0B
-;
-; else {
-;
-	jmp     L001F
-;
-; Generic2.width = BIG_COIN;
-;
-L0021:	lda     #$0D
-	sta     _Generic2+2
-;
-; Generic2.height = BIG_COIN;
-;
-L001F:	sta     _Generic2+3
-;
-; Generic2.x = coin_x[index];
+; Generic.x = coin_x[index];
 ;
 	ldy     _index
 	lda     _coin_x,y
-	sta     _Generic2
+	sta     _Generic
 ;
-; Generic2.y = coin_y[index];
+; Generic.y = coin_y[index];
 ;
 	ldy     _index
 	lda     _coin_y,y
-	sta     _Generic2+1
+	sta     _Generic+1
 ;
-; if (check_collision(&Generic, &Generic2)) {
+; Generic.width = COIN_WIDTH;
+;
+	lda     #$07
+	sta     _Generic+2
+;
+; Generic.height = COIN_HEIGHT;
+;
+	lda     #$0B
+	sta     _Generic+3
+;
+; if (check_collision(&Generic, &BoxGuy1)) {
 ;
 	lda     #<(_Generic)
 	ldx     #>(_Generic)
 	jsr     pushax
-	lda     #<(_Generic2)
-	ldx     #>(_Generic2)
+	lda     #<(_BoxGuy1)
+	ldx     #>(_BoxGuy1)
 	jsr     _check_collision
 	tax
-	beq     L0022
+	beq     L001C
 ;
 ; coin_y[index] = TURN_OFF;
 ;
 	ldy     _index
 	lda     #$FF
 	sta     _coin_y,y
+;
+; coin_active[index] = 0;
+;
+	ldy     _index
+	lda     #$00
+	sta     _coin_active,y
+;
+; ++coins;
+;
+	inc     _coins
 ;
 ; sfx_play(SFX_DING, 0);
 ;
@@ -9503,57 +9571,65 @@ L001F:	sta     _Generic2+3
 	lda     #$00
 	jsr     _sfx_play
 ;
-; ++coins;
+; for (index = 0; index < MAX_COINS; ++index) {
 ;
-	inc     _coins
+L001C:	inc     _index
+	jmp     L001B
 ;
-; if (coin_type[index] == COIN_END) ++level_up;
+; Generic2.x = high_byte(BoxGuy1.x);
 ;
-	ldy     _index
-	lda     _coin_type,y
-	cmp     #$01
-	bne     L0022
-	inc     _level_up
+L001D:	lda     _BoxGuy1+1
+	sta     _Generic2
 ;
-; for(index = 0; index < MAX_COINS; ++index) {
+; Generic2.y = high_byte(BoxGuy1.y);
 ;
-L0022:	inc     _index
-	jmp     L0020
+	lda     _BoxGuy1+3
+	sta     _Generic2+1
 ;
-; Generic2.width = ENEMY_WIDTH;
+; Generic2.width = HERO_WIDTH;
 ;
-L0023:	lda     #$0D
+	lda     #$0D
 	sta     _Generic2+2
 ;
-; Generic2.height = ENEMY_HEIGHT;
+; Generic2.height = HERO_HEIGHT;
 ;
+	lda     #$0B
 	sta     _Generic2+3
 ;
-; for(index = 0; index < MAX_ENEMY; ++index) {
+; for (index = 0; index < MAX_ENEMY; ++index) {
 ;
 	lda     #$00
 	sta     _index
-L0024:	lda     _index
+L001E:	lda     _index
 	cmp     #$10
-	bcs     L0012
+	bcs     L000F
 ;
 ; if (enemy_active[index]) {
 ;
 	ldy     _index
 	lda     _enemy_active,y
-	beq     L0025
+	beq     L001F
 ;
-; Generic2.x = enemy_x[index];
+; Generic.x = enemy_x[index];
 ;
 	ldy     _index
 	lda     _enemy_x,y
-	sta     _Generic2
+	sta     _Generic
 ;
-; Generic2.y = enemy_y[index];
+; Generic.y = enemy_y[index];
 ;
 	ldy     _index
 	lda     _enemy_y,y
-	sta     _Generic2+1
+	sta     _Generic+1
+;
+; Generic.width = ENEMY_WIDTH;
+;
+	lda     #$0D
+	sta     _Generic+2
+;
+; Generic.height = ENEMY_HEIGHT;
+;
+	sta     _Generic+3
 ;
 ; if (check_collision(&Generic, &Generic2)) {
 ;
@@ -9564,19 +9640,24 @@ L0024:	lda     _index
 	ldx     #>(_Generic2)
 	jsr     _check_collision
 	tax
-	beq     L0025
+	beq     L001F
 ;
-; enemy_y[index] = TURN_OFF;
+; if (damage_cooldown == 0) {
 ;
-	ldy     _index
-	lda     #$FF
-	sta     _enemy_y,y
+	lda     _damage_cooldown
+	bne     L001F
 ;
-; enemy_active[index] = 0;
+; player_health -= 2;
 ;
-	ldy     _index
-	lda     #$00
-	sta     _enemy_active,y
+	lda     _player_health
+	sec
+	sbc     #$02
+	sta     _player_health
+;
+; damage_cooldown = DAMAGE_COOLDOWN_TIME;
+;
+	lda     #$3C
+	sta     _damage_cooldown
 ;
 ; sfx_play(SFX_NOISE, 0);
 ;
@@ -9585,40 +9666,28 @@ L0024:	lda     _index
 	lda     #$00
 	jsr     _sfx_play
 ;
-; if (coins) {
+; if (player_health <= 0) {
 ;
-	lda     _coins
-	beq     L001C
+	lda     _player_health
+	bne     L001F
 ;
-; coins -= 5;
+; death = 1;
 ;
-	sec
-	sbc     #$05
-	sta     _coins
+	lda     #$01
+	sta     _death
 ;
-; if (coins > 0x80) coins = 0;
+; break; // Exit the loop if dead
 ;
-	cmp     #$81
-	bcc     L0025
-	lda     #$00
-	sta     _coins
+	rts
 ;
-; else { // die
+; for (index = 0; index < MAX_ENEMY; ++index) {
 ;
-	jmp     L0025
-;
-; ++death;
-;
-L001C:	inc     _death
-;
-; for(index = 0; index < MAX_ENEMY; ++index) {
-;
-L0025:	inc     _index
-	jmp     L0024
+L001F:	inc     _index
+	jmp     L001E
 ;
 ; }
 ;
-L0012:	rts
+L000F:	rts
 
 .endproc
 
@@ -11413,6 +11482,16 @@ L0003:	rts
 	lda     #$00
 	sta     _turd_cooldown
 ;
+; player_health = MAX_HEALTH; // Initialize player health
+;
+	lda     #$0A
+	sta     _player_health
+;
+; damage_cooldown = 0;
+;
+	lda     #$00
+	sta     _damage_cooldown
+;
 ; for (index = 0; index < MAX_TURDS; ++index) {
 ;
 	sta     _index
@@ -11576,6 +11655,12 @@ L000F:	jsr     _ppu_wait_nmi
 	ldx     _scroll_x+1
 	jsr     _set_scroll_x
 ;
+; set_scroll_y(scroll_y);
+;
+	lda     _scroll_y
+	ldx     _scroll_y+1
+	jsr     _set_scroll_y
+;
 ; draw_screen_R();
 ;
 	jsr     _draw_screen_R
@@ -11695,7 +11780,7 @@ L0013:	lda     _death
 	lda     #$00
 	jsr     _vram_adr
 ;
-; vram_fill(0,1024); // blank the screen
+; vram_fill(0, 1024); // blank the screen
 ;
 	lda     #$00
 	jsr     pusha
@@ -11905,7 +11990,7 @@ L0022:	jsr     _ppu_wait_nmi
 	iny
 	lda     #>(_END_TEXT)
 	sta     (sp),y
-	lda     #$15
+	lda     #$11
 	ldy     #$00
 	sta     (sp),y
 	ldx     #$21
@@ -11921,7 +12006,7 @@ L0022:	jsr     _ppu_wait_nmi
 	iny
 	lda     #>(_END_TEXT2)
 	sta     (sp),y
-	lda     #$11
+	lda     #$18
 	ldy     #$00
 	sta     (sp),y
 	ldx     #$21

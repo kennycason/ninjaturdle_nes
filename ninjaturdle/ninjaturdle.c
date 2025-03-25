@@ -38,6 +38,8 @@ void main(void) {
 	
 	has_turd_power = 1; // Default to having turd power
 	turd_cooldown = 0;
+	player_health = MAX_HEALTH; // Initialize player health
+	damage_cooldown = 0;
 	
 	// Initialize turd projectiles
 	for (index = 0; index < MAX_TURDS; ++index) {
@@ -88,6 +90,7 @@ void main(void) {
 			
 			// set scroll
 			set_scroll_x(scroll_x);
+			set_scroll_y(scroll_y);
 			
 			draw_screen_R();
 			
@@ -100,8 +103,6 @@ void main(void) {
 				color_emphasis(COL_EMP_DARK);
 				break; // out of the game loop
 			}
-			
-			//gray_line(); //debugging
 			
 			if (level_up) {
 				game_mode = MODE_SWITCH;
@@ -116,15 +117,14 @@ void main(void) {
 				scroll_x = 0;
 				set_scroll_x(scroll_x);
 				ppu_off();
-                clear_vram_buffer();
+				clear_vram_buffer();
 				delay(5);
 				
-                oam_clear();
-                game_mode = MODE_GAME_OVER;
-                vram_adr(NAMETABLE_A);
-                vram_fill(0,1024); // blank the screen
-                ppu_on_all();
-				
+				oam_clear();
+				game_mode = MODE_GAME_OVER;
+				vram_adr(NAMETABLE_A);
+				vram_fill(0, 1024); // blank the screen
+				ppu_on_all();
 			}
 		}
 		
@@ -288,6 +288,10 @@ void load_room(void) {
 	BoxGuy1.vel_y = 0;
 	
 	map_loaded = 0;
+	
+	// Reset player health when starting a new level
+	player_health = MAX_HEALTH;
+	damage_cooldown = 0;
 }
 
 
@@ -307,19 +311,19 @@ void draw_sprites(void) {
 	}
 	
 	// draw coin sprites
-	for(index = 0; index < MAX_COINS; ++index) {
+	for (index = 0; index < MAX_COINS; ++index) {
 		temp_y = coin_y[index];
 		if (temp_y == TURN_OFF) continue;
-        if (!coin_active[index]) continue;
-        temp_x = coin_x[index];
+		if (!coin_active[index]) continue;
+		temp_x = coin_x[index];
 		if (temp_x > 0xf0) continue;
-        
-		// // bounce the coin
-        temp1 = get_frame_count();
-        temp1 = (temp1 >> 2) & 7;
-        temp1 = bounce[temp1];
-        temp_y += temp1;
-        
+		
+		// bounce the coin
+		temp1 = get_frame_count();
+		temp1 = (temp1 >> 2) & 7;
+		temp1 = bounce[temp1];
+		temp_y += temp1;
+		
 		if (temp_y < 0xf0) {
 			if (coin_type[index] == COIN_REG) {
 				oam_meta_spr(temp_x, temp_y, CoinSpr);
@@ -333,7 +337,7 @@ void draw_sprites(void) {
 	// draw enemy sprites
 	offset = get_frame_count() & 3;
 	offset = offset << 4; // * 16, the size of the shuffle array
-	for(index = 0; index < MAX_ENEMY; ++index) {
+	for (index = 0; index < MAX_ENEMY; ++index) {
 		index2 = shuffle_array[offset];
 		++offset;
 		temp_y = enemy_y[index2];
@@ -347,25 +351,35 @@ void draw_sprites(void) {
 		}
 	}
 	
-	
-	//last, draw coin in upper left
-	oam_meta_spr(0x10, 0x0f, CoinHud);
-	temp1 = (coins / 10) + 0xf0;
-	temp2 = (coins % 10) + 0xf0;
-	oam_spr(0x20, 0x17, temp1, 1);
-	oam_spr(0x28, 0x17, temp2, 1);
-
 	// Draw turds
 	draw_turds();
-}
 	
+	// Draw HUD elements as sprites (fixed position)
 
+	// Draw health icon in upper left
+	// oam_spr(0x10, 0x10, 0x20, 1); // Tile $20 for health icon
+	oam_meta_spr(0x08, 0x10, TurdLifeSpr);
 	
+	// Draw health count
+	temp1 = (player_health / 10) + 0xF0;
+	temp2 = (player_health % 10) + 0xF0;
+	oam_spr(0x16, 0x10, temp1, 1); // Tens digit
+	oam_spr(0x1F, 0x10, temp2, 1); // Ones digit
+	
+	
+	// Draw coin icon in upper right
+	oam_meta_spr(0xDD, 0x0D, CoinSpr);
+	
+	// Draw coin count
+	temp1 = (coins / 10) + 0xF0; // Convert to tile number
+	temp2 = (coins % 10) + 0xF0;
+	oam_spr(0xE8, 0x10, temp1, 1); // Tens digit
+	oam_spr(0xF0, 0x10, temp2, 1); // Ones digit
+}
+
 	
 void movement(void) {
-	
-// handle x
-
+    // handle x
 	old_x = BoxGuy1.x;
 	
 	if (pad1 & PAD_LEFT) {
@@ -905,59 +919,60 @@ void new_cmap(void) {
 }
 
 
-
-
-
 void sprite_collisions(void) {
-
-	Generic.x = high_byte(BoxGuy1.x);
-	Generic.y = high_byte(BoxGuy1.y);
-	Generic.width = HERO_WIDTH;
-	Generic.height = HERO_HEIGHT;
-	
-	for(index = 0; index < MAX_COINS; ++index) {
-		if (coin_active[index]) {
-			if (coin_type[index] == COIN_REG) {
-				Generic2.width = COIN_WIDTH;
-				Generic2.height = COIN_HEIGHT;
-			}
-			else {
-				Generic2.width = BIG_COIN;
-				Generic2.height = BIG_COIN;
-			}
-			Generic2.x = coin_x[index];
-			Generic2.y = coin_y[index];
-			if (check_collision(&Generic, &Generic2)) {
-				coin_y[index] = TURN_OFF;
-				sfx_play(SFX_DING, 0);
-				++coins;
-				
-				if (coin_type[index] == COIN_END) ++level_up;
-			}
-		}
-	}
-
-	Generic2.width = ENEMY_WIDTH;
-	Generic2.height = ENEMY_HEIGHT;
-	
-	for(index = 0; index < MAX_ENEMY; ++index) {
-		if (enemy_active[index]) {
-			Generic2.x = enemy_x[index];
-			Generic2.y = enemy_y[index];
-			if (check_collision(&Generic, &Generic2)) {
-				enemy_y[index] = TURN_OFF;
-				enemy_active[index] = 0;
-				sfx_play(SFX_NOISE, 0);
-				if (coins) {
-					coins -= 5;
-					if (coins > 0x80) coins = 0;
-				}
-				else { // die
-					++death;
-				} 
-			}
-		}
-	}
+    // Update damage cooldown
+    if (damage_cooldown > 0) {
+        --damage_cooldown;
+    }
+    
+    // Check coin collisions
+    for (index = 0; index < MAX_COINS; ++index) {
+        if (coin_active[index]) {
+            Generic.x = coin_x[index];
+            Generic.y = coin_y[index];
+            Generic.width = COIN_WIDTH;
+            Generic.height = COIN_HEIGHT;
+            
+            if (check_collision(&Generic, &BoxGuy1)) {
+                coin_y[index] = TURN_OFF;
+                coin_active[index] = 0;
+                ++coins;
+                sfx_play(SFX_DING, 0);
+            }
+        }
+    }
+    
+    // Check enemy collisions
+    Generic2.x = high_byte(BoxGuy1.x);
+    Generic2.y = high_byte(BoxGuy1.y);
+    Generic2.width = HERO_WIDTH;
+    Generic2.height = HERO_HEIGHT;
+    
+    for (index = 0; index < MAX_ENEMY; ++index) {
+        if (enemy_active[index]) {
+            Generic.x = enemy_x[index];
+            Generic.y = enemy_y[index];
+            Generic.width = ENEMY_WIDTH;
+            Generic.height = ENEMY_HEIGHT;
+            
+            if (check_collision(&Generic, &Generic2)) {
+                // Only take damage if not in cooldown period
+                if (damage_cooldown == 0) {
+                    player_health -= 2;
+                    damage_cooldown = DAMAGE_COOLDOWN_TIME;
+                    
+                    // Play damage sound
+                    sfx_play(SFX_NOISE, 0);
+                    
+                    // Only set death flag if health is depleted
+                    if (player_health <= 0) {
+                        death = 1;
+                        break; // Exit the loop if dead
+                    }
+                }
+            }
+        }
+    }
 }
 
 
@@ -1005,7 +1020,6 @@ void sprite_obj_init(void) {
 	for(++index;index < MAX_COINS; ++index) {
 		coin_y[index] = TURN_OFF;
 	}
-	
 	
 	
 
@@ -1181,10 +1195,3 @@ void draw_turds(void) {
 		}
 	}
 }
-
-
-
-
-
-
-

@@ -183,11 +183,11 @@ const unsigned char palette_sp[]={
 
 
 
-const unsigned char END_TEXT[]="The end of the game.";
-const unsigned char END_TEXT2[]="I guess you won?";
+const unsigned char END_TEXT[]="Congratulations!";
+const unsigned char END_TEXT2[]="You saved Steve, again.";
 const unsigned char END_TEXT3[]="Coins: ";
 
-const unsigned char DEAD_TEXT[]="You died.";
+const unsigned char DEAD_TEXT[]="Game Over";
 
 #include "NES_ST/title.h"
 
@@ -246,4 +246,10 @@ unsigned char turd_cooldown;
 void fire_turd(void);
 void update_turds(void);
 void draw_turds(void);
+
+// Add player health variables
+#define MAX_HEALTH 10
+unsigned char player_health;
+unsigned char damage_cooldown; // Invincibility frames after taking damage
+#define DAMAGE_COOLDOWN_TIME 60 // 1 second of invincibility
 
