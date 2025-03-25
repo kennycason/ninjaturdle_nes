@@ -926,14 +926,24 @@ void sprite_collisions(void) {
     }
     
     // Check coin collisions
+    Generic.x = high_byte(BoxGuy1.x);
+    Generic.y = high_byte(BoxGuy1.y);
+    Generic.width = HERO_WIDTH;
+    Generic.height = HERO_HEIGHT;
+    
     for (index = 0; index < MAX_COINS; ++index) {
         if (coin_active[index]) {
-            Generic.x = coin_x[index];
-            Generic.y = coin_y[index];
-            Generic.width = COIN_WIDTH;
-            Generic.height = COIN_HEIGHT;
+            if (coin_type[index] == COIN_REG) {
+                Generic2.width = COIN_WIDTH;
+                Generic2.height = COIN_HEIGHT;
+            } else {
+                Generic2.width = BIG_COIN;
+                Generic2.height = BIG_COIN;
+            }
+            Generic2.x = coin_x[index];
+            Generic2.y = coin_y[index];
             
-            if (check_collision(&Generic, &BoxGuy1)) {
+            if (check_collision(&Generic, &Generic2)) {
                 coin_y[index] = TURN_OFF;
                 coin_active[index] = 0;
                 ++coins;

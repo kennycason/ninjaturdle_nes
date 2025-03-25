@@ -9495,58 +9495,96 @@ L002C:	rts
 ; if (damage_cooldown > 0) {
 ;
 	lda     _damage_cooldown
-	beq     L001A
+	beq     L001D
 ;
 ; --damage_cooldown;
 ;
 	dec     _damage_cooldown
 ;
+; Generic.x = high_byte(BoxGuy1.x);
+;
+L001D:	lda     _BoxGuy1+1
+	sta     _Generic
+;
+; Generic.y = high_byte(BoxGuy1.y);
+;
+	lda     _BoxGuy1+3
+	sta     _Generic+1
+;
+; Generic.width = HERO_WIDTH;
+;
+	lda     #$0D
+	sta     _Generic+2
+;
+; Generic.height = HERO_HEIGHT;
+;
+	lda     #$0B
+	sta     _Generic+3
+;
 ; for (index = 0; index < MAX_COINS; ++index) {
 ;
 	lda     #$00
-L001A:	sta     _index
-L001B:	lda     _index
+	sta     _index
+L001E:	lda     _index
 	cmp     #$10
-	bcs     L001D
+	bcs     L0021
 ;
 ; if (coin_active[index]) {
 ;
 	ldy     _index
 	lda     _coin_active,y
-	beq     L001C
+	beq     L0020
 ;
-; Generic.x = coin_x[index];
+; if (coin_type[index] == COIN_REG) {
+;
+	ldy     _index
+	lda     _coin_type,y
+	bne     L001F
+;
+; Generic2.width = COIN_WIDTH;
+;
+	lda     #$07
+	sta     _Generic2+2
+;
+; Generic2.height = COIN_HEIGHT;
+;
+	lda     #$0B
+;
+; } else {
+;
+	jmp     L001C
+;
+; Generic2.width = BIG_COIN;
+;
+L001F:	lda     #$0D
+	sta     _Generic2+2
+;
+; Generic2.height = BIG_COIN;
+;
+L001C:	sta     _Generic2+3
+;
+; Generic2.x = coin_x[index];
 ;
 	ldy     _index
 	lda     _coin_x,y
-	sta     _Generic
+	sta     _Generic2
 ;
-; Generic.y = coin_y[index];
+; Generic2.y = coin_y[index];
 ;
 	ldy     _index
 	lda     _coin_y,y
-	sta     _Generic+1
+	sta     _Generic2+1
 ;
-; Generic.width = COIN_WIDTH;
-;
-	lda     #$07
-	sta     _Generic+2
-;
-; Generic.height = COIN_HEIGHT;
-;
-	lda     #$0B
-	sta     _Generic+3
-;
-; if (check_collision(&Generic, &BoxGuy1)) {
+; if (check_collision(&Generic, &Generic2)) {
 ;
 	lda     #<(_Generic)
 	ldx     #>(_Generic)
 	jsr     pushax
-	lda     #<(_BoxGuy1)
-	ldx     #>(_BoxGuy1)
+	lda     #<(_Generic2)
+	ldx     #>(_Generic2)
 	jsr     _check_collision
 	tax
-	beq     L001C
+	beq     L0020
 ;
 ; coin_y[index] = TURN_OFF;
 ;
@@ -9573,12 +9611,12 @@ L001B:	lda     _index
 ;
 ; for (index = 0; index < MAX_COINS; ++index) {
 ;
-L001C:	inc     _index
-	jmp     L001B
+L0020:	inc     _index
+	jmp     L001E
 ;
 ; Generic2.x = high_byte(BoxGuy1.x);
 ;
-L001D:	lda     _BoxGuy1+1
+L0021:	lda     _BoxGuy1+1
 	sta     _Generic2
 ;
 ; Generic2.y = high_byte(BoxGuy1.y);
@@ -9600,15 +9638,15 @@ L001D:	lda     _BoxGuy1+1
 ;
 	lda     #$00
 	sta     _index
-L001E:	lda     _index
+L0022:	lda     _index
 	cmp     #$10
-	bcs     L000F
+	bcs     L0012
 ;
 ; if (enemy_active[index]) {
 ;
 	ldy     _index
 	lda     _enemy_active,y
-	beq     L001F
+	beq     L0023
 ;
 ; Generic.x = enemy_x[index];
 ;
@@ -9640,12 +9678,12 @@ L001E:	lda     _index
 	ldx     #>(_Generic2)
 	jsr     _check_collision
 	tax
-	beq     L001F
+	beq     L0023
 ;
 ; if (damage_cooldown == 0) {
 ;
 	lda     _damage_cooldown
-	bne     L001F
+	bne     L0023
 ;
 ; player_health -= 2;
 ;
@@ -9669,7 +9707,7 @@ L001E:	lda     _index
 ; if (player_health <= 0) {
 ;
 	lda     _player_health
-	bne     L001F
+	bne     L0023
 ;
 ; death = 1;
 ;
@@ -9682,12 +9720,12 @@ L001E:	lda     _index
 ;
 ; for (index = 0; index < MAX_ENEMY; ++index) {
 ;
-L001F:	inc     _index
-	jmp     L001E
+L0023:	inc     _index
+	jmp     L0022
 ;
 ; }
 ;
-L000F:	rts
+L0012:	rts
 
 .endproc
 
