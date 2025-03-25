@@ -1058,27 +1058,57 @@ void fire_turd(void) {
             } else {
                 turd_x[index] = high_byte(BoxGuy1.x) + 12; // Slightly in front when facing right
             }
-            turd_y[index] = high_byte(BoxGuy1.y) - 4; // From upper body
+            turd_y[index] = high_byte(BoxGuy1.y) - 2; // From upper body
             
-            // Set direction based on d-pad
+            // Handle diagonal throws (up + left/right)
             if (pad1 & PAD_UP) {
-                turd_direction[index] = TURD_UP;
-                turd_vel_x[index] = (direction == LEFT) ? -1 : 1; // Slight horizontal movement
-                turd_vel_y[index] = -8; // Faster upward velocity
+                if (pad1 & PAD_RIGHT) {
+                    // Diagonal up-right
+                    turd_direction[index] = TURD_UP;
+                    turd_vel_x[index] = 3; // Right movement
+                    turd_vel_y[index] = -7; // Upward velocity
+                } 
+                else if (pad1 & PAD_LEFT) {
+                    // Diagonal up-left
+                    turd_direction[index] = TURD_UP;
+                    turd_vel_x[index] = -3; // Left movement
+                    turd_vel_y[index] = -7; // Upward velocity
+                }
+                else {
+                    // Just up
+                    turd_direction[index] = TURD_UP;
+                    turd_vel_x[index] = (direction == LEFT) ? -1 : 1; // Slight horizontal movement
+                    turd_vel_y[index] = -7; // Faster upward velocity
+                }
             }
             else if (pad1 & PAD_DOWN) {
-                turd_direction[index] = TURD_DOWN;
-                turd_vel_x[index] = (direction == LEFT) ? -1 : 1; // Slight horizontal movement
-                turd_vel_y[index] = 3; // Downward velocity
+                if (pad1 & PAD_RIGHT) {
+                    // Diagonal down-right
+                    turd_direction[index] = TURD_DOWN;
+                    turd_vel_x[index] = 3; // Right movement
+                    turd_vel_y[index] = 3; // Downward velocity
+                }
+                else if (pad1 & PAD_LEFT) {
+                    // Diagonal down-left
+                    turd_direction[index] = TURD_DOWN;
+                    turd_vel_x[index] = -3; // Left movement
+                    turd_vel_y[index] = 3; // Downward velocity
+                }
+                else {
+                    // Just down
+                    turd_direction[index] = TURD_DOWN;
+                    turd_vel_x[index] = (direction == LEFT) ? -1 : 1; // Slight horizontal movement
+                    turd_vel_y[index] = 3; // Downward velocity
+                }
             }
             else if (direction == LEFT) {
                 turd_direction[index] = TURD_LEFT;
-                turd_vel_x[index] = -5; // Horizontal speed
+                turd_vel_x[index] = -3; // Horizontal speed
                 turd_vel_y[index] = -3; // Slight initial upward arc
             }
             else { // RIGHT
                 turd_direction[index] = TURD_RIGHT;
-                turd_vel_x[index] = 5; // Horizontal speed
+                turd_vel_x[index] = 3; // Horizontal speed
                 turd_vel_y[index] = -3; // Slight initial upward arc
             }
             
@@ -1100,8 +1130,8 @@ void update_turds(void) {
             turd_vel_y[index] += 1; // Integer gravity
           
             // Cap falling speed
-            if (turd_vel_y[index] > 3) {
-                turd_vel_y[index] = 3;
+            if (turd_vel_y[index] > 5) {
+                turd_vel_y[index] = 5;
             }
             
             // Check if turd is off screen
