@@ -48,7 +48,7 @@ PNG files for NES sprites must meet these requirements:
 - Stored as two bit planes (total 16 bytes per tile)
 
 ### Metasprite Structure:
-In metasprite definitions (like in Sprites.h):
+In metasprite definitions (like in sprites.h):
 ```c
 const unsigned char RoundSprR[]={
     0xff, 0xfc, 0x00, 0,  // x_offset, y_offset, tile_id, attribute

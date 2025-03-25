@@ -8,7 +8,7 @@
  
 #include "LIB/neslib.h"
 #include "LIB/nesdoug.h"
-#include "Sprites.h"
+#include "sprites.h"
 #include "ninjaturdle.h"
 #include "level_data.c"
 

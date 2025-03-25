@@ -56,7 +56,7 @@ The sprite sheet is organized as follows:
 
 ## Advanced: Metasprite Structure
 
-If you change sprite designs significantly, you may need to update the metasprite definitions in Sprites.h:
+If you change sprite designs significantly, you may need to update the metasprite definitions in sprites.h:
 
 ```c
 const unsigned char RoundSprL[]={
