@@ -71,9 +71,13 @@ const unsigned char EnemyBounceSpr2[]={
 //	EnemyChaseSpr, EnemyBounceSpr, EnemyBounceSpr2
 //}
 
+// Using a simple 8x8 sprite for the turd projectile
+const unsigned char TurdSpr[]={
+    0, 0, 0x10, 1,
+    128
+};
 
-
-
-
-
-
+const unsigned char TurdLifeSpr[]={
+    0, 0, 0x40, 1, 
+    128
+};

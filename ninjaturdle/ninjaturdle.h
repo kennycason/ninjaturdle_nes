@@ -183,11 +183,11 @@ const unsigned char palette_sp[]={
 
 
 
-const unsigned char END_TEXT[]="The end of the game.";
-const unsigned char END_TEXT2[]="I guess you won?";
+const unsigned char END_TEXT[]="Congratulations!";
+const unsigned char END_TEXT2[]="You saved Steve, again.";
 const unsigned char END_TEXT3[]="Coins: ";
 
-const unsigned char DEAD_TEXT[]="You died.";
+const unsigned char DEAD_TEXT[]="Game Over";
 
 #include "NES_ST/title.h"
 
@@ -215,4 +215,41 @@ char bg_coll_R(void);
 char bg_coll_U(void);
 char bg_coll_D(void);
 char bg_coll_D2(void);
+
+// Add these definitions for the turd projectiles
+#define MAX_TURDS 4  // Maximum number of turds on screen at once
+#define TURD_WIDTH 7
+#define TURD_HEIGHT 7
+#define TURD_SPEED 3  // Horizontal speed
+#define TURD_GRAVITY 1 // How fast turds fall
+#define TURD_COOLDOWN 15 // Frames between shots
+
+// Turd direction constants
+#define TURD_RIGHT 0
+#define TURD_LEFT 1
+#define TURD_UP 2
+#define TURD_DOWN 3
+
+// Turd projectile arrays
+unsigned char turd_x[MAX_TURDS];
+unsigned char turd_y[MAX_TURDS];
+unsigned char turd_active[MAX_TURDS];
+signed char turd_vel_x[MAX_TURDS];
+signed char turd_vel_y[MAX_TURDS];
+unsigned char turd_direction[MAX_TURDS];
+
+// Turd power flag (default to true for now)
+unsigned char has_turd_power;
+unsigned char turd_cooldown;
+
+// Function prototypes
+void fire_turd(void);
+void update_turds(void);
+void draw_turds(void);
+
+// Add player health variables
+#define MAX_HEALTH 10
+unsigned char player_health;
+unsigned char damage_cooldown; // Invincibility frames after taking damage
+#define DAMAGE_COOLDOWN_TIME 60 // 1 second of invincibility
 
