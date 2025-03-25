@@ -9495,7 +9495,7 @@ L002C:	rts
 ; if (damage_cooldown > 0) {
 ;
 	lda     _damage_cooldown
-	beq     L001D
+	beq     L001F
 ;
 ; --damage_cooldown;
 ;
@@ -9503,7 +9503,7 @@ L002C:	rts
 ;
 ; Generic.x = high_byte(BoxGuy1.x);
 ;
-L001D:	lda     _BoxGuy1+1
+L001F:	lda     _BoxGuy1+1
 	sta     _Generic
 ;
 ; Generic.y = high_byte(BoxGuy1.y);
@@ -9525,21 +9525,21 @@ L001D:	lda     _BoxGuy1+1
 ;
 	lda     #$00
 	sta     _index
-L001E:	lda     _index
+L0020:	lda     _index
 	cmp     #$10
-	bcs     L0021
+	bcs     L0023
 ;
 ; if (coin_active[index]) {
 ;
 	ldy     _index
 	lda     _coin_active,y
-	beq     L0020
+	beq     L0022
 ;
 ; if (coin_type[index] == COIN_REG) {
 ;
 	ldy     _index
 	lda     _coin_type,y
-	bne     L001F
+	bne     L0021
 ;
 ; Generic2.width = COIN_WIDTH;
 ;
@@ -9552,16 +9552,16 @@ L001E:	lda     _index
 ;
 ; } else {
 ;
-	jmp     L001C
+	jmp     L001E
 ;
 ; Generic2.width = BIG_COIN;
 ;
-L001F:	lda     #$0D
+L0021:	lda     #$0D
 	sta     _Generic2+2
 ;
 ; Generic2.height = BIG_COIN;
 ;
-L001C:	sta     _Generic2+3
+L001E:	sta     _Generic2+3
 ;
 ; Generic2.x = coin_x[index];
 ;
@@ -9584,7 +9584,7 @@ L001C:	sta     _Generic2+3
 	ldx     #>(_Generic2)
 	jsr     _check_collision
 	tax
-	beq     L0020
+	beq     L0022
 ;
 ; coin_y[index] = TURN_OFF;
 ;
@@ -9609,14 +9609,22 @@ L001C:	sta     _Generic2+3
 	lda     #$00
 	jsr     _sfx_play
 ;
+; if (coin_type[index] == COIN_END) ++level_up;
+;
+	ldy     _index
+	lda     _coin_type,y
+	cmp     #$01
+	bne     L0022
+	inc     _level_up
+;
 ; for (index = 0; index < MAX_COINS; ++index) {
 ;
-L0020:	inc     _index
-	jmp     L001E
+L0022:	inc     _index
+	jmp     L0020
 ;
 ; Generic2.x = high_byte(BoxGuy1.x);
 ;
-L0021:	lda     _BoxGuy1+1
+L0023:	lda     _BoxGuy1+1
 	sta     _Generic2
 ;
 ; Generic2.y = high_byte(BoxGuy1.y);
@@ -9638,15 +9646,15 @@ L0021:	lda     _BoxGuy1+1
 ;
 	lda     #$00
 	sta     _index
-L0022:	lda     _index
+L0024:	lda     _index
 	cmp     #$10
-	bcs     L0012
+	bcs     L0014
 ;
 ; if (enemy_active[index]) {
 ;
 	ldy     _index
 	lda     _enemy_active,y
-	beq     L0023
+	beq     L0025
 ;
 ; Generic.x = enemy_x[index];
 ;
@@ -9678,12 +9686,12 @@ L0022:	lda     _index
 	ldx     #>(_Generic2)
 	jsr     _check_collision
 	tax
-	beq     L0023
+	beq     L0025
 ;
 ; if (damage_cooldown == 0) {
 ;
 	lda     _damage_cooldown
-	bne     L0023
+	bne     L0025
 ;
 ; player_health -= 2;
 ;
@@ -9707,7 +9715,7 @@ L0022:	lda     _index
 ; if (player_health <= 0) {
 ;
 	lda     _player_health
-	bne     L0023
+	bne     L0025
 ;
 ; death = 1;
 ;
@@ -9720,12 +9728,12 @@ L0022:	lda     _index
 ;
 ; for (index = 0; index < MAX_ENEMY; ++index) {
 ;
-L0023:	inc     _index
-	jmp     L0022
+L0025:	inc     _index
+	jmp     L0024
 ;
 ; }
 ;
-L0012:	rts
+L0014:	rts
 
 .endproc
 

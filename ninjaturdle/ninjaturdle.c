@@ -948,6 +948,9 @@ void sprite_collisions(void) {
                 coin_active[index] = 0;
                 ++coins;
                 sfx_play(SFX_DING, 0);
+                
+                // Add this line to trigger level transition for big coins
+                if (coin_type[index] == COIN_END) ++level_up;
             }
         }
     }
@@ -984,11 +987,6 @@ void sprite_collisions(void) {
         }
     }
 }
-
-
-
-
-
 
 
 
