@@ -1,0 +1,105 @@
+# Bidirectional Scrolling Implementation Plan
+
+## Overview
+This document outlines the plan to convert Ninja Turdle from unidirectional (right-only) scrolling to bidirectional scrolling like Metroid, with future plans to support vertical scrolling as well.
+
+## Current Architecture Analysis
+
+The game currently:
+1. Uses a room-based system with 8 rooms per level
+2. Loads collision maps for the current and next room
+3. Draws new tiles as they come into view from the right
+4. Handles player movement with fixed-point positioning
+5. Manages scrolling when the player moves beyond a threshold (MAX_RIGHT)
+
+The key challenge is that the current system is asymmetric - it's designed specifically for right scrolling with assumptions about data loading and screen drawing that don't work in reverse.
+
+## Implementation Plan
+
+### Phase 1: Prepare the Codebase
+1. Add new function prototypes to ninjaturdle.h:
+   - `void draw_screen_L(void);`
+   - `void new_cmap_left(void);`
+
+2. Add variables to track left scrolling state:
+   - Add a `map_loaded_left` variable similar to `map_loaded`
+   - Consider adding a direction flag for scrolling
+
+3. Review existing code for assumptions about scroll direction:
+   - Check for hardcoded values that assume right-only scrolling
+   - Identify areas where logic needs to be mirrored for left scrolling
+
+### Phase 2: Implement Left Scrolling Logic
+1. Modify the `movement()` function to handle left scrolling:
+   - Add a threshold for left scrolling (similar to MAX_RIGHT but for left side)
+   - Implement scroll adjustment when player moves left past threshold
+   - Ensure proper boundary checking (don't scroll past beginning of level)
+
+2. Create the `new_cmap_left()` function:
+   - Load the collision map for the room to the left
+   - Handle room transitions properly
+   - Ensure collision maps are synchronized with visual display
+
+3. Create the `draw_screen_L()` function:
+   - Draw metatiles as they come into view from the left
+   - Mirror the functionality of draw_screen_R()
+   - Ensure proper nametable addressing
+
+### Phase 3: Fix Edge Cases and Synchronization
+1. Handle room transitions properly:
+   - Ensure objects (coins, enemies) appear/disappear correctly when scrolling in either direction
+   - Fix any issues with collision detection at room boundaries
+   - Handle the case where player is at the beginning of the level
+
+2. Ensure smooth scrolling:
+   - Prevent "jumps" when transitioning between player movement and screen scrolling
+   - Maintain consistent player position relative to screen
+   - Handle acceleration/deceleration properly in both directions
+
+3. Fix potential issues with object management:
+   - Update check_spr_objects() to handle bidirectional scrolling
+   - Ensure enemies and coins are properly activated/deactivated in both directions
+
+### Phase 4: Testing and Refinement
+1. Test scrolling in both directions at different speeds:
+   - Slow movement near thresholds
+   - Fast movement across multiple rooms
+   - Rapid direction changes
+
+2. Test room transitions in both directions:
+   - Moving from room 0 to 1 and back
+   - Moving across multiple rooms quickly
+   - Edge cases at the beginning and end of levels
+
+3. Test object interactions near room boundaries:
+   - Coins and enemies at room edges
+   - Projectiles crossing room boundaries
+   - Collision detection at boundaries
+
+4. Fix any visual glitches or collision issues:
+   - Tile alignment problems
+   - Flickering or missing sprites
+   - Incorrect collision detection
+
+## Technical Considerations
+
+### NES Hardware Limitations
+- The NES has specific hardware for scrolling that works in a particular way
+- Nametable addressing needs careful handling for bidirectional scrolling
+- PPU updates must be synchronized with the game loop
+
+### Memory Management
+- Collision maps need to be properly loaded and synchronized
+- Object data needs to be managed efficiently for both directions
+- Consider the impact on zero-page variables and memory usage
+
+### Performance
+- Ensure scrolling remains smooth in both directions
+- Watch for performance bottlenecks in the NMI handler
+- Optimize drawing routines for both directions
+
+## Future Extensions
+- After horizontal bidirectional scrolling is working, consider:
+  - Vertical scrolling for larger rooms
+  - Diagonal scrolling for open-world areas
+  - Room-to-room transitions with doors (Metroid-style) 
