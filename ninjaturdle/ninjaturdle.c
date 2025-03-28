@@ -971,7 +971,7 @@ void sprite_collisions(void) {
             if (check_collision(&Generic, &Generic2)) {
                 // Only take damage if not in cooldown period
                 if (damage_cooldown == 0) {
-                    player_health -= 2;
+                  //  player_health -= 2;
                     damage_cooldown = DAMAGE_COOLDOWN_TIME;
                     
                     // Play damage sound
