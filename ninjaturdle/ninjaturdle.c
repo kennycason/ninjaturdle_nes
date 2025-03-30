@@ -12,6 +12,8 @@
 #include "ninjaturdle.h"
 #include "level_data.c"
 
+#define LEFT 0
+#define RIGHT 1
 
 unsigned char bounce[] = {
     0, 0, 0, 1, 2, 2, 2, 1
@@ -40,6 +42,8 @@ void main(void) {
 	turd_cooldown = 0;
 	player_health = MAX_HEALTH; // Initialize player health
 	damage_cooldown = 0;
+	
+	direction = RIGHT; // Initialize direction to face right
 	
 	// Initialize turd projectiles
 	for (index = 0; index < MAX_TURDS; ++index) {
