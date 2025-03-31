@@ -48,8 +48,8 @@
 	.import		_buffer_4_mt
 	.import		_flush_vram_update2
 	.import		_color_emphasis
-	.export		_RoundSprL
-	.export		_RoundSprR
+	.export		_NinjaSprL
+	.export		_NinjaSprR
 	.export		_CoinSpr
 	.export		_BigCoinSpr
 	.export		_CoinHud
@@ -226,7 +226,7 @@ _bounce:
 
 .segment	"RODATA"
 
-_RoundSprL:
+_NinjaSprL:
 	.byte	$FF
 	.byte	$FC
 	.byte	$02
@@ -244,7 +244,7 @@ _RoundSprL:
 	.byte	$13
 	.byte	$01
 	.byte	$80
-_RoundSprR:
+_NinjaSprR:
 	.byte	$FF
 	.byte	$FC
 	.byte	$00
@@ -7443,7 +7443,7 @@ L002A:	lda     _temp_x
 L002B:	lda     _direction
 	bne     L0004
 ;
-; oam_meta_spr(temp_x, high_byte(NINJA.y), RoundSprL);
+; oam_meta_spr(temp_x, high_byte(NINJA.y), NinjaSprL);
 ;
 	jsr     decsp2
 	lda     _temp_x
@@ -7452,14 +7452,14 @@ L002B:	lda     _direction
 	lda     _NINJA+3
 	dey
 	sta     (sp),y
-	lda     #<(_RoundSprL)
-	ldx     #>(_RoundSprL)
+	lda     #<(_NinjaSprL)
+	ldx     #>(_NinjaSprL)
 ;
 ; else {
 ;
 	jmp     L0027
 ;
-; oam_meta_spr(temp_x, high_byte(NINJA.y), RoundSprR);
+; oam_meta_spr(temp_x, high_byte(NINJA.y), NinjaSprR);
 ;
 L0004:	jsr     decsp2
 	lda     _temp_x
@@ -7468,8 +7468,8 @@ L0004:	jsr     decsp2
 	lda     _NINJA+3
 	dey
 	sta     (sp),y
-	lda     #<(_RoundSprR)
-	ldx     #>(_RoundSprR)
+	lda     #<(_NinjaSprR)
+	ldx     #>(_NinjaSprR)
 L0027:	jsr     _oam_meta_spr
 ;
 ; for (index = 0; index < MAX_COINS; ++index) {

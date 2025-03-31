@@ -49,8 +49,8 @@ al 00C726 ._Level3_list
 al 00C766 ._Level_offsets
 al 00C736 ._Levels_list
 al 0004F0 ._NINJA
-al 00AD1B ._RoundSprL
-al 00AD2C ._RoundSprR
+al 00AD1B ._NinjaSprL
+al 00AD2C ._NinjaSprR
 al 00ADE6 ._TurdLifeSpr
 al 00ADE1 ._TurdSpr
 al 000308 .__BSS_LOAD__

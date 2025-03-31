@@ -1,6 +1,6 @@
 // a 16x16 pixel metasprite
 
-const unsigned char RoundSprL[]={
+const unsigned char NinjaSprL[]={
 	  0xff,  0xfc,0x02,1,
 	  7,  0xfc,0x03,1,
 	  0xff,  4,0x12,1,
@@ -9,7 +9,7 @@ const unsigned char RoundSprL[]={
 };
 
 
-const unsigned char RoundSprR[]={
+const unsigned char NinjaSprR[]={
 	  0xff,  0xfc,0x00,1,
 	  7,  0xfc,0x01,1,
 	  0xff,  4,0x10,1,

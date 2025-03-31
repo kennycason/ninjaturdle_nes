@@ -308,10 +308,10 @@ void draw_sprites(void) {
 	if (temp_x == 0) temp_x = 1;
 	// draw 1 hero
 	if (direction == LEFT) {
-		oam_meta_spr(temp_x, high_byte(NINJA.y), RoundSprL);
+		oam_meta_spr(temp_x, high_byte(NINJA.y), NinjaSprL);
 	}
 	else {
-		oam_meta_spr(temp_x, high_byte(NINJA.y), RoundSprR);
+		oam_meta_spr(temp_x, high_byte(NINJA.y), NinjaSprR);
 	}
 	
 	// draw coin sprites
