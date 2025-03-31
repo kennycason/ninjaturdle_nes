@@ -77,28 +77,28 @@ const unsigned char EnemyBounceSpr2[]={
 
 const unsigned char Boss1SprL[]={
     // Top-left 16x16 block
-    0xff, 0xff, 0x2C, 0,  // Top-left tile
-    7,    0xff, 0x2D, 0,   // Top-right tile
-    0xff, 7,    0x3C, 0,   // Bottom-left tile
-    7,    7,    0x3D, 0,    // Bottom-right tile
+    0xff, 0xff, 0x2C, 1,  // Top-left tile
+    7,    0xff, 0x2D, 1,   // Top-right tile
+    0xff, 7,    0x3C, 1,   // Bottom-left tile
+    7,    7,    0x3D, 1,    // Bottom-right tile
 
     // Top-right 16x16 block
-    15,  0xff, 0x2E, 0,   // Top-left tile
-    23,  0xff, 0x2F, 0,   // Top-right tile
-    15,  7,    0x3E, 0,    // Bottom-left tile
-    23,  7,    0x3F, 0,    // Bottom-right tile
+    15,  0xff, 0x2E, 1,   // Top-left tile
+    23,  0xff, 0x2F, 1,   // Top-right tile
+    15,  7,    0x3E, 1,    // Bottom-left tile
+    23,  7,    0x3F, 1,    // Bottom-right tile
 
     // Bottom-left 16x16 block
-    0xff, 15,  0x4C, 0,   // Top-left tile
-    7,    15,  0x4D, 0,    // Top-right tile
-    0xff, 23,  0x5C, 0,   // Bottom-left tile
-    7,    23,  0x5D, 0,    // Bottom-right tile
+    0xff, 15,  0x4C, 1,   // Top-left tile
+    7,    15,  0x4D, 1,    // Top-right tile
+    0xff, 23,  0x5C, 1,   // Bottom-left tile
+    7,    23,  0x5D, 1,    // Bottom-right tile
 
     // Bottom-right 16x16 block
-    15,  15,  0x4E, 0,    // Top-left tile
-    23,  15,  0x4F, 0,    // Top-right tile
-    15,  23,  0x5E, 0,    // Bottom-left tile
-    23,  23,  0x5F, 0,    // Bottom-right tile
+    15,  15,  0x4E, 1,    // Top-left tile
+    23,  15,  0x4F, 1,    // Top-right tile
+    15,  23,  0x5E, 1,    // Bottom-left tile
+    23,  23,  0x5F, 1,    // Bottom-right tile
     128
 };
 

@@ -1,4 +1,7 @@
-enum{COIN_REG, COIN_END};
+enum { 
+	COIN_REG, 
+	COIN_END
+};
 
 //NOTE MAX_COINS = 12
 
@@ -75,15 +78,15 @@ const unsigned char level_1_enemies[]={
 	0x71,0,0xe8,ENEMY_WASP,
 */
 	
-	0xb0, 0, 0xc0, ENEMY_BOSS1, 
+	0x90, 0, 0xc0, ENEMY_WASP, 
 	0xc0, 1, 0xe0, ENEMY_BOUNCE, 
 	0xc0, 2, 0x30, ENEMY_BOUNCE,  
-	0xc0, 2, 0x90, ENEMY_WASP, 
+	0x80, 2, 0x90, ENEMY_WASP, 
 	0xb0, 3, 0x20, ENEMY_BOUNCE,  
 	0xc0, 3, 0xb0, ENEMY_WASP, 
 	0x80, 5, 0x00, ENEMY_BOUNCE, 
 	0xc0, 5, 0x90, ENEMY_WASP, 
-	0xc0, 6, 0x70, ENEMY_WASP, 
+	0xb0, 7, 0x70, ENEMY_BOSS1, 
 	TURN_OFF
 };
 

@@ -529,7 +529,7 @@ void movement(void) {
 		map_loaded = 0;
 	}
 	
-// scroll
+	// scroll
 	temp5 = NINJA.x;
 	if (NINJA.x > MAX_RIGHT) {
 		temp1 = (NINJA.x - MAX_RIGHT) >> 8;
@@ -566,7 +566,7 @@ void check_spr_objects(void) {
 	ENTITY2.x = high_byte(NINJA.x);
 	// mark each object "active" if they are, and get the screen x
 	
-	for(index = 0; index < MAX_COINS; ++index) {
+	for (index = 0; index < MAX_COINS; ++index) {
 		coin_active[index] = 0; //default to zero
 		if (coin_y[index] != TURN_OFF) {
 			high_byte(temp5) = coin_room[index];
@@ -578,7 +578,7 @@ void check_spr_objects(void) {
 	}
 	
 
-	for(index = 0; index < MAX_ENEMY; ++index) {
+	for (index = 0; index < MAX_ENEMY; ++index) {
 		enemy_active[index] = 0; //default to zero
 		if (enemy_y[index] != TURN_OFF) {
 			high_byte(temp5) = enemy_room[index];
@@ -589,7 +589,6 @@ void check_spr_objects(void) {
 			
 			enemy_moves(); // if active, do it's moves now
 		}
-
 	}
 }
 
@@ -607,10 +606,28 @@ void enemy_moves(void) {
 	if (enemy_type[index] == ENEMY_BOSS1) {
 		ENTITY1.x = enemy_x[index];
 		ENTITY1.y = enemy_y[index] + 14; // mid point
-		ENTITY1.width = 28;
-        ENTITY1.height = 28;
-
-		enemy_anim[index] = Boss1SprL;
+		ENTITY1.width = 28; 
+		ENTITY1.height = 28; 
+        // note, ENTITY2 is the hero's x position
+		
+		if (enemy_frames & 1) return; // half speed
+		if (enemy_x[index] > ENTITY2.x) {
+			ENTITY1.x -= 1; // test going left
+            bg_collision_fast();
+			if (collision_L) return;
+            // else, no collision, do the move.
+			if (enemy_actual_x[index] == 0) --enemy_room[index];
+			--enemy_actual_x[index];
+			enemy_anim[index] = Boss1SprL; // Use left-facing sprite
+		}
+		else if (enemy_x[index] < ENTITY2.x) {
+			ENTITY1.x += 1; // test going right
+            bg_collision_fast();
+			if (collision_R) return;
+			++enemy_actual_x[index];
+			if (enemy_actual_x[index] == 0) ++enemy_room[index];
+			enemy_anim[index] = Boss1SprL; // Use right-facing sprite
+		}
 	}
 	else if (enemy_type[index] == ENEMY_WASP) {
 		//for bg collisions
@@ -679,8 +696,6 @@ void enemy_moves(void) {
 	}
 
 }
-
-
 
 
 void bg_collision_fast(void) {
@@ -969,13 +984,20 @@ void sprite_collisions(void) {
         if (enemy_active[index]) {
             ENTITY1.x = enemy_x[index];
             ENTITY1.y = enemy_y[index];
-            ENTITY1.width = ENEMY_WIDTH;
-            ENTITY1.height = ENEMY_HEIGHT;
+            
+            // Use different collision box for boss
+            if (enemy_type[index] == ENEMY_BOSS1) {
+                ENTITY1.width = 28;  // 32 pixels - 4 pixels for safety
+                ENTITY1.height = 28; // 32 pixels - 4 pixels for safety
+            } else {
+                ENTITY1.width = ENEMY_WIDTH;
+                ENTITY1.height = ENEMY_HEIGHT;
+            }
             
             if (check_collision(&ENTITY1, &ENTITY2)) {
                 // Only take damage if not in cooldown period
                 if (damage_cooldown == 0) {
-                  //  player_health -= 2;
+                    player_health -= 2;
                     damage_cooldown = DAMAGE_COOLDOWN_TIME;
                     
                     // Play damage sound
