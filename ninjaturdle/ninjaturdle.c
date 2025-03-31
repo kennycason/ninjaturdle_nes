@@ -286,10 +286,10 @@ void load_room(void) {
 	
 	
 	sprite_obj_init();
-	BoxGuy1.x = 0x4000;
-	BoxGuy1.y = 0xc400;
-	BoxGuy1.vel_x = 0;
-	BoxGuy1.vel_y = 0;
+	NINJA.x = 0x4000;
+	NINJA.y = 0xc400;
+	NINJA.vel_x = 0;
+	NINJA.vel_y = 0;
 	
 	map_loaded = 0;
 	
@@ -303,15 +303,15 @@ void draw_sprites(void) {
 	// clear all sprites from sprite buffer
 	oam_clear();
 	
-	temp_x = high_byte(BoxGuy1.x);
+	temp_x = high_byte(NINJA.x);
 	if (temp_x > 0xfc) temp_x = 1;
 	if (temp_x == 0) temp_x = 1;
 	// draw 1 hero
 	if (direction == LEFT) {
-		oam_meta_spr(temp_x, high_byte(BoxGuy1.y), RoundSprL);
+		oam_meta_spr(temp_x, high_byte(NINJA.y), RoundSprL);
 	}
 	else {
-		oam_meta_spr(temp_x, high_byte(BoxGuy1.y), RoundSprR);
+		oam_meta_spr(temp_x, high_byte(NINJA.y), RoundSprR);
 	}
 	
 	// draw coin sprites
@@ -372,7 +372,7 @@ void draw_sprites(void) {
 	
 	
 	// Draw coin icon in upper right
-	oam_meta_spr(0xDD, 0x0D, CoinSpr);
+	oam_meta_spr(0xDD, 0x10, CoinSpr);
 	
 	// Draw coin count
 	temp1 = (coins / 10) + 0xF0; // Convert to tile number
@@ -384,79 +384,79 @@ void draw_sprites(void) {
 	
 void movement(void) {
     // handle x
-	old_x = BoxGuy1.x;
+	old_x = NINJA.x;
 	
 	if (pad1 & PAD_LEFT) {
 		direction = LEFT;
 		
-        if (BoxGuy1.vel_x >= DECEL) {
-            BoxGuy1.vel_x -= DECEL;
+        if (NINJA.vel_x >= DECEL) {
+            NINJA.vel_x -= DECEL;
         }
-        else if (BoxGuy1.vel_x > 0) {
-            BoxGuy1.vel_x = 0;
+        else if (NINJA.vel_x > 0) {
+            NINJA.vel_x = 0;
         }
 		else {
-			BoxGuy1.vel_x -= ACCEL;
-			if (BoxGuy1.vel_x < -MAX_SPEED) BoxGuy1.vel_x = -MAX_SPEED;
+			NINJA.vel_x -= ACCEL;
+			if (NINJA.vel_x < -MAX_SPEED) NINJA.vel_x = -MAX_SPEED;
 		}
 	}
 	else if (pad1 & PAD_RIGHT) {
 		
 		direction = RIGHT;
 
-		if (BoxGuy1.vel_x <= DECEL) {
-            BoxGuy1.vel_x += DECEL;
+		if (NINJA.vel_x <= DECEL) {
+            NINJA.vel_x += DECEL;
         }
-        else if (BoxGuy1.vel_x < 0) {
-            BoxGuy1.vel_x = 0;
+        else if (NINJA.vel_x < 0) {
+            NINJA.vel_x = 0;
         }
 		else {
-			BoxGuy1.vel_x += ACCEL;
-			if (BoxGuy1.vel_x >= MAX_SPEED) BoxGuy1.vel_x = MAX_SPEED;
+			NINJA.vel_x += ACCEL;
+			if (NINJA.vel_x >= MAX_SPEED) NINJA.vel_x = MAX_SPEED;
 		}
 	}
 	else { // nothing pressed
-		if (BoxGuy1.vel_x >= ACCEL) BoxGuy1.vel_x -= ACCEL;
-		else if (BoxGuy1.vel_x < -ACCEL) BoxGuy1.vel_x += ACCEL;
-		else BoxGuy1.vel_x = 0;
+		if (NINJA.vel_x >= ACCEL) NINJA.vel_x -= ACCEL;
+		else if (NINJA.vel_x < -ACCEL) NINJA.vel_x += ACCEL;
+		else NINJA.vel_x = 0;
 	}
 	
-	BoxGuy1.x += BoxGuy1.vel_x;
+	NINJA.x += NINJA.vel_x;
 	
-	if (BoxGuy1.x > 0xf000) { // too far, don't wrap around
+	if (NINJA.x > 0xf000) { // too far, don't wrap around
         
         if (old_x >= 0x8000) {
-            BoxGuy1.x = 0xf000; // max right
+            NINJA.x = 0xf000; // max right
         }
         else {
-            BoxGuy1.x = 0x0000; // max left
+            NINJA.x = 0x0000; // max left
         }
         
-		BoxGuy1.vel_x = 0;
+		NINJA.vel_x = 0;
 	} 
 	
-	Generic.x = high_byte(BoxGuy1.x); // this is much faster than passing a pointer to BoxGuy1
-	Generic.y = high_byte(BoxGuy1.y);
-	Generic.width = HERO_WIDTH;
-	Generic.height = HERO_HEIGHT;
+	ENTITY1.x = high_byte(NINJA.x); // this is much faster than passing a pointer to NINJA
+	ENTITY1.y = high_byte(NINJA.y);
+	ENTITY1.width = HERO_WIDTH;
+	ENTITY1.height = HERO_HEIGHT;
 	
-    if (BoxGuy1.vel_x < 0) {
+    if (NINJA.vel_x < 0) {
         if (bg_coll_L() ) { // check collision left
-            high_byte(BoxGuy1.x) = high_byte(BoxGuy1.x) - eject_L;
-            BoxGuy1.vel_x = 0;
-            if (BoxGuy1.x > 0xf000) {
+            high_byte(NINJA.x) = high_byte(NINJA.x) - eject_L;
+            NINJA.vel_x = 0;
+            if (NINJA.x > 0xf000) {
                 // no wrap around
-                BoxGuy1.x = 0xf000;
+                NINJA.x = 0xf000;
             }
         }
     }
-    else if (BoxGuy1.vel_x > 0) {
+    else if (NINJA.vel_x > 0) {
         if (bg_coll_R() ) { // check collision right
-            high_byte(BoxGuy1.x) = high_byte(BoxGuy1.x) - eject_R;
-            BoxGuy1.vel_x = 0;
-            if (BoxGuy1.x > 0xf000) {
+            high_byte(NINJA.x) = high_byte(NINJA.x) - eject_R;
+            NINJA.vel_x = 0;
+            if (NINJA.x > 0xf000) {
                 // no wrap around
-                BoxGuy1.x = 0x0000;
+                NINJA.x = 0x0000;
             }
         }
     }
@@ -467,40 +467,40 @@ void movement(void) {
 
 // gravity
 
-	// BoxGuy1.vel_y is signed
-	if (BoxGuy1.vel_y < 0x300) {
-		BoxGuy1.vel_y += GRAVITY;
+	// NINJA.vel_y is signed
+	if (NINJA.vel_y < 0x300) {
+		NINJA.vel_y += GRAVITY;
 	}
 	else {
-		BoxGuy1.vel_y = 0x300; // consistent
+		NINJA.vel_y = 0x300; // consistent
 	}
-	BoxGuy1.y += BoxGuy1.vel_y;
+	NINJA.y += NINJA.vel_y;
 	
-	Generic.x = high_byte(BoxGuy1.x);
-	Generic.y = high_byte(BoxGuy1.y);
+	ENTITY1.x = high_byte(NINJA.x);
+	ENTITY1.y = high_byte(NINJA.y);
 	
-    if (BoxGuy1.vel_y > 0) {
+    if (NINJA.vel_y > 0) {
         if (bg_coll_D() ) { // check collision below
-            high_byte(BoxGuy1.y) = high_byte(BoxGuy1.y) - eject_D;
-            BoxGuy1.y &= 0xff00;
-            if (BoxGuy1.vel_y > 0) {
-                BoxGuy1.vel_y = 0;
+            high_byte(NINJA.y) = high_byte(NINJA.y) - eject_D;
+            NINJA.y &= 0xff00;
+            if (NINJA.vel_y > 0) {
+                NINJA.vel_y = 0;
             }
         }
     }
-    else if (BoxGuy1.vel_y < 0) {
+    else if (NINJA.vel_y < 0) {
         if (bg_coll_U() ) { // check collision above
-            high_byte(BoxGuy1.y) = high_byte(BoxGuy1.y) - eject_U;
-            BoxGuy1.vel_y = 0;
+            high_byte(NINJA.y) = high_byte(NINJA.y) - eject_U;
+            NINJA.vel_y = 0;
         }
     }
     
 	// check collision down a little lower than hero
-	Generic.y = high_byte(BoxGuy1.y); // the rest should be the same
+	ENTITY1.y = high_byte(NINJA.y); // the rest should be the same
 	
 	if (pad1_new & PAD_A) {
         if (bg_coll_D2() ) {
-			BoxGuy1.vel_y = JUMP_VEL; // JUMP
+			NINJA.vel_y = JUMP_VEL; // JUMP
 			sfx_play(SFX_JUMP, 0);
 			short_jump_count = 1;
 		}
@@ -512,8 +512,8 @@ void movement(void) {
 		++short_jump_count;
 		if (short_jump_count > 30) short_jump_count = 0;
 	}
-	if ((short_jump_count) && ((pad1 & PAD_A) == 0) && (BoxGuy1.vel_y < -0x200)) {
-		BoxGuy1.vel_y = -0x200;
+	if ((short_jump_count) && ((pad1 & PAD_A) == 0) && (NINJA.vel_y < -0x200)) {
+		NINJA.vel_y = -0x200;
 		short_jump_count = 0;
 	}
 	
@@ -530,19 +530,19 @@ void movement(void) {
 	}
 	
 // scroll
-	temp5 = BoxGuy1.x;
-	if (BoxGuy1.x > MAX_RIGHT) {
-		temp1 = (BoxGuy1.x - MAX_RIGHT) >> 8;
+	temp5 = NINJA.x;
+	if (NINJA.x > MAX_RIGHT) {
+		temp1 = (NINJA.x - MAX_RIGHT) >> 8;
         if (temp1 > 3) temp1 = 3; // max scroll change
 		scroll_x += temp1;
-		high_byte(BoxGuy1.x) = high_byte(BoxGuy1.x) - temp1;
+		high_byte(NINJA.x) = high_byte(NINJA.x) - temp1;
 	}
 
 	if (scroll_x >= MAX_SCROLL) {
 		scroll_x = MAX_SCROLL; // stop scrolling right, end of level
-		BoxGuy1.x = temp5; // but allow the x position to go all the way right
-		if (high_byte(BoxGuy1.x) >= 0xf1) {
-			BoxGuy1.x = 0xf100;
+		NINJA.x = temp5; // but allow the x position to go all the way right
+		if (high_byte(NINJA.x) >= 0xf1) {
+			NINJA.x = 0xf100;
 		}
 	}
 
@@ -565,7 +565,7 @@ void movement(void) {
 
 void check_spr_objects(void) {
 	++enemy_frames;
-	Generic2.x = high_byte(BoxGuy1.x);
+	ENTITY2.x = high_byte(NINJA.x);
 	// mark each object "active" if they are, and get the screen x
 	
 	for(index = 0; index < MAX_COINS; ++index) {
@@ -614,29 +614,30 @@ char get_position(void) {
 void enemy_moves(void) {
 	if (enemy_type[index] == ENEMY_CHASE) {
 		//for bg collisions
-		Generic.x = enemy_x[index];
-		Generic.y = enemy_y[index] + 6; // mid point
-		Generic.width = 13;
-        Generic.height = 15;
+		ENTITY1.x = enemy_x[index];
+		ENTITY1.y = enemy_y[index] + 6; // mid point
+		ENTITY1.width = 13;
+        ENTITY1.height = 15;
         
-        // note, Generic2 is the hero's x position
+        // note, ENTITY2 is the hero's x position
 		
-		enemy_anim[index] = EnemyChaseSpr;
 		if (enemy_frames & 1) return; // half speed
-		if (enemy_x[index] > Generic2.x) {
-			Generic.x -= 1; // test going left
+		if (enemy_x[index] > ENTITY2.x) {
+			ENTITY1.x -= 1; // test going left
             bg_collision_fast();
 			if (collision_L) return;
             // else, no collision, do the move.
 			if (enemy_actual_x[index] == 0) --enemy_room[index];
 			--enemy_actual_x[index];
+			enemy_anim[index] = EnemyWaspSprL; // Use left-facing sprite
 		}
-		else if (enemy_x[index] < Generic2.x) {
-			Generic.x += 1; // test going right
+		else if (enemy_x[index] < ENTITY2.x) {
+			ENTITY1.x += 1; // test going right
             bg_collision_fast();
 			if (collision_R) return;
 			++enemy_actual_x[index];
 			if (enemy_actual_x[index] == 0) ++enemy_room[index];
+			enemy_anim[index] = EnemyWaspSprR; // Use right-facing sprite
 		}
 	}
 	else if (enemy_type[index] == ENEMY_BOUNCE) {
@@ -666,10 +667,10 @@ void enemy_moves(void) {
 			enemy_anim[index] = EnemyBounceSpr2;
 			temp1 = enemy_y[index];
 			//check ground collision
-			Generic.x = enemy_x[index];
-			Generic.y = enemy_y[index];
-			Generic.width = 15;
-			Generic.height = 14;
+			ENTITY1.x = enemy_x[index];
+			ENTITY1.y = enemy_y[index];
+			ENTITY1.width = 15;
+			ENTITY1.height = 14;
 			
 			if (bg_coll_D()) {
 				enemy_y[index] -= eject_D;
@@ -690,13 +691,13 @@ void bg_collision_fast(void) {
 	collision_L = 0;
 	collision_R = 0;
     
-	if (Generic.y >= 0xf0) return;
+	if (ENTITY1.y >= 0xf0) return;
 	
-	temp5 = Generic.x + scroll_x;
+	temp5 = ENTITY1.x + scroll_x;
 	temp_x = temp5 & 0xff; // low byte x
 	temp_room = temp5 >> 8; // high byte x
 	
-	temp_y = Generic.y + 6; // y middle
+	temp_y = ENTITY1.y + 6; // y middle
 	
 	bg_collision_sub();
 	
@@ -705,7 +706,7 @@ void bg_collision_fast(void) {
 	}
 	
 	// right side
-	temp5 += Generic.width;
+	temp5 += ENTITY1.width;
 	temp_x = temp5 & 0xff; // low byte x
 	temp_room = temp5 >> 8; // high byte x
 	
@@ -721,15 +722,15 @@ void bg_collision_fast(void) {
 
 char bg_coll_L(void) {
     // check 2 points on the left side
-    temp5 = Generic.x + scroll_x;
+    temp5 = ENTITY1.x + scroll_x;
     temp_x = (char)temp5; // low byte
     temp_room = temp5 >> 8; // high byte
     
     eject_L = temp_x | 0xf0;
-    temp_y = Generic.y + 2;
+    temp_y = ENTITY1.y + 2;
     if (bg_collision_sub() & COL_ALL) return 1;
     
-    temp_y = Generic.y + Generic.height;
+    temp_y = ENTITY1.y + ENTITY1.height;
     temp_y -= 2;
     if (bg_collision_sub() & COL_ALL) return 1;
     
@@ -738,15 +739,15 @@ char bg_coll_L(void) {
 
 char bg_coll_R(void) {
     // check 2 points on the right side
-    temp5 = Generic.x + scroll_x + Generic.width;
+    temp5 = ENTITY1.x + scroll_x + ENTITY1.width;
     temp_x = (char)temp5; // low byte
     temp_room = temp5 >> 8; // high byte
     
     eject_R = (temp_x + 1) & 0x0f;
-    temp_y = Generic.y + 2;
+    temp_y = ENTITY1.y + 2;
     if (bg_collision_sub() & COL_ALL) return 1;
     
-    temp_y = Generic.y + Generic.height;
+    temp_y = ENTITY1.y + ENTITY1.height;
     temp_y -= 2;
     if (bg_collision_sub() & COL_ALL) return 1;
     
@@ -755,16 +756,16 @@ char bg_coll_R(void) {
 
 char bg_coll_U(void) {
     // check 2 points on the top side
-    temp5 = Generic.x + scroll_x;
+    temp5 = ENTITY1.x + scroll_x;
     temp5 += 2;
     temp_x = (char)temp5; // low byte
     temp_room = temp5 >> 8; // high byte
     
-    temp_y = Generic.y;
+    temp_y = ENTITY1.y;
     eject_U = temp_y | 0xf0;
     if (bg_collision_sub() & COL_ALL) return 1;
     
-    temp5 = Generic.x + scroll_x + Generic.width;
+    temp5 = ENTITY1.x + scroll_x + ENTITY1.width;
     temp5 -= 2;
     temp_x = (char)temp5; // low byte
     temp_room = temp5 >> 8; // high byte
@@ -776,12 +777,12 @@ char bg_coll_U(void) {
 
 char bg_coll_D(void) {
     // check 2 points on the bottom side
-    temp5 = Generic.x + scroll_x;
+    temp5 = ENTITY1.x + scroll_x;
     temp5 += 2;
     temp_x = (char)temp5; // low byte
     temp_room = temp5 >> 8; // high byte
     
-    temp_y = Generic.y + Generic.height;
+    temp_y = ENTITY1.y + ENTITY1.height;
     
     if ((temp_y & 0x0f) > 3) return 0; // bug fix
     // so we don't snap to those platforms
@@ -791,7 +792,7 @@ char bg_coll_D(void) {
     
     if (bg_collision_sub() ) return 1;
     
-    temp5 = Generic.x + scroll_x + Generic.width;
+    temp5 = ENTITY1.x + scroll_x + ENTITY1.width;
     temp5 -= 2;
     temp_x = (char)temp5; // low byte
     temp_room = temp5 >> 8; // high byte
@@ -804,16 +805,16 @@ char bg_coll_D(void) {
 char bg_coll_D2(void) {
     // check 2 points on the bottom side
     // a little lower, for jumping
-    temp5 = Generic.x + scroll_x;
+    temp5 = ENTITY1.x + scroll_x;
     temp5 += 2;
     temp_x = (char)temp5; // low byte
     temp_room = temp5 >> 8; // high byte
     
-    temp_y = Generic.y + Generic.height;
+    temp_y = ENTITY1.y + ENTITY1.height;
     temp_y += 2;
     if (bg_collision_sub() ) return 1;
     
-    temp5 = Generic.x + scroll_x + Generic.width;
+    temp5 = ENTITY1.x + scroll_x + ENTITY1.width;
     temp5 -= 2;
     temp_x = (char)temp5; // low byte
     temp_room = temp5 >> 8; // high byte
@@ -930,24 +931,24 @@ void sprite_collisions(void) {
     }
     
     // Check coin collisions
-    Generic.x = high_byte(BoxGuy1.x);
-    Generic.y = high_byte(BoxGuy1.y);
-    Generic.width = HERO_WIDTH;
-    Generic.height = HERO_HEIGHT;
+    ENTITY1.x = high_byte(NINJA.x);
+    ENTITY1.y = high_byte(NINJA.y);
+    ENTITY1.width = HERO_WIDTH;
+    ENTITY1.height = HERO_HEIGHT;
     
     for (index = 0; index < MAX_COINS; ++index) {
         if (coin_active[index]) {
             if (coin_type[index] == COIN_REG) {
-                Generic2.width = COIN_WIDTH;
-                Generic2.height = COIN_HEIGHT;
+                ENTITY2.width = COIN_WIDTH;
+                ENTITY2.height = COIN_HEIGHT;
             } else {
-                Generic2.width = BIG_COIN;
-                Generic2.height = BIG_COIN;
+                ENTITY2.width = BIG_COIN;
+                ENTITY2.height = BIG_COIN;
             }
-            Generic2.x = coin_x[index];
-            Generic2.y = coin_y[index];
+            ENTITY2.x = coin_x[index];
+            ENTITY2.y = coin_y[index];
             
-            if (check_collision(&Generic, &Generic2)) {
+            if (check_collision(&ENTITY1, &ENTITY2)) {
                 coin_y[index] = TURN_OFF;
                 coin_active[index] = 0;
                 ++coins;
@@ -960,19 +961,19 @@ void sprite_collisions(void) {
     }
     
     // Check enemy collisions
-    Generic2.x = high_byte(BoxGuy1.x);
-    Generic2.y = high_byte(BoxGuy1.y);
-    Generic2.width = HERO_WIDTH;
-    Generic2.height = HERO_HEIGHT;
+    ENTITY2.x = high_byte(NINJA.x);
+    ENTITY2.y = high_byte(NINJA.y);
+    ENTITY2.width = HERO_WIDTH;
+    ENTITY2.height = HERO_HEIGHT;
     
     for (index = 0; index < MAX_ENEMY; ++index) {
         if (enemy_active[index]) {
-            Generic.x = enemy_x[index];
-            Generic.y = enemy_y[index];
-            Generic.width = ENEMY_WIDTH;
-            Generic.height = ENEMY_HEIGHT;
+            ENTITY1.x = enemy_x[index];
+            ENTITY1.y = enemy_y[index];
+            ENTITY1.width = ENEMY_WIDTH;
+            ENTITY1.height = ENEMY_HEIGHT;
             
-            if (check_collision(&Generic, &Generic2)) {
+            if (check_collision(&ENTITY1, &ENTITY2)) {
                 // Only take damage if not in cooldown period
                 if (damage_cooldown == 0) {
                   //  player_health -= 2;
@@ -1080,11 +1081,11 @@ void fire_turd(void) {
             // Set initial position based on player position and direction
             // Adjust to fire from top half and front of ninja
             if (direction == LEFT) {
-                turd_x[index] = high_byte(BoxGuy1.x) - 4; // Slightly in front when facing left
+                turd_x[index] = high_byte(NINJA.x) - 4; // Slightly in front when facing left
             } else {
-                turd_x[index] = high_byte(BoxGuy1.x) + 12; // Slightly in front when facing right
+                turd_x[index] = high_byte(NINJA.x) + 12; // Slightly in front when facing right
             }
-            turd_y[index] = high_byte(BoxGuy1.y) - 2; // From upper body
+            turd_y[index] = high_byte(NINJA.y) - 2; // From upper body
             
             // Handle diagonal throws (up + left/right)
             if (pad1 & PAD_UP) {
@@ -1167,10 +1168,10 @@ void update_turds(void) {
             }
             
             // Check collision with background
-            Generic.x = turd_x[index];
-            Generic.y = turd_y[index];
-            Generic.width = TURD_WIDTH;
-            Generic.height = TURD_HEIGHT;
+            ENTITY1.x = turd_x[index];
+            ENTITY1.y = turd_y[index];
+            ENTITY1.width = TURD_WIDTH;
+            ENTITY1.height = TURD_HEIGHT;
             
             if (bg_coll_L() || bg_coll_R() || bg_coll_U() || bg_coll_D()) {
                 turd_active[index] = 0;
@@ -1180,12 +1181,12 @@ void update_turds(void) {
             // Check collision with enemies
             for (index2 = 0; index2 < MAX_ENEMY; ++index2) {
                 if (enemy_active[index2]) {
-                    Generic2.x = enemy_x[index2];
-                    Generic2.y = enemy_y[index2];
-                    Generic2.width = ENEMY_WIDTH;
-                    Generic2.height = ENEMY_HEIGHT;
+                    ENTITY2.x = enemy_x[index2];
+                    ENTITY2.y = enemy_y[index2];
+                    ENTITY2.width = ENEMY_WIDTH;
+                    ENTITY2.height = ENEMY_HEIGHT;
                     
-                    if (check_collision(&Generic, &Generic2)) {
+                    if (check_collision(&ENTITY1, &ENTITY2)) {
                         // Hit enemy
                         enemy_y[index2] = TURN_OFF;
                         enemy_active[index2] = 0;

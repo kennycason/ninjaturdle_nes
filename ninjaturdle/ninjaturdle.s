@@ -53,7 +53,8 @@
 	.export		_CoinSpr
 	.export		_BigCoinSpr
 	.export		_CoinHud
-	.export		_EnemyChaseSpr
+	.export		_EnemyWaspSprL
+	.export		_EnemyWaspSprR
 	.export		_EnemyBounceSpr
 	.export		_EnemyBounceSpr2
 	.export		_TurdSpr
@@ -111,9 +112,9 @@
 	.export		_temp_room
 	.export		_c_map
 	.export		_c_map2
-	.export		_Generic
-	.export		_Generic2
-	.export		_BoxGuy1
+	.export		_ENTITY1
+	.export		_ENTITY2
+	.export		_NINJA
 	.export		_coin_x
 	.export		_coin_y
 	.export		_coin_active
@@ -274,7 +275,7 @@ _BigCoinSpr:
 	.byte	$FF
 	.byte	$FF
 	.byte	$21
-	.byte	$01
+	.byte	$00
 	.byte	$FF
 	.byte	$07
 	.byte	$31
@@ -282,38 +283,26 @@ _BigCoinSpr:
 	.byte	$07
 	.byte	$FF
 	.byte	$22
-	.byte	$01
+	.byte	$02
 	.byte	$07
 	.byte	$07
 	.byte	$32
-	.byte	$01
+	.byte	$03
 	.byte	$80
 _CoinHud:
 	.byte	$00
 	.byte	$00
 	.byte	$23
 	.byte	$01
-	.byte	$08
-	.byte	$00
-	.byte	$24
-	.byte	$01
-	.byte	$00
-	.byte	$08
-	.byte	$33
-	.byte	$01
-	.byte	$08
-	.byte	$08
-	.byte	$34
-	.byte	$01
 	.byte	$80
-_EnemyChaseSpr:
+_EnemyWaspSprL:
 	.byte	$FF
 	.byte	$FF
-	.byte	$07
+	.byte	$08
 	.byte	$02
 	.byte	$07
 	.byte	$FF
-	.byte	$08
+	.byte	$09
 	.byte	$02
 	.byte	$FF
 	.byte	$07
@@ -322,6 +311,24 @@ _EnemyChaseSpr:
 	.byte	$07
 	.byte	$07
 	.byte	$19
+	.byte	$02
+	.byte	$80
+_EnemyWaspSprR:
+	.byte	$FF
+	.byte	$FF
+	.byte	$0A
+	.byte	$02
+	.byte	$07
+	.byte	$FF
+	.byte	$0B
+	.byte	$02
+	.byte	$FF
+	.byte	$07
+	.byte	$1A
+	.byte	$02
+	.byte	$07
+	.byte	$07
+	.byte	$1B
 	.byte	$02
 	.byte	$80
 _EnemyBounceSpr:
@@ -6952,11 +6959,11 @@ _c_map:
 	.res	240,$00
 _c_map2:
 	.res	240,$00
-_Generic:
+_ENTITY1:
 	.res	4,$00
-_Generic2:
+_ENTITY2:
 	.res	4,$00
-_BoxGuy1:
+_NINJA:
 	.res	8,$00
 _coin_x:
 	.res	16,$00
@@ -7287,28 +7294,28 @@ L001B:	adc     #<(_Levels_list)
 ;
 	jsr     _sprite_obj_init
 ;
-; BoxGuy1.x = 0x4000;
+; NINJA.x = 0x4000;
 ;
 	ldx     #$40
 	lda     #$00
-	sta     _BoxGuy1
-	stx     _BoxGuy1+1
+	sta     _NINJA
+	stx     _NINJA+1
 ;
-; BoxGuy1.y = 0xc400;
+; NINJA.y = 0xc400;
 ;
 	ldx     #$C4
-	sta     _BoxGuy1+2
-	stx     _BoxGuy1+2+1
+	sta     _NINJA+2
+	stx     _NINJA+2+1
 ;
-; BoxGuy1.vel_x = 0;
+; NINJA.vel_x = 0;
 ;
-	sta     _BoxGuy1+4
-	sta     _BoxGuy1+4+1
+	sta     _NINJA+4
+	sta     _NINJA+4+1
 ;
-; BoxGuy1.vel_y = 0;
+; NINJA.vel_y = 0;
 ;
-	sta     _BoxGuy1+6
-	sta     _BoxGuy1+6+1
+	sta     _NINJA+6
+	sta     _NINJA+6+1
 ;
 ; map_loaded = 0;
 ;
@@ -7345,9 +7352,9 @@ L001B:	adc     #<(_Levels_list)
 ;
 	jsr     _oam_clear
 ;
-; temp_x = high_byte(BoxGuy1.x);
+; temp_x = high_byte(NINJA.x);
 ;
-	lda     _BoxGuy1+1
+	lda     _NINJA+1
 	sta     _temp_x
 ;
 ; if (temp_x > 0xfc) temp_x = 1;
@@ -7369,13 +7376,13 @@ L002A:	lda     _temp_x
 L002B:	lda     _direction
 	bne     L0004
 ;
-; oam_meta_spr(temp_x, high_byte(BoxGuy1.y), RoundSprL);
+; oam_meta_spr(temp_x, high_byte(NINJA.y), RoundSprL);
 ;
 	jsr     decsp2
 	lda     _temp_x
 	ldy     #$01
 	sta     (sp),y
-	lda     _BoxGuy1+3
+	lda     _NINJA+3
 	dey
 	sta     (sp),y
 	lda     #<(_RoundSprL)
@@ -7385,13 +7392,13 @@ L002B:	lda     _direction
 ;
 	jmp     L0027
 ;
-; oam_meta_spr(temp_x, high_byte(BoxGuy1.y), RoundSprR);
+; oam_meta_spr(temp_x, high_byte(NINJA.y), RoundSprR);
 ;
 L0004:	jsr     decsp2
 	lda     _temp_x
 	ldy     #$01
 	sta     (sp),y
-	lda     _BoxGuy1+3
+	lda     _NINJA+3
 	dey
 	sta     (sp),y
 	lda     #<(_RoundSprR)
@@ -7676,13 +7683,13 @@ L0016:	jsr     _draw_turds
 	lda     #$01
 	jsr     _oam_spr
 ;
-; oam_meta_spr(0xDD, 0x0D, CoinSpr);
+; oam_meta_spr(0xDD, 0x10, CoinSpr);
 ;
 	jsr     decsp2
 	lda     #$DD
 	ldy     #$01
 	sta     (sp),y
-	lda     #$0D
+	lda     #$10
 	dey
 	sta     (sp),y
 	lda     #<(_CoinSpr)
@@ -7752,11 +7759,11 @@ L0016:	jsr     _draw_turds
 .segment	"CODE"
 
 ;
-; old_x = BoxGuy1.x;
+; old_x = NINJA.x;
 ;
-	lda     _BoxGuy1+1
+	lda     _NINJA+1
 	sta     _old_x+1
-	lda     _BoxGuy1
+	lda     _NINJA
 	sta     _old_x
 ;
 ; if (pad1 & PAD_LEFT) {
@@ -7770,37 +7777,37 @@ L0016:	jsr     _draw_turds
 	lda     #$00
 	sta     _direction
 ;
-; if (BoxGuy1.vel_x >= DECEL) {
+; if (NINJA.vel_x >= DECEL) {
 ;
-	lda     _BoxGuy1+4
+	lda     _NINJA+4
 	cmp     #$32
-	lda     _BoxGuy1+4+1
+	lda     _NINJA+4+1
 	sbc     #$00
 	bvs     L0004
 	eor     #$80
 L0004:	bpl     L0003
 ;
-; BoxGuy1.vel_x -= DECEL;
+; NINJA.vel_x -= DECEL;
 ;
-	lda     _BoxGuy1+4
+	lda     _NINJA+4
 	sec
 	sbc     #$32
-	sta     _BoxGuy1+4
+	sta     _NINJA+4
 	jcs     L0020
-	dec     _BoxGuy1+4+1
+	dec     _NINJA+4+1
 ;
-; else if (BoxGuy1.vel_x > 0) {
+; else if (NINJA.vel_x > 0) {
 ;
 	jmp     L0020
-L0003:	lda     _BoxGuy1+4
+L0003:	lda     _NINJA+4
 	cmp     #$01
-	lda     _BoxGuy1+4+1
+	lda     _NINJA+4+1
 	sbc     #$00
 	bvs     L0008
 	eor     #$80
 L0008:	bpl     L0007
 ;
-; BoxGuy1.vel_x = 0;
+; NINJA.vel_x = 0;
 ;
 	ldx     #$00
 	txa
@@ -7809,20 +7816,20 @@ L0008:	bpl     L0007
 ;
 	jmp     L0056
 ;
-; BoxGuy1.vel_x -= ACCEL;
+; NINJA.vel_x -= ACCEL;
 ;
-L0007:	lda     _BoxGuy1+4
+L0007:	lda     _NINJA+4
 	sec
 	sbc     #$1E
-	sta     _BoxGuy1+4
+	sta     _NINJA+4
 	bcs     L000A
-	dec     _BoxGuy1+4+1
+	dec     _NINJA+4+1
 ;
-; if (BoxGuy1.vel_x < -MAX_SPEED) BoxGuy1.vel_x = -MAX_SPEED;
+; if (NINJA.vel_x < -MAX_SPEED) NINJA.vel_x = -MAX_SPEED;
 ;
-L000A:	lda     _BoxGuy1+4
+L000A:	lda     _NINJA+4
 	cmp     #$C0
-	lda     _BoxGuy1+4+1
+	lda     _NINJA+4+1
 	sbc     #$FD
 	bvc     L000C
 	eor     #$80
@@ -7842,33 +7849,33 @@ L0054:	lda     _pad1
 	lda     #$01
 	sta     _direction
 ;
-; if (BoxGuy1.vel_x <= DECEL) {
+; if (NINJA.vel_x <= DECEL) {
 ;
-	lda     _BoxGuy1+4
+	lda     _NINJA+4
 	cmp     #$33
-	lda     _BoxGuy1+4+1
+	lda     _NINJA+4+1
 	sbc     #$00
 	bvc     L0010
 	eor     #$80
 L0010:	bpl     L000F
 ;
-; BoxGuy1.vel_x += DECEL;
+; NINJA.vel_x += DECEL;
 ;
 	lda     #$32
 	clc
-	adc     _BoxGuy1+4
-	sta     _BoxGuy1+4
+	adc     _NINJA+4
+	sta     _NINJA+4
 	jcc     L0020
-	inc     _BoxGuy1+4+1
+	inc     _NINJA+4+1
 ;
-; else if (BoxGuy1.vel_x < 0) {
+; else if (NINJA.vel_x < 0) {
 ;
 	jmp     L0020
-L000F:	ldx     _BoxGuy1+4+1
+L000F:	ldx     _NINJA+4+1
 	cpx     #$80
 	bcc     L0013
 ;
-; BoxGuy1.vel_x = 0;
+; NINJA.vel_x = 0;
 ;
 	ldx     #$00
 	txa
@@ -7877,20 +7884,20 @@ L000F:	ldx     _BoxGuy1+4+1
 ;
 	jmp     L0056
 ;
-; BoxGuy1.vel_x += ACCEL;
+; NINJA.vel_x += ACCEL;
 ;
 L0013:	lda     #$1E
 	clc
-	adc     _BoxGuy1+4
-	sta     _BoxGuy1+4
+	adc     _NINJA+4
+	sta     _NINJA+4
 	bcc     L0015
-	inc     _BoxGuy1+4+1
+	inc     _NINJA+4+1
 ;
-; if (BoxGuy1.vel_x >= MAX_SPEED) BoxGuy1.vel_x = MAX_SPEED;
+; if (NINJA.vel_x >= MAX_SPEED) NINJA.vel_x = MAX_SPEED;
 ;
-L0015:	lda     _BoxGuy1+4
+L0015:	lda     _NINJA+4
 	cmp     #$40
-	lda     _BoxGuy1+4+1
+	lda     _NINJA+4+1
 	sbc     #$02
 	bvs     L0017
 	eor     #$80
@@ -7902,28 +7909,28 @@ L0017:	bpl     L0020
 ;
 	jmp     L0056
 ;
-; if (BoxGuy1.vel_x >= ACCEL) BoxGuy1.vel_x -= ACCEL;
+; if (NINJA.vel_x >= ACCEL) NINJA.vel_x -= ACCEL;
 ;
-L000E:	lda     _BoxGuy1+4
+L000E:	lda     _NINJA+4
 	cmp     #$1E
-	lda     _BoxGuy1+4+1
+	lda     _NINJA+4+1
 	sbc     #$00
 	bvs     L001A
 	eor     #$80
 L001A:	bpl     L0019
-	lda     _BoxGuy1+4
+	lda     _NINJA+4
 	sec
 	sbc     #$1E
-	sta     _BoxGuy1+4
+	sta     _NINJA+4
 	bcs     L0020
-	dec     _BoxGuy1+4+1
+	dec     _NINJA+4+1
 ;
-; else if (BoxGuy1.vel_x < -ACCEL) BoxGuy1.vel_x += ACCEL;
+; else if (NINJA.vel_x < -ACCEL) NINJA.vel_x += ACCEL;
 ;
 	jmp     L0020
-L0019:	lda     _BoxGuy1+4
+L0019:	lda     _NINJA+4
 	cmp     #$E2
-	lda     _BoxGuy1+4+1
+	lda     _NINJA+4+1
 	sbc     #$FF
 	bvc     L001E
 	eor     #$80
@@ -7933,32 +7940,32 @@ L001E:	asl     a
 	bcc     L0056
 	lda     #$1E
 	clc
-	adc     _BoxGuy1+4
-	sta     _BoxGuy1+4
+	adc     _NINJA+4
+	sta     _NINJA+4
 	bcc     L0020
-	inc     _BoxGuy1+4+1
+	inc     _NINJA+4+1
 ;
-; else BoxGuy1.vel_x = 0;
+; else NINJA.vel_x = 0;
 ;
 	jmp     L0020
-L0056:	sta     _BoxGuy1+4
-	stx     _BoxGuy1+4+1
+L0056:	sta     _NINJA+4
+	stx     _NINJA+4+1
 ;
-; BoxGuy1.x += BoxGuy1.vel_x;
+; NINJA.x += NINJA.vel_x;
 ;
-L0020:	lda     _BoxGuy1+4
+L0020:	lda     _NINJA+4
 	clc
-	adc     _BoxGuy1
-	sta     _BoxGuy1
-	lda     _BoxGuy1+4+1
-	adc     _BoxGuy1+1
-	sta     _BoxGuy1+1
+	adc     _NINJA
+	sta     _NINJA
+	lda     _NINJA+4+1
+	adc     _NINJA+1
+	sta     _NINJA+1
 ;
-; if (BoxGuy1.x > 0xf000) { // too far, don't wrap around
+; if (NINJA.x > 0xf000) { // too far, don't wrap around
 ;
-	lda     _BoxGuy1
+	lda     _NINJA
 	cmp     #$01
-	lda     _BoxGuy1+1
+	lda     _NINJA+1
 	sbc     #$F0
 	bcc     L0059
 ;
@@ -7972,43 +7979,43 @@ L0020:	lda     _BoxGuy1+4
 	tax
 	bcc     L0058
 ;
-; BoxGuy1.x = 0xf000; // max right
+; NINJA.x = 0xf000; // max right
 ;
 	ldx     #$F0
 ;
-; BoxGuy1.x = 0x0000; // max left
+; NINJA.x = 0x0000; // max left
 ;
-L0058:	sta     _BoxGuy1
-	stx     _BoxGuy1+1
+L0058:	sta     _NINJA
+	stx     _NINJA+1
 ;
-; BoxGuy1.vel_x = 0;
+; NINJA.vel_x = 0;
 ;
-	sta     _BoxGuy1+4
-	sta     _BoxGuy1+4+1
+	sta     _NINJA+4
+	sta     _NINJA+4+1
 ;
-; Generic.x = high_byte(BoxGuy1.x); // this is much faster than passing a pointer to BoxGuy1
+; ENTITY1.x = high_byte(NINJA.x); // this is much faster than passing a pointer to NINJA
 ;
-L0059:	lda     _BoxGuy1+1
-	sta     _Generic
+L0059:	lda     _NINJA+1
+	sta     _ENTITY1
 ;
-; Generic.y = high_byte(BoxGuy1.y);
+; ENTITY1.y = high_byte(NINJA.y);
 ;
-	lda     _BoxGuy1+3
-	sta     _Generic+1
+	lda     _NINJA+3
+	sta     _ENTITY1+1
 ;
-; Generic.width = HERO_WIDTH;
+; ENTITY1.width = HERO_WIDTH;
 ;
 	lda     #$0D
-	sta     _Generic+2
+	sta     _ENTITY1+2
 ;
-; Generic.height = HERO_HEIGHT;
+; ENTITY1.height = HERO_HEIGHT;
 ;
 	lda     #$0B
-	sta     _Generic+3
+	sta     _ENTITY1+3
 ;
-; if (BoxGuy1.vel_x < 0) {
+; if (NINJA.vel_x < 0) {
 ;
-	ldx     _BoxGuy1+4+1
+	ldx     _NINJA+4+1
 	cpx     #$80
 	bcc     L0024
 ;
@@ -8018,37 +8025,37 @@ L0059:	lda     _BoxGuy1+1
 	tax
 	beq     L002B
 ;
-; high_byte(BoxGuy1.x) = high_byte(BoxGuy1.x) - eject_L;
+; high_byte(NINJA.x) = high_byte(NINJA.x) - eject_L;
 ;
-	lda     _BoxGuy1+1
+	lda     _NINJA+1
 	sec
 	sbc     _eject_L
-	sta     _BoxGuy1+1
+	sta     _NINJA+1
 ;
-; BoxGuy1.vel_x = 0;
+; NINJA.vel_x = 0;
 ;
 	lda     #$00
-	sta     _BoxGuy1+4
-	sta     _BoxGuy1+4+1
+	sta     _NINJA+4
+	sta     _NINJA+4+1
 ;
-; if (BoxGuy1.x > 0xf000) {
+; if (NINJA.x > 0xf000) {
 ;
-	lda     _BoxGuy1
+	lda     _NINJA
 	cmp     #$01
-	lda     _BoxGuy1+1
+	lda     _NINJA+1
 	sbc     #$F0
 	bcc     L002B
 ;
-; BoxGuy1.x = 0xf000;
+; NINJA.x = 0xf000;
 ;
 	ldx     #$F0
 ;
-; else if (BoxGuy1.vel_x > 0) {
+; else if (NINJA.vel_x > 0) {
 ;
 	jmp     L0066
-L0024:	lda     _BoxGuy1+4
+L0024:	lda     _NINJA+4
 	cmp     #$01
-	lda     _BoxGuy1+4+1
+	lda     _NINJA+4+1
 	sbc     #$00
 	bvs     L0029
 	eor     #$80
@@ -8060,89 +8067,89 @@ L0029:	bpl     L002B
 	tax
 	beq     L002B
 ;
-; high_byte(BoxGuy1.x) = high_byte(BoxGuy1.x) - eject_R;
+; high_byte(NINJA.x) = high_byte(NINJA.x) - eject_R;
 ;
-	lda     _BoxGuy1+1
+	lda     _NINJA+1
 	sec
 	sbc     _eject_R
-	sta     _BoxGuy1+1
+	sta     _NINJA+1
 ;
-; BoxGuy1.vel_x = 0;
+; NINJA.vel_x = 0;
 ;
 	lda     #$00
-	sta     _BoxGuy1+4
-	sta     _BoxGuy1+4+1
+	sta     _NINJA+4
+	sta     _NINJA+4+1
 ;
-; if (BoxGuy1.x > 0xf000) {
+; if (NINJA.x > 0xf000) {
 ;
-	lda     _BoxGuy1
+	lda     _NINJA
 	cmp     #$01
-	lda     _BoxGuy1+1
+	lda     _NINJA+1
 	sbc     #$F0
 	bcc     L002B
 ;
-; BoxGuy1.x = 0x0000;
+; NINJA.x = 0x0000;
 ;
 	ldx     #$00
 L0066:	lda     #$00
-	sta     _BoxGuy1
-	stx     _BoxGuy1+1
+	sta     _NINJA
+	stx     _NINJA+1
 ;
-; if (BoxGuy1.vel_y < 0x300) {
+; if (NINJA.vel_y < 0x300) {
 ;
-L002B:	lda     _BoxGuy1+6
+L002B:	lda     _NINJA+6
 	cmp     #$00
-	lda     _BoxGuy1+6+1
+	lda     _NINJA+6+1
 	sbc     #$03
 	bvc     L002D
 	eor     #$80
 L002D:	bpl     L002C
 ;
-; BoxGuy1.vel_y += GRAVITY;
+; NINJA.vel_y += GRAVITY;
 ;
 	lda     #$4C
 	clc
-	adc     _BoxGuy1+6
-	sta     _BoxGuy1+6
+	adc     _NINJA+6
+	sta     _NINJA+6
 	bcc     L002F
-	inc     _BoxGuy1+6+1
+	inc     _NINJA+6+1
 ;
 ; else {
 ;
 	jmp     L002F
 ;
-; BoxGuy1.vel_y = 0x300; // consistent
+; NINJA.vel_y = 0x300; // consistent
 ;
 L002C:	ldx     #$03
 	lda     #$00
-	sta     _BoxGuy1+6
-	stx     _BoxGuy1+6+1
+	sta     _NINJA+6
+	stx     _NINJA+6+1
 ;
-; BoxGuy1.y += BoxGuy1.vel_y;
+; NINJA.y += NINJA.vel_y;
 ;
-L002F:	lda     _BoxGuy1+6
+L002F:	lda     _NINJA+6
 	clc
-	adc     _BoxGuy1+2
-	sta     _BoxGuy1+2
-	lda     _BoxGuy1+6+1
-	adc     _BoxGuy1+2+1
-	sta     _BoxGuy1+2+1
+	adc     _NINJA+2
+	sta     _NINJA+2
+	lda     _NINJA+6+1
+	adc     _NINJA+2+1
+	sta     _NINJA+2+1
 ;
-; Generic.x = high_byte(BoxGuy1.x);
+; ENTITY1.x = high_byte(NINJA.x);
 ;
-	lda     _BoxGuy1+1
-	sta     _Generic
+	lda     _NINJA+1
+	sta     _ENTITY1
 ;
-; Generic.y = high_byte(BoxGuy1.y);
+; ENTITY1.y = high_byte(NINJA.y);
 ;
-	lda     _BoxGuy1+3
-	sta     _Generic+1
+	lda     _NINJA+3
+	sta     _ENTITY1+1
 ;
-; if (BoxGuy1.vel_y > 0) {
+; if (NINJA.vel_y > 0) {
 ;
-	lda     _BoxGuy1+6
+	lda     _NINJA+6
 	cmp     #$01
-	lda     _BoxGuy1+6+1
+	lda     _NINJA+6+1
 	sbc     #$00
 	bvs     L0031
 	eor     #$80
@@ -8154,34 +8161,34 @@ L0031:	bpl     L0030
 	tax
 	beq     L005A
 ;
-; high_byte(BoxGuy1.y) = high_byte(BoxGuy1.y) - eject_D;
+; high_byte(NINJA.y) = high_byte(NINJA.y) - eject_D;
 ;
-	lda     _BoxGuy1+3
+	lda     _NINJA+3
 	sec
 	sbc     _eject_D
-	sta     _BoxGuy1+3
+	sta     _NINJA+3
 ;
-; BoxGuy1.y &= 0xff00;
+; NINJA.y &= 0xff00;
 ;
-	ldx     _BoxGuy1+2+1
+	ldx     _NINJA+2+1
 	lda     #$00
-	sta     _BoxGuy1+2
-	stx     _BoxGuy1+2+1
+	sta     _NINJA+2
+	stx     _NINJA+2+1
 ;
-; if (BoxGuy1.vel_y > 0) {
+; if (NINJA.vel_y > 0) {
 ;
-	lda     _BoxGuy1+6
+	lda     _NINJA+6
 	cmp     #$01
-	lda     _BoxGuy1+6+1
+	lda     _NINJA+6+1
 	sbc     #$00
 	bvs     L0034
 	eor     #$80
 L0034:	bpl     L005A
 ;
-; else if (BoxGuy1.vel_y < 0) {
+; else if (NINJA.vel_y < 0) {
 ;
 	jmp     L0067
-L0030:	ldx     _BoxGuy1+6+1
+L0030:	ldx     _NINJA+6+1
 	cpx     #$80
 	bcc     L005A
 ;
@@ -8191,23 +8198,23 @@ L0030:	ldx     _BoxGuy1+6+1
 	tax
 	beq     L005A
 ;
-; high_byte(BoxGuy1.y) = high_byte(BoxGuy1.y) - eject_U;
+; high_byte(NINJA.y) = high_byte(NINJA.y) - eject_U;
 ;
-	lda     _BoxGuy1+3
+	lda     _NINJA+3
 	sec
 	sbc     _eject_U
-	sta     _BoxGuy1+3
+	sta     _NINJA+3
 ;
-; BoxGuy1.vel_y = 0;
+; NINJA.vel_y = 0;
 ;
 L0067:	lda     #$00
-	sta     _BoxGuy1+6
-	sta     _BoxGuy1+6+1
+	sta     _NINJA+6
+	sta     _NINJA+6+1
 ;
-; Generic.y = high_byte(BoxGuy1.y); // the rest should be the same
+; ENTITY1.y = high_byte(NINJA.y); // the rest should be the same
 ;
-L005A:	lda     _BoxGuy1+3
-	sta     _Generic+1
+L005A:	lda     _NINJA+3
+	sta     _ENTITY1+1
 ;
 ; if (pad1_new & PAD_A) {
 ;
@@ -8221,12 +8228,12 @@ L005A:	lda     _BoxGuy1+3
 	tax
 	beq     L0039
 ;
-; BoxGuy1.vel_y = JUMP_VEL; // JUMP
+; NINJA.vel_y = JUMP_VEL; // JUMP
 ;
 	ldx     #$FA
 	lda     #$00
-	sta     _BoxGuy1+6
-	stx     _BoxGuy1+6+1
+	sta     _NINJA+6
+	stx     _NINJA+6+1
 ;
 ; sfx_play(SFX_JUMP, 0);
 ;
@@ -8255,27 +8262,27 @@ L0039:	lda     _short_jump_count
 	lda     #$00
 	sta     _short_jump_count
 ;
-; if ((short_jump_count) && ((pad1 & PAD_A) == 0) && (BoxGuy1.vel_y < -0x200)) {
+; if ((short_jump_count) && ((pad1 & PAD_A) == 0) && (NINJA.vel_y < -0x200)) {
 ;
 L003B:	lda     _short_jump_count
 	beq     L003C
 	lda     _pad1
 	and     #$80
 	bne     L003C
-	lda     _BoxGuy1+6
+	lda     _NINJA+6
 	cmp     #$00
-	lda     _BoxGuy1+6+1
+	lda     _NINJA+6+1
 	sbc     #$FE
 	bvc     L003F
 	eor     #$80
 L003F:	bpl     L003C
 ;
-; BoxGuy1.vel_y = -0x200;
+; NINJA.vel_y = -0x200;
 ;
 	ldx     #$FE
 	lda     #$00
-	sta     _BoxGuy1+6
-	stx     _BoxGuy1+6+1
+	sta     _NINJA+6
+	stx     _NINJA+6+1
 ;
 ; short_jump_count = 0;
 ;
@@ -8309,23 +8316,23 @@ L003C:	lda     _scroll_x
 L005E:	lda     #$00
 L0053:	sta     _map_loaded
 ;
-; temp5 = BoxGuy1.x;
+; temp5 = NINJA.x;
 ;
-L0045:	lda     _BoxGuy1+1
+L0045:	lda     _NINJA+1
 	sta     _temp5+1
-	lda     _BoxGuy1
+	lda     _NINJA
 	sta     _temp5
 ;
-; if (BoxGuy1.x > MAX_RIGHT) {
+; if (NINJA.x > MAX_RIGHT) {
 ;
 	cmp     #$01
-	lda     _BoxGuy1+1
+	lda     _NINJA+1
 	sbc     #$90
 	bcc     L0046
 ;
-; temp1 = (BoxGuy1.x - MAX_RIGHT) >> 8;
+; temp1 = (NINJA.x - MAX_RIGHT) >> 8;
 ;
-	lda     _BoxGuy1+1
+	lda     _NINJA+1
 	sec
 	sbc     #$90
 	sta     _temp1
@@ -8347,12 +8354,12 @@ L005F:	lda     _temp1
 	adc     _scroll_x+1
 	sta     _scroll_x+1
 ;
-; high_byte(BoxGuy1.x) = high_byte(BoxGuy1.x) - temp1;
+; high_byte(NINJA.x) = high_byte(NINJA.x) - temp1;
 ;
-	lda     _BoxGuy1+1
+	lda     _NINJA+1
 	sec
 	sbc     _temp1
-	sta     _BoxGuy1+1
+	sta     _NINJA+1
 ;
 ; if (scroll_x >= MAX_SCROLL) {
 ;
@@ -8369,25 +8376,25 @@ L0046:	lda     _scroll_x
 	sta     _scroll_x
 	stx     _scroll_x+1
 ;
-; BoxGuy1.x = temp5; // but allow the x position to go all the way right
+; NINJA.x = temp5; // but allow the x position to go all the way right
 ;
 	lda     _temp5+1
-	sta     _BoxGuy1+1
+	sta     _NINJA+1
 	lda     _temp5
-	sta     _BoxGuy1
+	sta     _NINJA
 ;
-; if (high_byte(BoxGuy1.x) >= 0xf1) {
+; if (high_byte(NINJA.x) >= 0xf1) {
 ;
-	lda     _BoxGuy1+1
+	lda     _NINJA+1
 	cmp     #$F1
 	bcc     L0060
 ;
-; BoxGuy1.x = 0xf100;
+; NINJA.x = 0xf100;
 ;
 	ldx     #$F1
 	lda     #$00
-	sta     _BoxGuy1
-	stx     _BoxGuy1+1
+	sta     _NINJA
+	stx     _NINJA+1
 ;
 ; if (turd_cooldown > 0) {
 ;
@@ -8984,71 +8991,51 @@ L0003:	lda     #$01
 	lda     _enemy_type,y
 	jne     L0002
 ;
-; Generic.x = enemy_x[index];
+; ENTITY1.x = enemy_x[index];
 ;
 	ldy     _index
 	lda     _enemy_x,y
-	sta     _Generic
+	sta     _ENTITY1
 ;
-; Generic.y = enemy_y[index] + 6; // mid point
+; ENTITY1.y = enemy_y[index] + 6; // mid point
 ;
 	ldy     _index
 	lda     _enemy_y,y
 	clc
 	adc     #$06
-	sta     _Generic+1
+	sta     _ENTITY1+1
 ;
-; Generic.width = 13;
+; ENTITY1.width = 13;
 ;
 	lda     #$0D
-	sta     _Generic+2
+	sta     _ENTITY1+2
 ;
-; Generic.height = 15;
+; ENTITY1.height = 15;
 ;
 	lda     #$0F
-	sta     _Generic+3
-;
-; enemy_anim[index] = EnemyChaseSpr;
-;
-	ldx     #$00
-	lda     _index
-	asl     a
-	bcc     L0035
-	inx
-	clc
-L0035:	adc     #<(_enemy_anim)
-	sta     ptr1
-	txa
-	adc     #>(_enemy_anim)
-	sta     ptr1+1
-	lda     #<(_EnemyChaseSpr)
-	ldy     #$00
-	sta     (ptr1),y
-	iny
-	lda     #>(_EnemyChaseSpr)
-	sta     (ptr1),y
+	sta     _ENTITY1+3
 ;
 ; if (enemy_frames & 1) return; // half speed
 ;
 	lda     _enemy_frames
 	and     #$01
-	beq     L003F
+	beq     L0042
 ;
 ; }
 ;
 	rts
 ;
-; if (enemy_x[index] > Generic2.x) {
+; if (enemy_x[index] > ENTITY2.x) {
 ;
-L003F:	ldy     _index
+L0042:	ldy     _index
 	lda     _enemy_x,y
-	cmp     _Generic2
+	cmp     _ENTITY2
 	bcc     L0008
 	beq     L0008
 ;
-; Generic.x -= 1; // test going left
+; ENTITY1.x -= 1; // test going left
 ;
-	dec     _Generic
+	dec     _ENTITY1
 ;
 ; bg_collision_fast();
 ;
@@ -9057,7 +9044,7 @@ L003F:	ldy     _index
 ; if (collision_L) return;
 ;
 	lda     _collision_L
-	beq     L0040
+	beq     L0043
 ;
 ; }
 ;
@@ -9065,7 +9052,7 @@ L003F:	ldy     _index
 ;
 ; if (enemy_actual_x[index] == 0) --enemy_room[index];
 ;
-L0040:	ldy     _index
+L0043:	ldy     _index
 	lda     _enemy_actual_x,y
 	bne     L000B
 	lda     #<(_enemy_room)
@@ -9098,21 +9085,40 @@ L000E:	sta     ptr1
 	sbc     #$01
 	sta     (ptr1),y
 ;
-; else if (enemy_x[index] < Generic2.x) {
+; enemy_anim[index] = EnemyWaspSprL; // Use left-facing sprite
+;
+	ldx     #$00
+	lda     _index
+	asl     a
+	bcc     L0036
+	inx
+	clc
+L0036:	adc     #<(_enemy_anim)
+	sta     ptr1
+	txa
+	adc     #>(_enemy_anim)
+	sta     ptr1+1
+	lda     #<(_EnemyWaspSprL)
+	sta     (ptr1),y
+	iny
+	lda     #>(_EnemyWaspSprL)
+	sta     (ptr1),y
+;
+; else if (enemy_x[index] < ENTITY2.x) {
 ;
 	rts
 L0008:	ldy     _index
 	lda     _enemy_x,y
-	cmp     _Generic2
-	bcc     L0041
+	cmp     _ENTITY2
+	bcc     L0044
 ;
 ; }
 ;
 	rts
 ;
-; Generic.x += 1; // test going right
+; ENTITY1.x += 1; // test going right
 ;
-L0041:	inc     _Generic
+L0044:	inc     _ENTITY1
 ;
 ; bg_collision_fast();
 ;
@@ -9121,7 +9127,7 @@ L0041:	inc     _Generic
 ; if (collision_R) return;
 ;
 	lda     _collision_R
-	beq     L0042
+	beq     L0045
 ;
 ; }
 ;
@@ -9129,7 +9135,7 @@ L0041:	inc     _Generic
 ;
 ; ++enemy_actual_x[index];
 ;
-L0042:	lda     #<(_enemy_actual_x)
+L0045:	lda     #<(_enemy_actual_x)
 	ldx     #>(_enemy_actual_x)
 	clc
 	adc     _index
@@ -9146,16 +9152,10 @@ L0013:	sta     ptr1
 ; if (enemy_actual_x[index] == 0) ++enemy_room[index];
 ;
 	ldy     _index
+	ldx     #$00
 	lda     _enemy_actual_x,y
-	beq     L0043
-;
-; }
-;
-	rts
-;
-; if (enemy_actual_x[index] == 0) ++enemy_room[index];
-;
-L0043:	lda     #<(_enemy_room)
+	bne     L003D
+	lda     #<(_enemy_room)
 	ldx     #>(_enemy_room)
 	clc
 	adc     _index
@@ -9169,13 +9169,33 @@ L0016:	sta     ptr1
 	adc     (ptr1),y
 	sta     (ptr1),y
 ;
+; enemy_anim[index] = EnemyWaspSprR; // Use right-facing sprite
+;
+	ldx     #$00
+L003D:	lda     _index
+	asl     a
+	bcc     L0037
+	inx
+	clc
+L0037:	adc     #<(_enemy_anim)
+	sta     ptr1
+	txa
+	adc     #>(_enemy_anim)
+	sta     ptr1+1
+	lda     #<(_EnemyWaspSprR)
+	ldy     #$00
+	sta     (ptr1),y
+	iny
+	lda     #>(_EnemyWaspSprR)
+	sta     (ptr1),y
+;
 ; else if (enemy_type[index] == ENEMY_BOUNCE) {
 ;
 	rts
 L0002:	ldy     _index
 	lda     _enemy_type,y
 	cmp     #$01
-	beq     L0044
+	beq     L0046
 ;
 ; }
 ;
@@ -9183,7 +9203,7 @@ L0002:	ldy     _index
 ;
 ; temp1 = enemy_frames + (index << 3);
 ;
-L0044:	lda     _index
+L0046:	lda     _index
 	asl     a
 	asl     a
 	asl     a
@@ -9199,17 +9219,17 @@ L0044:	lda     _index
 ; if (temp1 < 16) { // stand still
 ;
 	cmp     #$10
-	bcs     L003B
+	bcs     L003E
 ;
 ; enemy_anim[index] = EnemyBounceSpr;
 ;
 	ldx     #$00
 	lda     _index
 	asl     a
-	bcc     L0036
+	bcc     L0038
 	inx
 	clc
-L0036:	adc     #<(_enemy_anim)
+L0038:	adc     #<(_enemy_anim)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_anim)
@@ -9224,9 +9244,9 @@ L0036:	adc     #<(_enemy_anim)
 ; else if (temp1 < 22) {
 ;
 	rts
-L003B:	lda     _temp1
+L003E:	lda     _temp1
 	cmp     #$16
-	bcs     L003C
+	bcs     L003F
 ;
 ; --enemy_y[index]; // jump
 ;
@@ -9264,10 +9284,10 @@ L001E:	sta     ptr1
 	ldx     #$00
 	lda     _index
 	asl     a
-	bcc     L0037
+	bcc     L0039
 	inx
 	clc
-L0037:	adc     #<(_enemy_anim)
+L0039:	adc     #<(_enemy_anim)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_anim)
@@ -9281,9 +9301,9 @@ L0037:	adc     #<(_enemy_anim)
 ; else if (temp1 < 42) {
 ;
 	rts
-L003C:	lda     _temp1
+L003F:	lda     _temp1
 	cmp     #$2A
-	bcs     L003D
+	bcs     L0040
 ;
 ; --enemy_y[index]; // jump
 ;
@@ -9306,10 +9326,10 @@ L0021:	sta     ptr1
 	ldx     #$00
 	lda     _index
 	asl     a
-	bcc     L0038
+	bcc     L003A
 	inx
 	clc
-L0038:	adc     #<(_enemy_anim)
+L003A:	adc     #<(_enemy_anim)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_anim)
@@ -9323,7 +9343,7 @@ L0038:	adc     #<(_enemy_anim)
 ; else if (temp1 < 44) { // use short anim. 2 frames
 ;
 	rts
-L003D:	lda     _temp1
+L0040:	lda     _temp1
 	cmp     #$2C
 	bcs     L0023
 ;
@@ -9348,10 +9368,10 @@ L0024:	sta     ptr1
 	ldx     #$00
 	lda     _index
 	asl     a
-	bcc     L0039
+	bcc     L003B
 	inx
 	clc
-L0039:	adc     #<(_enemy_anim)
+L003B:	adc     #<(_enemy_anim)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_anim)
@@ -9387,7 +9407,7 @@ L0026:	sta     ptr1
 	ldx     #$00
 	lda     _temp1
 	cmp     #$3E
-	bcs     L003E
+	bcs     L0041
 ;
 ; ++enemy_y[index]; // fall faster
 ;
@@ -9407,12 +9427,12 @@ L0028:	sta     ptr1
 ; enemy_anim[index] = EnemyBounceSpr2;
 ;
 	ldx     #$00
-L003E:	lda     _index
+L0041:	lda     _index
 	asl     a
-	bcc     L003A
+	bcc     L003C
 	inx
 	clc
-L003A:	adc     #<(_enemy_anim)
+L003C:	adc     #<(_enemy_anim)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_anim)
@@ -9429,27 +9449,27 @@ L003A:	adc     #<(_enemy_anim)
 	lda     _enemy_y,y
 	sta     _temp1
 ;
-; Generic.x = enemy_x[index];
+; ENTITY1.x = enemy_x[index];
 ;
 	ldy     _index
 	lda     _enemy_x,y
-	sta     _Generic
+	sta     _ENTITY1
 ;
-; Generic.y = enemy_y[index];
+; ENTITY1.y = enemy_y[index];
 ;
 	ldy     _index
 	lda     _enemy_y,y
-	sta     _Generic+1
+	sta     _ENTITY1+1
 ;
-; Generic.width = 15;
+; ENTITY1.width = 15;
 ;
 	lda     #$0F
-	sta     _Generic+2
+	sta     _ENTITY1+2
 ;
-; Generic.height = 14;
+; ENTITY1.height = 14;
 ;
 	lda     #$0E
-	sta     _Generic+3
+	sta     _ENTITY1+3
 ;
 ; if (bg_coll_D()) {
 ;
@@ -9501,25 +9521,25 @@ L002C:	rts
 ;
 	dec     _damage_cooldown
 ;
-; Generic.x = high_byte(BoxGuy1.x);
+; ENTITY1.x = high_byte(NINJA.x);
 ;
-L001F:	lda     _BoxGuy1+1
-	sta     _Generic
+L001F:	lda     _NINJA+1
+	sta     _ENTITY1
 ;
-; Generic.y = high_byte(BoxGuy1.y);
+; ENTITY1.y = high_byte(NINJA.y);
 ;
-	lda     _BoxGuy1+3
-	sta     _Generic+1
+	lda     _NINJA+3
+	sta     _ENTITY1+1
 ;
-; Generic.width = HERO_WIDTH;
+; ENTITY1.width = HERO_WIDTH;
 ;
 	lda     #$0D
-	sta     _Generic+2
+	sta     _ENTITY1+2
 ;
-; Generic.height = HERO_HEIGHT;
+; ENTITY1.height = HERO_HEIGHT;
 ;
 	lda     #$0B
-	sta     _Generic+3
+	sta     _ENTITY1+3
 ;
 ; for (index = 0; index < MAX_COINS; ++index) {
 ;
@@ -9541,12 +9561,12 @@ L0020:	lda     _index
 	lda     _coin_type,y
 	bne     L0021
 ;
-; Generic2.width = COIN_WIDTH;
+; ENTITY2.width = COIN_WIDTH;
 ;
 	lda     #$07
-	sta     _Generic2+2
+	sta     _ENTITY2+2
 ;
-; Generic2.height = COIN_HEIGHT;
+; ENTITY2.height = COIN_HEIGHT;
 ;
 	lda     #$0B
 ;
@@ -9554,34 +9574,34 @@ L0020:	lda     _index
 ;
 	jmp     L001E
 ;
-; Generic2.width = BIG_COIN;
+; ENTITY2.width = BIG_COIN;
 ;
 L0021:	lda     #$0D
-	sta     _Generic2+2
+	sta     _ENTITY2+2
 ;
-; Generic2.height = BIG_COIN;
+; ENTITY2.height = BIG_COIN;
 ;
-L001E:	sta     _Generic2+3
+L001E:	sta     _ENTITY2+3
 ;
-; Generic2.x = coin_x[index];
+; ENTITY2.x = coin_x[index];
 ;
 	ldy     _index
 	lda     _coin_x,y
-	sta     _Generic2
+	sta     _ENTITY2
 ;
-; Generic2.y = coin_y[index];
+; ENTITY2.y = coin_y[index];
 ;
 	ldy     _index
 	lda     _coin_y,y
-	sta     _Generic2+1
+	sta     _ENTITY2+1
 ;
-; if (check_collision(&Generic, &Generic2)) {
+; if (check_collision(&ENTITY1, &ENTITY2)) {
 ;
-	lda     #<(_Generic)
-	ldx     #>(_Generic)
+	lda     #<(_ENTITY1)
+	ldx     #>(_ENTITY1)
 	jsr     pushax
-	lda     #<(_Generic2)
-	ldx     #>(_Generic2)
+	lda     #<(_ENTITY2)
+	ldx     #>(_ENTITY2)
 	jsr     _check_collision
 	tax
 	beq     L0022
@@ -9622,25 +9642,25 @@ L001E:	sta     _Generic2+3
 L0022:	inc     _index
 	jmp     L0020
 ;
-; Generic2.x = high_byte(BoxGuy1.x);
+; ENTITY2.x = high_byte(NINJA.x);
 ;
-L0023:	lda     _BoxGuy1+1
-	sta     _Generic2
+L0023:	lda     _NINJA+1
+	sta     _ENTITY2
 ;
-; Generic2.y = high_byte(BoxGuy1.y);
+; ENTITY2.y = high_byte(NINJA.y);
 ;
-	lda     _BoxGuy1+3
-	sta     _Generic2+1
+	lda     _NINJA+3
+	sta     _ENTITY2+1
 ;
-; Generic2.width = HERO_WIDTH;
+; ENTITY2.width = HERO_WIDTH;
 ;
 	lda     #$0D
-	sta     _Generic2+2
+	sta     _ENTITY2+2
 ;
-; Generic2.height = HERO_HEIGHT;
+; ENTITY2.height = HERO_HEIGHT;
 ;
 	lda     #$0B
-	sta     _Generic2+3
+	sta     _ENTITY2+3
 ;
 ; for (index = 0; index < MAX_ENEMY; ++index) {
 ;
@@ -9656,34 +9676,34 @@ L0024:	lda     _index
 	lda     _enemy_active,y
 	beq     L0025
 ;
-; Generic.x = enemy_x[index];
+; ENTITY1.x = enemy_x[index];
 ;
 	ldy     _index
 	lda     _enemy_x,y
-	sta     _Generic
+	sta     _ENTITY1
 ;
-; Generic.y = enemy_y[index];
+; ENTITY1.y = enemy_y[index];
 ;
 	ldy     _index
 	lda     _enemy_y,y
-	sta     _Generic+1
+	sta     _ENTITY1+1
 ;
-; Generic.width = ENEMY_WIDTH;
+; ENTITY1.width = ENEMY_WIDTH;
 ;
 	lda     #$0D
-	sta     _Generic+2
+	sta     _ENTITY1+2
 ;
-; Generic.height = ENEMY_HEIGHT;
+; ENTITY1.height = ENEMY_HEIGHT;
 ;
-	sta     _Generic+3
+	sta     _ENTITY1+3
 ;
-; if (check_collision(&Generic, &Generic2)) {
+; if (check_collision(&ENTITY1, &ENTITY2)) {
 ;
-	lda     #<(_Generic)
-	ldx     #>(_Generic)
+	lda     #<(_ENTITY1)
+	ldx     #>(_ENTITY1)
 	jsr     pushax
-	lda     #<(_Generic2)
-	ldx     #>(_Generic2)
+	lda     #<(_ENTITY2)
+	ldx     #>(_ENTITY2)
 	jsr     _check_collision
 	tax
 	beq     L0025
@@ -9745,10 +9765,10 @@ L0014:	rts
 ;
 	inc     _enemy_frames
 ;
-; Generic2.x = high_byte(BoxGuy1.x);
+; ENTITY2.x = high_byte(NINJA.x);
 ;
-	lda     _BoxGuy1+1
-	sta     _Generic2
+	lda     _NINJA+1
+	sta     _ENTITY2
 ;
 ; for(index = 0; index < MAX_COINS; ++index) {
 ;
@@ -10213,15 +10233,15 @@ L001E:	rts
 ;
 	sta     _collision_R
 ;
-; if (Generic.y >= 0xf0) return;
+; if (ENTITY1.y >= 0xf0) return;
 ;
-	lda     _Generic+1
+	lda     _ENTITY1+1
 	cmp     #$F0
 	bcs     L0005
 ;
-; temp5 = Generic.x + scroll_x;
+; temp5 = ENTITY1.x + scroll_x;
 ;
-	lda     _Generic
+	lda     _ENTITY1
 	clc
 	adc     _scroll_x
 	pha
@@ -10240,9 +10260,9 @@ L001E:	rts
 	lda     _temp5+1
 	sta     _temp_room
 ;
-; temp_y = Generic.y + 6; // y middle
+; temp_y = ENTITY1.y + 6; // y middle
 ;
-	lda     _Generic+1
+	lda     _ENTITY1+1
 	clc
 	adc     #$06
 	sta     _temp_y
@@ -10261,9 +10281,9 @@ L001E:	rts
 ;
 	inc     _collision_L
 ;
-; temp5 += Generic.width;
+; temp5 += ENTITY1.width;
 ;
-L0006:	lda     _Generic+2
+L0006:	lda     _ENTITY1+2
 	clc
 	adc     _temp5
 	sta     _temp5
@@ -10312,9 +10332,9 @@ L0005:	rts
 .segment	"CODE"
 
 ;
-; temp5 = Generic.x + scroll_x;
+; temp5 = ENTITY1.x + scroll_x;
 ;
-	lda     _Generic
+	lda     _ENTITY1
 	clc
 	adc     _scroll_x
 	sta     _temp5
@@ -10338,9 +10358,9 @@ L0005:	rts
 	ora     #$F0
 	sta     _eject_L
 ;
-; temp_y = Generic.y + 2;
+; temp_y = ENTITY1.y + 2;
 ;
-	lda     _Generic+1
+	lda     _ENTITY1+1
 	clc
 	adc     #$02
 	sta     _temp_y
@@ -10354,11 +10374,11 @@ L0005:	rts
 	lda     #$01
 	rts
 ;
-; temp_y = Generic.y + Generic.height;
+; temp_y = ENTITY1.y + ENTITY1.height;
 ;
-L0006:	lda     _Generic+1
+L0006:	lda     _ENTITY1+1
 	clc
-	adc     _Generic+3
+	adc     _ENTITY1+3
 	sta     _temp_y
 ;
 ; temp_y -= 2;
@@ -10393,9 +10413,9 @@ L0008:	rts
 .segment	"CODE"
 
 ;
-; temp5 = Generic.x + scroll_x + Generic.width;
+; temp5 = ENTITY1.x + scroll_x + ENTITY1.width;
 ;
-	lda     _Generic
+	lda     _ENTITY1
 	clc
 	adc     _scroll_x
 	pha
@@ -10404,7 +10424,7 @@ L0008:	rts
 	tax
 	pla
 	clc
-	adc     _Generic+2
+	adc     _ENTITY1+2
 	bcc     L0006
 	inx
 L0006:	sta     _temp5
@@ -10428,9 +10448,9 @@ L0006:	sta     _temp5
 	and     #$0F
 	sta     _eject_R
 ;
-; temp_y = Generic.y + 2;
+; temp_y = ENTITY1.y + 2;
 ;
-	lda     _Generic+1
+	lda     _ENTITY1+1
 	clc
 	adc     #$02
 	sta     _temp_y
@@ -10444,11 +10464,11 @@ L0006:	sta     _temp5
 	lda     #$01
 	rts
 ;
-; temp_y = Generic.y + Generic.height;
+; temp_y = ENTITY1.y + ENTITY1.height;
 ;
-L0008:	lda     _Generic+1
+L0008:	lda     _ENTITY1+1
 	clc
-	adc     _Generic+3
+	adc     _ENTITY1+3
 	sta     _temp_y
 ;
 ; temp_y -= 2;
@@ -10483,9 +10503,9 @@ L000A:	rts
 .segment	"CODE"
 
 ;
-; temp5 = Generic.x + scroll_x;
+; temp5 = ENTITY1.x + scroll_x;
 ;
-	lda     _Generic
+	lda     _ENTITY1
 	clc
 	adc     _scroll_x
 	sta     _temp5
@@ -10512,9 +10532,9 @@ L0002:	lda     _temp5
 	lda     _temp5+1
 	sta     _temp_room
 ;
-; temp_y = Generic.y;
+; temp_y = ENTITY1.y;
 ;
-	lda     _Generic+1
+	lda     _ENTITY1+1
 	sta     _temp_y
 ;
 ; eject_U = temp_y | 0xf0;
@@ -10531,9 +10551,9 @@ L0002:	lda     _temp5
 	lda     #$01
 	rts
 ;
-; temp5 = Generic.x + scroll_x + Generic.width;
+; temp5 = ENTITY1.x + scroll_x + ENTITY1.width;
 ;
-L0007:	lda     _Generic
+L0007:	lda     _ENTITY1
 	clc
 	adc     _scroll_x
 	pha
@@ -10542,7 +10562,7 @@ L0007:	lda     _Generic
 	tax
 	pla
 	clc
-	adc     _Generic+2
+	adc     _ENTITY1+2
 	bcc     L0006
 	inx
 L0006:	sta     _temp5
@@ -10593,9 +10613,9 @@ L0009:	rts
 .segment	"CODE"
 
 ;
-; temp5 = Generic.x + scroll_x;
+; temp5 = ENTITY1.x + scroll_x;
 ;
-	lda     _Generic
+	lda     _ENTITY1
 	clc
 	adc     _scroll_x
 	sta     _temp5
@@ -10622,11 +10642,11 @@ L0002:	lda     _temp5
 	lda     _temp5+1
 	sta     _temp_room
 ;
-; temp_y = Generic.y + Generic.height;
+; temp_y = ENTITY1.y + ENTITY1.height;
 ;
-	lda     _Generic+1
+	lda     _ENTITY1+1
 	clc
-	adc     _Generic+3
+	adc     _ENTITY1+3
 	sta     _temp_y
 ;
 ; if ((temp_y & 0x0f) > 3) return 0; // bug fix
@@ -10660,9 +10680,9 @@ L000C:	lda     _temp_y
 	lda     #$01
 	rts
 ;
-; temp5 = Generic.x + scroll_x + Generic.width;
+; temp5 = ENTITY1.x + scroll_x + ENTITY1.width;
 ;
-L000D:	lda     _Generic
+L000D:	lda     _ENTITY1
 	clc
 	adc     _scroll_x
 	pha
@@ -10671,7 +10691,7 @@ L000D:	lda     _Generic
 	tax
 	pla
 	clc
-	adc     _Generic+2
+	adc     _ENTITY1+2
 	bcc     L000A
 	inx
 L000A:	sta     _temp5
@@ -10722,9 +10742,9 @@ L000E:	rts
 .segment	"CODE"
 
 ;
-; temp5 = Generic.x + scroll_x;
+; temp5 = ENTITY1.x + scroll_x;
 ;
-	lda     _Generic
+	lda     _ENTITY1
 	clc
 	adc     _scroll_x
 	sta     _temp5
@@ -10751,11 +10771,11 @@ L0002:	lda     _temp5
 	lda     _temp5+1
 	sta     _temp_room
 ;
-; temp_y = Generic.y + Generic.height;
+; temp_y = ENTITY1.y + ENTITY1.height;
 ;
-	lda     _Generic+1
+	lda     _ENTITY1+1
 	clc
-	adc     _Generic+3
+	adc     _ENTITY1+3
 	sta     _temp_y
 ;
 ; temp_y += 2;
@@ -10774,9 +10794,9 @@ L0002:	lda     _temp5
 	lda     #$01
 	rts
 ;
-; temp5 = Generic.x + scroll_x + Generic.width;
+; temp5 = ENTITY1.x + scroll_x + ENTITY1.width;
 ;
-L0008:	lda     _Generic
+L0008:	lda     _ENTITY1
 	clc
 	adc     _scroll_x
 	pha
@@ -10785,7 +10805,7 @@ L0008:	lda     _Generic
 	tax
 	pla
 	clc
-	adc     _Generic+2
+	adc     _ENTITY1+2
 	bcc     L0007
 	inx
 L0007:	sta     _temp5
@@ -10865,7 +10885,7 @@ L0048:	ldy     _index
 	lda     _direction
 	bne     L0009
 ;
-; turd_x[index] = high_byte(BoxGuy1.x) - 4; // Slightly in front when facing left
+; turd_x[index] = high_byte(NINJA.x) - 4; // Slightly in front when facing left
 ;
 	lda     #<(_turd_x)
 	ldx     #>(_turd_x)
@@ -10875,7 +10895,7 @@ L0048:	ldy     _index
 	inx
 L000A:	sta     ptr1
 	stx     ptr1+1
-	lda     _BoxGuy1+1
+	lda     _NINJA+1
 	sec
 	sbc     #$04
 ;
@@ -10883,7 +10903,7 @@ L000A:	sta     ptr1
 ;
 	jmp     L0047
 ;
-; turd_x[index] = high_byte(BoxGuy1.x) + 12; // Slightly in front when facing right
+; turd_x[index] = high_byte(NINJA.x) + 12; // Slightly in front when facing right
 ;
 L0009:	lda     #<(_turd_x)
 	ldx     #>(_turd_x)
@@ -10893,13 +10913,13 @@ L0009:	lda     #<(_turd_x)
 	inx
 L000D:	sta     ptr1
 	stx     ptr1+1
-	lda     _BoxGuy1+1
+	lda     _NINJA+1
 	clc
 	adc     #$0C
 L0047:	ldy     #$00
 	sta     (ptr1),y
 ;
-; turd_y[index] = high_byte(BoxGuy1.y) - 2; // From upper body
+; turd_y[index] = high_byte(NINJA.y) - 2; // From upper body
 ;
 	lda     #<(_turd_y)
 	ldx     #>(_turd_y)
@@ -10909,7 +10929,7 @@ L0047:	ldy     #$00
 	inx
 L000F:	sta     ptr1
 	stx     ptr1+1
-	lda     _BoxGuy1+3
+	lda     _NINJA+3
 	sec
 	sbc     #$02
 	sta     (ptr1),y
@@ -11286,26 +11306,26 @@ L0031:	ldy     _index
 ;
 	jmp     L0036
 ;
-; Generic.x = turd_x[index];
+; ENTITY1.x = turd_x[index];
 ;
 L0011:	ldy     _index
 	lda     _turd_x,y
-	sta     _Generic
+	sta     _ENTITY1
 ;
-; Generic.y = turd_y[index];
+; ENTITY1.y = turd_y[index];
 ;
 	ldy     _index
 	lda     _turd_y,y
-	sta     _Generic+1
+	sta     _ENTITY1+1
 ;
-; Generic.width = TURD_WIDTH;
+; ENTITY1.width = TURD_WIDTH;
 ;
 	lda     #$07
-	sta     _Generic+2
+	sta     _ENTITY1+2
 ;
-; Generic.height = TURD_HEIGHT;
+; ENTITY1.height = TURD_HEIGHT;
 ;
-	sta     _Generic+3
+	sta     _ENTITY1+3
 ;
 ; if (bg_coll_L() || bg_coll_R() || bg_coll_U() || bg_coll_D()) {
 ;
@@ -11345,34 +11365,34 @@ L0034:	lda     _index2
 	lda     _enemy_active,y
 	beq     L0035
 ;
-; Generic2.x = enemy_x[index2];
+; ENTITY2.x = enemy_x[index2];
 ;
 	ldy     _index2
 	lda     _enemy_x,y
-	sta     _Generic2
+	sta     _ENTITY2
 ;
-; Generic2.y = enemy_y[index2];
+; ENTITY2.y = enemy_y[index2];
 ;
 	ldy     _index2
 	lda     _enemy_y,y
-	sta     _Generic2+1
+	sta     _ENTITY2+1
 ;
-; Generic2.width = ENEMY_WIDTH;
+; ENTITY2.width = ENEMY_WIDTH;
 ;
 	lda     #$0D
-	sta     _Generic2+2
+	sta     _ENTITY2+2
 ;
-; Generic2.height = ENEMY_HEIGHT;
+; ENTITY2.height = ENEMY_HEIGHT;
 ;
-	sta     _Generic2+3
+	sta     _ENTITY2+3
 ;
-; if (check_collision(&Generic, &Generic2)) {
+; if (check_collision(&ENTITY1, &ENTITY2)) {
 ;
-	lda     #<(_Generic)
-	ldx     #>(_Generic)
+	lda     #<(_ENTITY1)
+	ldx     #>(_ENTITY1)
 	jsr     pushax
-	lda     #<(_Generic2)
-	ldx     #>(_Generic2)
+	lda     #<(_ENTITY2)
+	ldx     #>(_ENTITY2)
 	jsr     _check_collision
 	tax
 	beq     L0035

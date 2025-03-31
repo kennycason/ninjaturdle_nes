@@ -81,24 +81,24 @@ unsigned char temp_room;
 unsigned char c_map[240];
 unsigned char c_map2[240];
 
-struct Base {
+struct Entity {
 	unsigned char x;
 	unsigned char y;
 	unsigned char width;
 	unsigned char height;
 };
 
-struct Base Generic; 
-struct Base Generic2; 
+struct Entity ENTITY1; 
+struct Entity ENTITY2; 
 
-struct Hero {
+struct Ninja {
 	unsigned int x; // low byte is sub-pixel
 	unsigned int y;
 	signed int vel_x; // speed, signed, low byte is sub-pixel
 	signed int vel_y;
 };
 
-struct Hero BoxGuy1;
+struct Ninja NINJA;
 // the width and height should be 1 less than the dimensions (14x12)
 // note, I'm using the top left as the 0,0 on x,y
 
