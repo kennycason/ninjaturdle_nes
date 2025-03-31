@@ -15,3 +15,11 @@ cd ninjaturdle/
 make
 fceux ninjaturdle.nes
 ```
+
+## Reginerating NES .CHR files
+
+```bash
+../tools/png2chr ninjaturdle.png
+```
+
+This will generated a `ninjaturdle.chr` file.

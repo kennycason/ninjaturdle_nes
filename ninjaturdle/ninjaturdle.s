@@ -309,19 +309,19 @@ _CoinHud:
 _EnemyChaseSpr:
 	.byte	$FF
 	.byte	$FF
-	.byte	$04
+	.byte	$07
 	.byte	$02
 	.byte	$07
 	.byte	$FF
-	.byte	$05
+	.byte	$08
 	.byte	$02
 	.byte	$FF
 	.byte	$07
-	.byte	$14
+	.byte	$18
 	.byte	$02
 	.byte	$07
 	.byte	$07
-	.byte	$15
+	.byte	$19
 	.byte	$02
 	.byte	$80
 _EnemyBounceSpr:
