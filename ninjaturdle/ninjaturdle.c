@@ -593,15 +593,11 @@ void check_spr_objects(void) {
 		}
 
 	}
-
-	
 }
-
 
 
 char get_position(void) {
 	// is it in range ? return 1 if yes
-	
 	temp5 -= scroll_x;
 	temp_x = temp5 & 0xff;
 	if (high_byte(temp5)) return 0;
@@ -609,10 +605,8 @@ char get_position(void) {
 }
 
 
-
-
 void enemy_moves(void) {
-	if (enemy_type[index] == ENEMY_CHASE) {
+	if (enemy_type[index] == ENEMY_WASP) {
 		//for bg collisions
 		ENTITY1.x = enemy_x[index];
 		ENTITY1.y = enemy_y[index] + 6; // mid point

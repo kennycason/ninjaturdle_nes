@@ -8985,7 +8985,7 @@ L0003:	lda     #$01
 .segment	"CODE"
 
 ;
-; if (enemy_type[index] == ENEMY_CHASE) {
+; if (enemy_type[index] == ENEMY_WASP) {
 ;
 	ldy     _index
 	lda     _enemy_type,y
