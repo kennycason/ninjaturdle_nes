@@ -463,9 +463,9 @@ void movement(void) {
     // skip collision if vel = 0
 
 	
-// handle y
+	// handle y
 
-// gravity
+	// gravity
 
 	// NINJA.vel_y is signed
 	if (NINJA.vel_y < 0x300) {
@@ -561,8 +561,6 @@ void movement(void) {
 }	
 
 
-
-
 void check_spr_objects(void) {
 	++enemy_frames;
 	ENTITY2.x = high_byte(NINJA.x);
@@ -606,7 +604,15 @@ char get_position(void) {
 
 
 void enemy_moves(void) {
-	if (enemy_type[index] == ENEMY_WASP) {
+	if (enemy_type[index] == ENEMY_BOSS1) {
+		ENTITY1.x = enemy_x[index];
+		ENTITY1.y = enemy_y[index] + 14; // mid point
+		ENTITY1.width = 28;
+        ENTITY1.height = 28;
+
+		enemy_anim[index] = Boss1SprL;
+	}
+	else if (enemy_type[index] == ENEMY_WASP) {
 		//for bg collisions
 		ENTITY1.x = enemy_x[index];
 		ENTITY1.y = enemy_y[index] + 6; // mid point
@@ -669,7 +675,6 @@ void enemy_moves(void) {
 			if (bg_coll_D()) {
 				enemy_y[index] -= eject_D;
 			}
-            
 		}
 	}
 

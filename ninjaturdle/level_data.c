@@ -1,8 +1,3 @@
-
-
-
-
-
 enum{COIN_REG, COIN_END};
 
 //NOTE MAX_COINS = 12
@@ -60,9 +55,7 @@ const unsigned char * const Coins_list[]={
 };
 
 
-
-
-enum{ENEMY_WASP, ENEMY_BOUNCE};
+enum{ENEMY_WASP, ENEMY_BOUNCE, ENEMY_BOSS1};
 
 //NOTE MAX_ENEMY = 10
 
@@ -82,7 +75,7 @@ const unsigned char level_1_enemies[]={
 	0x71,0,0xe8,ENEMY_WASP,
 */
 	
-	0xc0, 0, 0xc0, ENEMY_WASP, 
+	0xb0, 0, 0xc0, ENEMY_BOSS1, 
 	0xc0, 1, 0xe0, ENEMY_BOUNCE, 
 	0xc0, 2, 0x30, ENEMY_BOUNCE,  
 	0xc0, 2, 0x90, ENEMY_WASP, 
@@ -131,22 +124,11 @@ const unsigned char * const Enemy_list[]={
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 // 5 bytes per metatile definition, tile TL, TR, BL, BR, palette 0-3
 // T means top, B means bottom, L left,R right
 // 51 maximum # of metatiles = 255 bytes
 // 5th byte, 	1000 0000 = floor collision
-// 				0100 0000 = all collision, solid
+//				0100 0000 = all collision, solid
 //				0000 0011 = palette
 
 const unsigned char metatiles1[]={

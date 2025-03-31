@@ -6,7 +6,6 @@
 #define MAX_RIGHT 0x9000
 
 
-
 #pragma bss-name(push, "ZEROPAGE")
 
 // GLOBAL VARIABLES
@@ -50,14 +49,32 @@ unsigned int old_x;
 //unsigned char old_y;
 unsigned char temp_x;
 unsigned char temp_y;
-unsigned char song;
+
+// song & sfx variables
 #define MAX_SONGS 2
-enum {SONG_GAME, SONG_PAUSE};
-enum {SFX_JUMP, SFX_DING, SFX_NOISE};
+
+unsigned char song;
+enum { 
+	SONG_GAME, 
+	SONG_PAUSE
+};
+
+enum { 
+	SFX_JUMP, 
+	SFX_DING, 
+	SFX_NOISE
+};
 
 unsigned char game_mode;
-enum {MODE_TITLE, MODE_GAME, MODE_PAUSE, MODE_SWITCH, MODE_END, 
-MODE_GAME_OVER, MODE_RESET};
+enum {
+	MODE_TITLE, 
+	MODE_GAME, 
+	MODE_PAUSE, 
+	MODE_SWITCH, 
+	MODE_END, 
+	MODE_GAME_OVER, 
+	MODE_RESET
+};
 
 unsigned char coins;
 unsigned char lives;
@@ -136,61 +153,50 @@ const unsigned char * enemy_anim[MAX_ENEMY];
 
 //for shuffling 16 enemies
 const unsigned char shuffle_array[]={
-0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
-15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0,
-0,2,4,6,8,10,12,14,1,3,5,7,9,11,13,15,
-15,13,11,9,7,5,3,1,14,12,10,8,6,4,2,0	
+	0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
+	15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0,
+	0,2,4,6,8,10,12,14,1,3,5,7,9,11,13,15,
+	15,13,11,9,7,5,3,1,14,12,10,8,6,4,2,0	
 };
 
 
 const unsigned char palette_title[]={
-//0x0f, 0x00, 0x10, 0x30,
-0x0f,0x04,0x15,0x32,
-0, 0, 0, 0,
-0, 0, 0, 0,
-0, 0, 0, 0
+	//0x0f, 0x00, 0x10, 0x30,
+	0x0f, 0x04, 0x15, 0x32,
+	0, 0, 0, 0,
+	0, 0, 0, 0,
+	0, 0, 0, 0
 }; 
 
 
 const unsigned char title_color_rotate[]={
-	0x32,0x22,0x30,0x37
+	0x32, 0x22, 0x30, 0x37
 };
 
 
 const unsigned char palette_bg[]={
-0x0F,0x16,0x26,0x06,
-0x0F,0x17,0x19,0x29,
-0x0F,0x17,0x07,0x10,
-0x0F,0x08,0x19,0x29 
+	0x0F, 0x16, 0x26, 0x06,  // Light Purple, Dark Brown, Teal, Light Blue
+	0x0F, 0x17, 0x19, 0x29,  // Light Purple, Brown, Dark Pink, Navy
+	0x0F, 0x17, 0x07, 0x10,  // Light Purple, Brown, Dark Green, Dark Yellow
+	0x0F, 0x08, 0x19, 0x29   // Light Purple, Green, Dark Pink, Navy
 };
 
 
-
-
-
-
 const unsigned char palette_sp[]={
-0x0F, 0x01, 0x11, 0x10,
-0x0F, 0x17, 0x28, 0x38,
-0x0F, 0x0c, 0x2c, 0x30,
-0x0F, 0x03, 0x13, 0x33,
-}; 
+    0x0F, 0x01, 0x11, 0x10,  // Light Purple, White, Yellow, Dark Yellow
+    0x0F, 0x17, 0x28, 0x38,  // Light Purple, Brown, Navy, Tan
+    0x0F, 0x0c, 0x2c, 0x30,  // Light Purple, Light Red, Maroon, Light Lime
+    0x0F, 0x03, 0x13, 0x33,  // Light Purple, Light Gray, Dark Orange, Light Beige
+};
 
 
+const unsigned char END_TEXT[] = "Congratulations!";
+const unsigned char END_TEXT2[] = "You saved Steve, again.";
+const unsigned char END_TEXT3[] = "Corn: ";
 
-
-
-
-
-
-const unsigned char END_TEXT[]="Congratulations!";
-const unsigned char END_TEXT2[]="You saved Steve, again.";
-const unsigned char END_TEXT3[]="Coins: ";
-
-const unsigned char DEAD_TEXT[]="Game Over";
+const unsigned char DEAD_TEXT[] = "Game Over";
 
 #include "NES_ST/title.h"
-
 
 
 // PROTOTYPES
@@ -252,4 +258,3 @@ void draw_turds(void);
 unsigned char player_health;
 unsigned char damage_cooldown; // Invincibility frames after taking damage
 #define DAMAGE_COOLDOWN_TIME 60 // 1 second of invincibility
-

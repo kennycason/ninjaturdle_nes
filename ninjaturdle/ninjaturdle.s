@@ -57,6 +57,7 @@
 	.export		_EnemyWaspSprR
 	.export		_EnemyBounceSpr
 	.export		_EnemyBounceSpr2
+	.export		_Boss1SprL
 	.export		_TurdSpr
 	.export		_TurdLifeSpr
 	.export		_pad1
@@ -367,6 +368,72 @@ _EnemyBounceSpr2:
 	.byte	$15
 	.byte	$03
 	.byte	$80
+_Boss1SprL:
+	.byte	$FF
+	.byte	$FF
+	.byte	$2C
+	.byte	$00
+	.byte	$07
+	.byte	$FF
+	.byte	$2D
+	.byte	$00
+	.byte	$FF
+	.byte	$07
+	.byte	$3C
+	.byte	$00
+	.byte	$07
+	.byte	$07
+	.byte	$3D
+	.byte	$00
+	.byte	$0F
+	.byte	$FF
+	.byte	$2E
+	.byte	$00
+	.byte	$17
+	.byte	$FF
+	.byte	$2F
+	.byte	$00
+	.byte	$0F
+	.byte	$07
+	.byte	$3E
+	.byte	$00
+	.byte	$17
+	.byte	$07
+	.byte	$3F
+	.byte	$00
+	.byte	$FF
+	.byte	$0F
+	.byte	$4C
+	.byte	$00
+	.byte	$07
+	.byte	$0F
+	.byte	$4D
+	.byte	$00
+	.byte	$FF
+	.byte	$17
+	.byte	$5C
+	.byte	$00
+	.byte	$07
+	.byte	$17
+	.byte	$5D
+	.byte	$00
+	.byte	$0F
+	.byte	$0F
+	.byte	$4E
+	.byte	$00
+	.byte	$17
+	.byte	$0F
+	.byte	$4F
+	.byte	$00
+	.byte	$0F
+	.byte	$17
+	.byte	$5E
+	.byte	$00
+	.byte	$17
+	.byte	$17
+	.byte	$5F
+	.byte	$00
+	.byte	$80
 _TurdSpr:
 	.byte	$00
 	.byte	$00
@@ -507,7 +574,7 @@ _END_TEXT2:
 	.byte	$59,$6F,$75,$20,$73,$61,$76,$65,$64,$20,$53,$74,$65,$76,$65,$2C
 	.byte	$20,$61,$67,$61,$69,$6E,$2E,$00
 _END_TEXT3:
-	.byte	$43,$6F,$69,$6E,$73,$3A,$20,$00
+	.byte	$43,$6F,$72,$6E,$3A,$20,$00
 _DEAD_TEXT:
 	.byte	$47,$61,$6D,$65,$20,$4F,$76,$65,$72,$00
 _title:
@@ -805,10 +872,10 @@ _Coins_list:
 	.addr	_level_2_coins
 	.addr	_level_3_coins
 _level_1_enemies:
-	.byte	$C0
+	.byte	$B0
 	.byte	$00
 	.byte	$C0
-	.byte	$00
+	.byte	$02
 	.byte	$C0
 	.byte	$01
 	.byte	$E0
@@ -8985,11 +9052,62 @@ L0003:	lda     #$01
 .segment	"CODE"
 
 ;
-; if (enemy_type[index] == ENEMY_WASP) {
+; if (enemy_type[index] == ENEMY_BOSS1) {
 ;
 	ldy     _index
 	lda     _enemy_type,y
-	jne     L0002
+	cmp     #$02
+	bne     L0002
+;
+; ENTITY1.x = enemy_x[index];
+;
+	ldy     _index
+	lda     _enemy_x,y
+	sta     _ENTITY1
+;
+; ENTITY1.y = enemy_y[index] + 14; // mid point
+;
+	ldy     _index
+	lda     _enemy_y,y
+	clc
+	adc     #$0E
+	sta     _ENTITY1+1
+;
+; ENTITY1.width = 28;
+;
+	lda     #$1C
+	sta     _ENTITY1+2
+;
+; ENTITY1.height = 28;
+;
+	sta     _ENTITY1+3
+;
+; enemy_anim[index] = Boss1SprL;
+;
+	ldx     #$00
+	lda     _index
+	asl     a
+	bcc     L003D
+	inx
+	clc
+L003D:	adc     #<(_enemy_anim)
+	sta     ptr1
+	txa
+	adc     #>(_enemy_anim)
+	sta     ptr1+1
+	lda     #<(_Boss1SprL)
+	ldy     #$00
+	sta     (ptr1),y
+	iny
+	lda     #>(_Boss1SprL)
+	sta     (ptr1),y
+;
+; else if (enemy_type[index] == ENEMY_WASP) {
+;
+	rts
+L0002:	ldy     _index
+	lda     _enemy_type,y
+	jne     L0008
 ;
 ; ENTITY1.x = enemy_x[index];
 ;
@@ -9019,7 +9137,7 @@ L0003:	lda     #$01
 ;
 	lda     _enemy_frames
 	and     #$01
-	beq     L0042
+	beq     L004A
 ;
 ; }
 ;
@@ -9027,11 +9145,11 @@ L0003:	lda     #$01
 ;
 ; if (enemy_x[index] > ENTITY2.x) {
 ;
-L0042:	ldy     _index
+L004A:	ldy     _index
 	lda     _enemy_x,y
 	cmp     _ENTITY2
-	bcc     L0008
-	beq     L0008
+	bcc     L000E
+	beq     L000E
 ;
 ; ENTITY1.x -= 1; // test going left
 ;
@@ -9044,7 +9162,7 @@ L0042:	ldy     _index
 ; if (collision_L) return;
 ;
 	lda     _collision_L
-	beq     L0043
+	beq     L004B
 ;
 ; }
 ;
@@ -9052,16 +9170,16 @@ L0042:	ldy     _index
 ;
 ; if (enemy_actual_x[index] == 0) --enemy_room[index];
 ;
-L0043:	ldy     _index
+L004B:	ldy     _index
 	lda     _enemy_actual_x,y
-	bne     L000B
+	bne     L0011
 	lda     #<(_enemy_room)
 	ldx     #>(_enemy_room)
 	clc
 	adc     _index
-	bcc     L000D
+	bcc     L0013
 	inx
-L000D:	sta     ptr1
+L0013:	sta     ptr1
 	stx     ptr1+1
 	ldy     #$00
 	lda     (ptr1),y
@@ -9071,13 +9189,13 @@ L000D:	sta     ptr1
 ;
 ; --enemy_actual_x[index];
 ;
-L000B:	lda     #<(_enemy_actual_x)
+L0011:	lda     #<(_enemy_actual_x)
 	ldx     #>(_enemy_actual_x)
 	clc
 	adc     _index
-	bcc     L000E
+	bcc     L0014
 	inx
-L000E:	sta     ptr1
+L0014:	sta     ptr1
 	stx     ptr1+1
 	ldy     #$00
 	lda     (ptr1),y
@@ -9090,10 +9208,10 @@ L000E:	sta     ptr1
 	ldx     #$00
 	lda     _index
 	asl     a
-	bcc     L0036
+	bcc     L003E
 	inx
 	clc
-L0036:	adc     #<(_enemy_anim)
+L003E:	adc     #<(_enemy_anim)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_anim)
@@ -9107,10 +9225,10 @@ L0036:	adc     #<(_enemy_anim)
 ; else if (enemy_x[index] < ENTITY2.x) {
 ;
 	rts
-L0008:	ldy     _index
+L000E:	ldy     _index
 	lda     _enemy_x,y
 	cmp     _ENTITY2
-	bcc     L0044
+	bcc     L004C
 ;
 ; }
 ;
@@ -9118,7 +9236,7 @@ L0008:	ldy     _index
 ;
 ; ENTITY1.x += 1; // test going right
 ;
-L0044:	inc     _ENTITY1
+L004C:	inc     _ENTITY1
 ;
 ; bg_collision_fast();
 ;
@@ -9127,7 +9245,7 @@ L0044:	inc     _ENTITY1
 ; if (collision_R) return;
 ;
 	lda     _collision_R
-	beq     L0045
+	beq     L004D
 ;
 ; }
 ;
@@ -9135,13 +9253,13 @@ L0044:	inc     _ENTITY1
 ;
 ; ++enemy_actual_x[index];
 ;
-L0045:	lda     #<(_enemy_actual_x)
+L004D:	lda     #<(_enemy_actual_x)
 	ldx     #>(_enemy_actual_x)
 	clc
 	adc     _index
-	bcc     L0013
+	bcc     L0019
 	inx
-L0013:	sta     ptr1
+L0019:	sta     ptr1
 	stx     ptr1+1
 	ldy     #$00
 	lda     #$01
@@ -9154,14 +9272,14 @@ L0013:	sta     ptr1
 	ldy     _index
 	ldx     #$00
 	lda     _enemy_actual_x,y
-	bne     L003D
+	bne     L0045
 	lda     #<(_enemy_room)
 	ldx     #>(_enemy_room)
 	clc
 	adc     _index
-	bcc     L0016
+	bcc     L001C
 	inx
-L0016:	sta     ptr1
+L001C:	sta     ptr1
 	stx     ptr1+1
 	ldy     #$00
 	lda     #$01
@@ -9172,12 +9290,12 @@ L0016:	sta     ptr1
 ; enemy_anim[index] = EnemyWaspSprR; // Use right-facing sprite
 ;
 	ldx     #$00
-L003D:	lda     _index
+L0045:	lda     _index
 	asl     a
-	bcc     L0037
+	bcc     L003F
 	inx
 	clc
-L0037:	adc     #<(_enemy_anim)
+L003F:	adc     #<(_enemy_anim)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_anim)
@@ -9192,10 +9310,10 @@ L0037:	adc     #<(_enemy_anim)
 ; else if (enemy_type[index] == ENEMY_BOUNCE) {
 ;
 	rts
-L0002:	ldy     _index
+L0008:	ldy     _index
 	lda     _enemy_type,y
 	cmp     #$01
-	beq     L0046
+	beq     L004E
 ;
 ; }
 ;
@@ -9203,7 +9321,7 @@ L0002:	ldy     _index
 ;
 ; temp1 = enemy_frames + (index << 3);
 ;
-L0046:	lda     _index
+L004E:	lda     _index
 	asl     a
 	asl     a
 	asl     a
@@ -9219,17 +9337,17 @@ L0046:	lda     _index
 ; if (temp1 < 16) { // stand still
 ;
 	cmp     #$10
-	bcs     L003E
+	bcs     L0046
 ;
 ; enemy_anim[index] = EnemyBounceSpr;
 ;
 	ldx     #$00
 	lda     _index
 	asl     a
-	bcc     L0038
+	bcc     L0040
 	inx
 	clc
-L0038:	adc     #<(_enemy_anim)
+L0040:	adc     #<(_enemy_anim)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_anim)
@@ -9244,9 +9362,9 @@ L0038:	adc     #<(_enemy_anim)
 ; else if (temp1 < 22) {
 ;
 	rts
-L003E:	lda     _temp1
+L0046:	lda     _temp1
 	cmp     #$16
-	bcs     L003F
+	bcs     L0047
 ;
 ; --enemy_y[index]; // jump
 ;
@@ -9254,9 +9372,9 @@ L003E:	lda     _temp1
 	ldx     #>(_enemy_y)
 	clc
 	adc     _index
-	bcc     L001D
+	bcc     L0023
 	inx
-L001D:	sta     ptr1
+L0023:	sta     ptr1
 	stx     ptr1+1
 	ldy     #$00
 	lda     (ptr1),y
@@ -9270,9 +9388,9 @@ L001D:	sta     ptr1
 	ldx     #>(_enemy_y)
 	clc
 	adc     _index
-	bcc     L001E
+	bcc     L0024
 	inx
-L001E:	sta     ptr1
+L0024:	sta     ptr1
 	stx     ptr1+1
 	lda     (ptr1),y
 	sec
@@ -9284,10 +9402,10 @@ L001E:	sta     ptr1
 	ldx     #$00
 	lda     _index
 	asl     a
-	bcc     L0039
+	bcc     L0041
 	inx
 	clc
-L0039:	adc     #<(_enemy_anim)
+L0041:	adc     #<(_enemy_anim)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_anim)
@@ -9301,9 +9419,9 @@ L0039:	adc     #<(_enemy_anim)
 ; else if (temp1 < 42) {
 ;
 	rts
-L003F:	lda     _temp1
+L0047:	lda     _temp1
 	cmp     #$2A
-	bcs     L0040
+	bcs     L0048
 ;
 ; --enemy_y[index]; // jump
 ;
@@ -9311,9 +9429,9 @@ L003F:	lda     _temp1
 	ldx     #>(_enemy_y)
 	clc
 	adc     _index
-	bcc     L0021
+	bcc     L0027
 	inx
-L0021:	sta     ptr1
+L0027:	sta     ptr1
 	stx     ptr1+1
 	ldy     #$00
 	lda     (ptr1),y
@@ -9326,10 +9444,10 @@ L0021:	sta     ptr1
 	ldx     #$00
 	lda     _index
 	asl     a
-	bcc     L003A
+	bcc     L0042
 	inx
 	clc
-L003A:	adc     #<(_enemy_anim)
+L0042:	adc     #<(_enemy_anim)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_anim)
@@ -9343,9 +9461,9 @@ L003A:	adc     #<(_enemy_anim)
 ; else if (temp1 < 44) { // use short anim. 2 frames
 ;
 	rts
-L0040:	lda     _temp1
+L0048:	lda     _temp1
 	cmp     #$2C
-	bcs     L0023
+	bcs     L0029
 ;
 ; --enemy_y[index]; // jump
 ;
@@ -9353,9 +9471,9 @@ L0040:	lda     _temp1
 	ldx     #>(_enemy_y)
 	clc
 	adc     _index
-	bcc     L0024
+	bcc     L002A
 	inx
-L0024:	sta     ptr1
+L002A:	sta     ptr1
 	stx     ptr1+1
 	ldy     #$00
 	lda     (ptr1),y
@@ -9368,10 +9486,10 @@ L0024:	sta     ptr1
 	ldx     #$00
 	lda     _index
 	asl     a
-	bcc     L003B
+	bcc     L0043
 	inx
 	clc
-L003B:	adc     #<(_enemy_anim)
+L0043:	adc     #<(_enemy_anim)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_anim)
@@ -9388,13 +9506,13 @@ L003B:	adc     #<(_enemy_anim)
 ;
 ; ++enemy_y[index]; // fall
 ;
-L0023:	lda     #<(_enemy_y)
+L0029:	lda     #<(_enemy_y)
 	ldx     #>(_enemy_y)
 	clc
 	adc     _index
-	bcc     L0026
+	bcc     L002C
 	inx
-L0026:	sta     ptr1
+L002C:	sta     ptr1
 	stx     ptr1+1
 	ldy     #$00
 	lda     #$01
@@ -9407,7 +9525,7 @@ L0026:	sta     ptr1
 	ldx     #$00
 	lda     _temp1
 	cmp     #$3E
-	bcs     L0041
+	bcs     L0049
 ;
 ; ++enemy_y[index]; // fall faster
 ;
@@ -9415,9 +9533,9 @@ L0026:	sta     ptr1
 	ldx     #>(_enemy_y)
 	clc
 	adc     _index
-	bcc     L0028
+	bcc     L002E
 	inx
-L0028:	sta     ptr1
+L002E:	sta     ptr1
 	stx     ptr1+1
 	lda     #$01
 	clc
@@ -9427,12 +9545,12 @@ L0028:	sta     ptr1
 ; enemy_anim[index] = EnemyBounceSpr2;
 ;
 	ldx     #$00
-L0041:	lda     _index
+L0049:	lda     _index
 	asl     a
-	bcc     L003C
+	bcc     L0044
 	inx
 	clc
-L003C:	adc     #<(_enemy_anim)
+L0044:	adc     #<(_enemy_anim)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_anim)
@@ -9475,7 +9593,7 @@ L003C:	adc     #<(_enemy_anim)
 ;
 	jsr     _bg_coll_D
 	tax
-	beq     L002C
+	beq     L0032
 ;
 ; enemy_y[index] -= eject_D;
 ;
@@ -9483,9 +9601,9 @@ L003C:	adc     #<(_enemy_anim)
 	ldx     #>(_enemy_y)
 	clc
 	adc     _index
-	bcc     L002D
+	bcc     L0033
 	inx
-L002D:	sta     sreg
+L0033:	sta     sreg
 	stx     sreg+1
 	sta     ptr1
 	stx     ptr1+1
@@ -9497,7 +9615,7 @@ L002D:	sta     sreg
 ;
 ; }
 ;
-L002C:	rts
+L0032:	rts
 
 .endproc
 
@@ -12087,7 +12205,7 @@ L0022:	jsr     _ppu_wait_nmi
 	iny
 	lda     #>(_END_TEXT3)
 	sta     (sp),y
-	lda     #$08
+	lda     #$07
 	ldy     #$00
 	sta     (sp),y
 	ldx     #$22
