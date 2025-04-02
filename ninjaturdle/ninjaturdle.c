@@ -8,6 +8,7 @@
  
 #include "LIB/neslib.h"
 #include "LIB/nesdoug.h"
+#include "LIB/kenes.h"
 #include "sprites.h"
 #include "ninjaturdle.h"
 #include "level_data.c"
@@ -26,7 +27,8 @@ void main(void) {
 	
 	// use the second set of tiles for sprites
 	// both bg and sprites are set to 0 by default
-	bank_spr(1);
+	bank_spr(CHR_BANK_1);    // Sprite pattern table
+	bank_bg(CHR_BANK_0);     // Background pattern table for map tiles
 	
 	set_vram_buffer(); // do at least once
 	
@@ -241,6 +243,9 @@ void main(void) {
 }
 
 void load_title(void) {
+	// Switch to the font/title bank
+	bank_bg(CHR_BANK_0);
+	
 	pal_bg(palette_title);
 	pal_spr(palette_sp);
 	vram_adr(NAMETABLE_A);
@@ -250,6 +255,10 @@ void load_title(void) {
 
 void load_room(void) {
 	clear_vram_buffer();
+	
+	// Switch to the map tiles bank
+	bank_bg(CHR_BANK_0);
+	
 	offset = Level_offsets[level];
 	
 	set_data_pointer(Levels_list[offset]);

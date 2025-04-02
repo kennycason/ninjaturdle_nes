@@ -14,6 +14,7 @@
 	.import		_pal_bg
 	.import		_pal_spr
 	.import		_pal_col
+	.import		_pal_clear
 	.import		_pal_bright
 	.import		_ppu_wait_nmi
 	.import		_ppu_off
@@ -21,11 +22,13 @@
 	.import		_oam_clear
 	.import		_oam_spr
 	.import		_oam_meta_spr
+	.import		_oam_get
 	.import		_music_play
 	.import		_music_stop
 	.import		_sfx_play
 	.import		_pad_poll
 	.import		_bank_spr
+	.import		_bank_bg
 	.import		_vram_adr
 	.import		_vram_fill
 	.import		_vram_unrle
@@ -48,6 +51,11 @@
 	.import		_buffer_4_mt
 	.import		_flush_vram_update2
 	.import		_color_emphasis
+	.export		_setup_pattern_tables
+	.export		_fade_in_palette
+	.export		_fade_out_palette
+	.export		_create_sprite
+	.export		_update_sprite_pos
 	.export		_NinjaSprL
 	.export		_NinjaSprR
 	.export		_CoinSpr
@@ -7080,6 +7088,454 @@ _damage_cooldown:
 	.res	1,$00
 
 ; ---------------------------------------------------------------
+; void __near__ setup_pattern_tables (unsigned char bg_bank, unsigned char spr_bank)
+; ---------------------------------------------------------------
+
+.segment	"CODE"
+
+.proc	_setup_pattern_tables: near
+
+.segment	"CODE"
+
+;
+; void setup_pattern_tables(unsigned char bg_bank, unsigned char spr_bank) {
+;
+	jsr     pusha
+;
+; bank_bg(bg_bank);
+;
+	ldy     #$01
+	lda     (sp),y
+	jsr     _bank_bg
+;
+; bank_spr(spr_bank);
+;
+	ldy     #$00
+	lda     (sp),y
+	jsr     _bank_spr
+;
+; }
+;
+	jmp     incsp2
+
+.endproc
+
+; ---------------------------------------------------------------
+; void __near__ fade_in_palette (const unsigned char *palette, unsigned char delay_frames)
+; ---------------------------------------------------------------
+
+.segment	"CODE"
+
+.proc	_fade_in_palette: near
+
+.segment	"CODE"
+
+;
+; void fade_in_palette(const unsigned char *palette, unsigned char delay_frames) {
+;
+	jsr     pusha
+;
+; pal_clear();
+;
+	ldy     #$21
+	jsr     subysp
+	jsr     _pal_clear
+;
+; for (i = 0; i < 32; i++) {
+;
+	lda     #$00
+	ldy     #$20
+L000F:	sta     (sp),y
+	cmp     #$20
+	bcs     L0003
+;
+; temp_pal[i] = palette[i];
+;
+	lda     sp
+	ldx     sp+1
+	clc
+	adc     (sp),y
+	bcc     L0006
+	inx
+L0006:	sta     sreg
+	stx     sreg+1
+	ldy     #$23
+	lda     (sp),y
+	sta     ptr1+1
+	dey
+	lda     (sp),y
+	sta     ptr1
+	ldy     #$20
+	lda     (sp),y
+	tay
+	lda     (ptr1),y
+	ldy     #$00
+	sta     (sreg),y
+;
+; pal_col(i, temp_pal[i]);
+;
+	ldy     #$20
+	lda     (sp),y
+	jsr     pusha
+	lda     sp
+	ldx     sp+1
+	clc
+	adc     #$01
+	bcc     L0007
+	inx
+L0007:	ldy     #$21
+	clc
+	adc     (sp),y
+	bcc     L0008
+	inx
+L0008:	sta     ptr1
+	stx     ptr1+1
+	ldy     #$00
+	lda     (ptr1),y
+	jsr     _pal_col
+;
+; ppu_wait_nmi(); // Wait for NMI to complete
+;
+	jsr     _ppu_wait_nmi
+;
+; if (delay_frames > 0) {
+;
+	ldy     #$21
+	lda     (sp),y
+	beq     L0004
+;
+; for (j = 0; j < delay_frames; j++) {
+;
+	jsr     decsp1
+	lda     #$00
+	tay
+L000E:	sta     (sp),y
+	ldy     #$22
+	cmp     (sp),y
+	bcs     L000B
+;
+; ppu_wait_nmi(); // Wait for NMI to complete
+;
+	jsr     _ppu_wait_nmi
+;
+; for (j = 0; j < delay_frames; j++) {
+;
+	ldy     #$00
+	clc
+	lda     #$01
+	adc     (sp),y
+	jmp     L000E
+;
+; }
+;
+L000B:	jsr     incsp1
+;
+; for (i = 0; i < 32; i++) {
+;
+L0004:	ldy     #$20
+	clc
+	lda     #$01
+	adc     (sp),y
+	jmp     L000F
+;
+; }
+;
+L0003:	ldy     #$24
+	jmp     addysp
+
+.endproc
+
+; ---------------------------------------------------------------
+; void __near__ fade_out_palette (unsigned char delay_frames)
+; ---------------------------------------------------------------
+
+.segment	"CODE"
+
+.proc	_fade_out_palette: near
+
+.segment	"CODE"
+
+;
+; void fade_out_palette(unsigned char delay_frames) {
+;
+	jsr     pusha
+;
+; for (i = 0; i < 32; i++) {
+;
+	ldy     #$22
+	jsr     subysp
+	lda     #$00
+	ldy     #$21
+L0019:	sta     (sp),y
+	cmp     #$20
+	bcs     L001D
+;
+; temp_pal[i] = 0x0F; // Default to black
+;
+	lda     sp+1
+	sta     ptr1+1
+	lda     sp
+	sta     ptr1
+	lda     (sp),y
+	tay
+	lda     #$0F
+	sta     (ptr1),y
+;
+; for (i = 0; i < 32; i++) {
+;
+	ldy     #$21
+	clc
+	lda     #$01
+	adc     (sp),y
+	jmp     L0019
+;
+; for (i = 0; i < 32; i++) {
+;
+L001D:	lda     #$00
+L001C:	sta     (sp),y
+	cmp     #$20
+	jcs     L0008
+;
+; for (j = 0; j < 32; j++) {
+;
+	lda     #$00
+	dey
+L001A:	sta     (sp),y
+	cmp     #$20
+	bcs     L000C
+;
+; if (temp_pal[j] > 0) {
+;
+	lda     sp
+	ldx     sp+1
+	clc
+	adc     (sp),y
+	bcc     L0010
+	inx
+L0010:	sta     ptr1
+	stx     ptr1+1
+	ldy     #$00
+	lda     (ptr1),y
+	beq     L000D
+;
+; temp_pal[j]--;
+;
+	lda     sp
+	ldx     sp+1
+	ldy     #$20
+	clc
+	adc     (sp),y
+	bcc     L0011
+	inx
+L0011:	sta     sreg
+	stx     sreg+1
+	sta     ptr1
+	stx     ptr1+1
+	ldy     #$00
+	lda     (ptr1),y
+	sec
+	sbc     #$01
+	sta     (sreg),y
+;
+; pal_col(j, temp_pal[j]);
+;
+	ldy     #$20
+	lda     (sp),y
+	jsr     pusha
+	lda     sp
+	ldx     sp+1
+	clc
+	adc     #$01
+	bcc     L0012
+	inx
+L0012:	ldy     #$21
+	clc
+	adc     (sp),y
+	bcc     L0013
+	inx
+L0013:	sta     ptr1
+	stx     ptr1+1
+	ldy     #$00
+	lda     (ptr1),y
+	jsr     _pal_col
+;
+; for (j = 0; j < 32; j++) {
+;
+L000D:	ldy     #$20
+	clc
+	lda     #$01
+	adc     (sp),y
+	jmp     L001A
+;
+; ppu_wait_nmi(); // Wait for NMI to complete
+;
+L000C:	jsr     _ppu_wait_nmi
+;
+; if (delay_frames > 0) {
+;
+	ldy     #$22
+	lda     (sp),y
+	beq     L0009
+;
+; for (k = 0; k < delay_frames; k++) {
+;
+	jsr     decsp1
+	lda     #$00
+	tay
+L001B:	sta     (sp),y
+	ldy     #$23
+	cmp     (sp),y
+	bcs     L0016
+;
+; ppu_wait_nmi(); // Wait for NMI to complete
+;
+	jsr     _ppu_wait_nmi
+;
+; for (k = 0; k < delay_frames; k++) {
+;
+	ldy     #$00
+	clc
+	lda     #$01
+	adc     (sp),y
+	jmp     L001B
+;
+; }
+;
+L0016:	jsr     incsp1
+;
+; for (i = 0; i < 32; i++) {
+;
+L0009:	ldy     #$21
+	clc
+	lda     #$01
+	adc     (sp),y
+	jmp     L001C
+;
+; }
+;
+L0008:	ldy     #$23
+	jmp     addysp
+
+.endproc
+
+; ---------------------------------------------------------------
+; unsigned char __near__ create_sprite (unsigned char x, unsigned char y, unsigned char tile, unsigned char palette, unsigned char flip_h, unsigned char flip_v, unsigned char behind)
+; ---------------------------------------------------------------
+
+.segment	"CODE"
+
+.proc	_create_sprite: near
+
+.segment	"CODE"
+
+;
+; unsigned char flip_v, unsigned char behind) {
+;
+	jsr     pusha
+;
+; unsigned char attr = palette;
+;
+	ldy     #$03
+	lda     (sp),y
+	jsr     pusha
+;
+; if (flip_h) attr |= OAM_FLIP_H;
+;
+	ldy     #$03
+	lda     (sp),y
+	beq     L0002
+	ldy     #$00
+	lda     (sp),y
+	ora     #$40
+	sta     (sp),y
+;
+; if (flip_v) attr |= OAM_FLIP_V;
+;
+L0002:	ldy     #$02
+	lda     (sp),y
+	beq     L0003
+	ldy     #$00
+	lda     (sp),y
+	ora     #$80
+	sta     (sp),y
+;
+; if (behind) attr |= OAM_BEHIND;
+;
+L0003:	ldy     #$01
+	lda     (sp),y
+	beq     L0004
+	dey
+	lda     (sp),y
+	ora     #$20
+	sta     (sp),y
+;
+; oam_spr(x, y, tile, attr);
+;
+L0004:	jsr     decsp3
+	ldy     #$0A
+	lda     (sp),y
+	ldy     #$02
+	sta     (sp),y
+	ldy     #$09
+	lda     (sp),y
+	ldy     #$01
+	sta     (sp),y
+	ldy     #$08
+	lda     (sp),y
+	ldy     #$00
+	sta     (sp),y
+	ldy     #$03
+	lda     (sp),y
+	jsr     _oam_spr
+;
+; return oam_get();
+;
+	jsr     _oam_get
+;
+; }
+;
+	jmp     incsp8
+
+.endproc
+
+; ---------------------------------------------------------------
+; void __near__ update_sprite_pos (unsigned char index, unsigned char x, unsigned char y)
+; ---------------------------------------------------------------
+
+.segment	"CODE"
+
+.proc	_update_sprite_pos: near
+
+.segment	"CODE"
+
+;
+; void update_sprite_pos(unsigned char index, unsigned char x, unsigned char y) {
+;
+	jsr     pusha
+;
+; oam_spr(x, y, 0, 0); // Use default attributes
+;
+	jsr     decsp3
+	ldy     #$04
+	lda     (sp),y
+	ldy     #$02
+	sta     (sp),y
+	iny
+	lda     (sp),y
+	ldy     #$01
+	sta     (sp),y
+	lda     #$00
+	dey
+	sta     (sp),y
+	jsr     _oam_spr
+;
+; }
+;
+	jmp     incsp3
+
+.endproc
+
+; ---------------------------------------------------------------
 ; void __near__ load_title (void)
 ; ---------------------------------------------------------------
 
@@ -7089,6 +7545,11 @@ _damage_cooldown:
 
 .segment	"CODE"
 
+;
+; bank_bg(CHR_BANK_0);
+;
+	lda     #$00
+	jsr     _bank_bg
 ;
 ; pal_bg(palette_title);
 ;
@@ -7139,6 +7600,11 @@ _damage_cooldown:
 ; clear_vram_buffer();
 ;
 	jsr     _clear_vram_buffer
+;
+; bank_bg(CHR_BANK_0);
+;
+	lda     #$00
+	jsr     _bank_bg
 ;
 ; offset = Level_offsets[level];
 ;
@@ -11797,10 +12263,15 @@ L0003:	rts
 ;
 	jsr     _ppu_off
 ;
-; bank_spr(1);
+; bank_spr(CHR_BANK_1);    // Sprite pattern table
 ;
 	lda     #$01
 	jsr     _bank_spr
+;
+; bank_bg(CHR_BANK_0);     // Background pattern table for map tiles
+;
+	lda     #$00
+	jsr     _bank_bg
 ;
 ; set_vram_buffer(); // do at least once
 ;

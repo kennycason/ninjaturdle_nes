@@ -1007,3 +1007,22 @@ $2006's contents are in the same order as t, so you can affect the bits as:
   +++------------------ fine Y scroll
 
 
+
+
+Let me explain how CHR banking works on the NES:
+The NES PPU (Picture Processing Unit) has two pattern tables, each 4KB in size:
+Pattern Table 0: $0000-$0FFF (first 4KB)
+Pattern Table 1: $1000-$1FFF (second 4KB)
+Each 8x8 tile takes up 16 bytes, so:
+A 128x128 section contains 256 tiles (16x16 tiles)
+Each pattern table can hold 256 tiles (4KB ÷ 16 bytes per tile)
+A full 128x256 sprite sheet contains 512 tiles
+When you use bank_bg() and bank_spr():
+bank_bg(0) uses Pattern Table 0 for background tiles
+bank_bg(1) uses Pattern Table 1 for background tiles
+bank_spr(0) uses Pattern Table 0 for sprite tiles
+bank_spr(1) uses Pattern Table 1 for sprite tiles
+So in your case:
+Your first CHR file (ninjaturdle.chr) contains both pattern tables (8KB total):
+First 4KB (bank 0) = top 128x128 of your sprite sheet
+Second 4KB (bank 1) = bottom 128x128 of your sprite sheet

@@ -8,6 +8,10 @@
 
 #pragma bss-name(push, "ZEROPAGE")
 
+// CHR bank definitions
+#define CHR_BANK_0 0  // First tileset (font + title + sprites)
+#define CHR_BANK_1 1  // Second tileset (map tiles)
+
 // GLOBAL VARIABLES
 unsigned char pad1;
 unsigned char pad1_new;
