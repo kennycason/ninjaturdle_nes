@@ -262,3 +262,8 @@ void draw_turds(void);
 unsigned char player_health;
 unsigned char damage_cooldown; // Invincibility frames after taking damage
 #define DAMAGE_COOLDOWN_TIME 60 // 1 second of invincibility
+
+#define ENEMY_BOSS1 2
+#define BOSS_MAX_HEALTH 20
+#define BOSS_DAMAGE_PER_HIT 1
+unsigned char boss_health;

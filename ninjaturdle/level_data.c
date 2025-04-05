@@ -1,7 +1,9 @@
-enum { 
-	COIN_REG, 
-	COIN_END
-};
+#define COIN_REG 0
+#define COIN_END 1
+
+#define ENEMY_WASP 0
+#define ENEMY_BOUNCE 1
+#define ENEMY_BOSS1 2
 
 //NOTE MAX_COINS = 12
 
@@ -57,8 +59,6 @@ const unsigned char * const Coins_list[]={
 	level_1_coins, level_2_coins, level_3_coins
 };
 
-
-enum{ENEMY_WASP, ENEMY_BOUNCE, ENEMY_BOSS1};
 
 //NOTE MAX_ENEMY = 10
 

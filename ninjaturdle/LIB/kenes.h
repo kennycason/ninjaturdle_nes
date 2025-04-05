@@ -7,6 +7,12 @@
 #include "neslib.h"
 #include "nesdoug.h"
 
+// Type conversion macros for pointer signedness
+#define K_PAL(x) ((const char *)(x))
+#define K_SPR(x) ((const char *)(x))
+#define K_STR(x) ((const char *)(x))
+#define K_CHR(x) ((const char *)(x))
+
 // MMC1 registers (for future reference)
 #define MMC1_CONTROL    0x8000
 #define MMC1_CHR0       0xA000
@@ -125,6 +131,7 @@ unsigned char create_sprite(unsigned char x, unsigned char y, unsigned char tile
 void update_sprite_pos(unsigned char index, unsigned char x, unsigned char y) {
     // Since we can't read sprite attributes, we'll just recreate the sprite
     // This is a simplified version that assumes the sprite is visible
+    (void)index; // Suppress unused parameter warning
     oam_spr(x, y, 0, 0); // Use default attributes
 }
 

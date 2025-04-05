@@ -178,6 +178,7 @@
 	.export		_draw_turds
 	.export		_player_health
 	.export		_damage_cooldown
+	.export		_boss_health
 	.export		_level_1_coins
 	.export		_level_2_coins
 	.export		_level_3_coins
@@ -7086,6 +7087,8 @@ _player_health:
 	.res	1,$00
 _damage_cooldown:
 	.res	1,$00
+_boss_health:
+	.res	1,$00
 
 ; ---------------------------------------------------------------
 ; void __near__ setup_pattern_tables (unsigned char bg_bank, unsigned char spr_bank)
@@ -7863,6 +7866,11 @@ L001B:	adc     #<(_Levels_list)
 ;
 	lda     #$00
 	sta     _damage_cooldown
+;
+; boss_health = BOSS_MAX_HEALTH;
+;
+	lda     #$14
+	sta     _boss_health
 ;
 ; }
 ;
@@ -9531,12 +9539,12 @@ L0003:	lda     #$01
 	lda     _enemy_x,y
 	sta     _ENTITY1
 ;
-; ENTITY1.y = enemy_y[index] + 14; // mid point
+; ENTITY1.y = enemy_y[index] + 28; // Bottom of the boss (32px height - 4px for safety)
 ;
 	ldy     _index
 	lda     _enemy_y,y
 	clc
-	adc     #$0E
+	adc     #$1C
 	sta     _ENTITY1+1
 ;
 ; ENTITY1.width = 28; 
@@ -9544,8 +9552,9 @@ L0003:	lda     #$01
 	lda     #$1C
 	sta     _ENTITY1+2
 ;
-; ENTITY1.height = 28; 
+; ENTITY1.height = 4; // Just check the bottom 4 pixels for ground collision
 ;
+	lda     #$04
 	sta     _ENTITY1+3
 ;
 ; if (enemy_frames & 1) return; // half speed
@@ -9573,9 +9582,9 @@ L007C:	lda     _index
 	and     #$3F
 	sta     _temp1
 ;
-; if (temp1 < 12) { // stand still
+; if (temp1 < 8) { // stand still
 ;
-	cmp     #$0C
+	cmp     #$08
 	bcs     L0073
 ;
 ; enemy_anim[index] = Boss1SprL; // Use left-facing sprite
@@ -9598,11 +9607,11 @@ L0067:	adc     #<(_enemy_anim)
 	lda     #>(_Boss1SprL)
 	sta     (ptr1),y
 ;
-; else if (temp1 < 18) {
+; else if (temp1 < 14) {
 ;
 	jmp     L0009
 L0073:	lda     _temp1
-	cmp     #$12
+	cmp     #$0E
 	bcs     L0074
 ;
 ; --enemy_y[index]; // jump
@@ -9655,11 +9664,11 @@ L0068:	adc     #<(_enemy_anim)
 	lda     #>(_Boss1SprL)
 	sta     (ptr1),y
 ;
-; else if (temp1 < 28) {
+; else if (temp1 < 24) {
 ;
 	jmp     L0009
 L0074:	lda     _temp1
-	cmp     #$1C
+	cmp     #$18
 	bcs     L0075
 ;
 ; --enemy_y[index]; // jump
@@ -9712,11 +9721,11 @@ L0069:	adc     #<(_enemy_anim)
 	lda     #>(_Boss1SprL)
 	sta     (ptr1),y
 ;
-; else if (temp1 < 30) { // use short anim. 2 frames
+; else if (temp1 < 26) { // use short anim. 2 frames
 ;
 	jmp     L0009
 L0075:	lda     _temp1
-	cmp     #$1E
+	cmp     #$1A
 	bcs     L0012
 ;
 ; --enemy_y[index]; // jump
@@ -9815,32 +9824,19 @@ L006B:	adc     #<(_enemy_anim)
 	lda     #>(_Boss1SprL)
 	sta     (ptr1),y
 ;
-; temp1 = enemy_y[index];
-;
-	ldy     _index
-	lda     _enemy_y,y
-	sta     _temp1
-;
 ; ENTITY1.x = enemy_x[index];
 ;
 	ldy     _index
 	lda     _enemy_x,y
 	sta     _ENTITY1
 ;
-; ENTITY1.y = enemy_y[index];
+; ENTITY1.y = enemy_y[index] + 28; // Bottom of the boss
 ;
 	ldy     _index
 	lda     _enemy_y,y
+	clc
+	adc     #$1C
 	sta     _ENTITY1+1
-;
-; ENTITY1.width = 28;
-;
-	lda     #$1C
-	sta     _ENTITY1+2
-;
-; ENTITY1.height = 28;
-;
-	sta     _ENTITY1+3
 ;
 ; if (bg_coll_D()) {
 ;
@@ -12590,6 +12586,11 @@ L0003:	rts
 ;
 	lda     #$00
 	sta     _damage_cooldown
+;
+; boss_health = BOSS_MAX_HEALTH; // Initialize boss health
+;
+	lda     #$14
+	sta     _boss_health
 ;
 ; direction = RIGHT; // Initialize direction to face right
 ;

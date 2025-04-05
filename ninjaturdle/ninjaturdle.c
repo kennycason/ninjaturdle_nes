@@ -44,6 +44,7 @@ void main(void) {
 	turd_cooldown = 0;
 	player_health = MAX_HEALTH; // Initialize player health
 	damage_cooldown = 0;
+	boss_health = BOSS_MAX_HEALTH; // Initialize boss health
 	
 	direction = RIGHT; // Initialize direction to face right
 	
@@ -305,6 +306,9 @@ void load_room(void) {
 	// Reset player health when starting a new level
 	player_health = MAX_HEALTH;
 	damage_cooldown = 0;
+	
+	// Reset boss health when starting a new level
+	boss_health = BOSS_MAX_HEALTH;
 }
 
 
@@ -613,10 +617,11 @@ char get_position(void) {
 
 void enemy_moves(void) {
 	if (enemy_type[index] == ENEMY_BOSS1) {
+		// Set collision box to center-bottom of the boss
 		ENTITY1.x = enemy_x[index];
-		ENTITY1.y = enemy_y[index] + 14; // mid point
+		ENTITY1.y = enemy_y[index] + 28; // Bottom of the boss (32px height - 4px for safety)
 		ENTITY1.width = 28; 
-		ENTITY1.height = 28; 
+		ENTITY1.height = 4; // Just check the bottom 4 pixels for ground collision
         // note, ENTITY2 is the hero's x position
 		
 		if (enemy_frames & 1) return; // half speed
@@ -624,20 +629,20 @@ void enemy_moves(void) {
 		// Jump behavior
 		temp1 = enemy_frames + (index << 3);
 		temp1 &= 0x3f;
-		if (temp1 < 12) { // stand still
+		if (temp1 < 8) { // stand still
 			enemy_anim[index] = Boss1SprL; // Use left-facing sprite
 		}
-		else if (temp1 < 18) {
+		else if (temp1 < 14) {
 			--enemy_y[index]; // jump
 			--enemy_y[index]; // jump faster
 			enemy_anim[index] = Boss1SprL;
 		}
-		else if (temp1 < 28) {
+		else if (temp1 < 24) {
 			--enemy_y[index]; // jump
 			--enemy_y[index]; // jump even faster
 			enemy_anim[index] = Boss1SprL;
 		}
-		else if (temp1 < 30) { // use short anim. 2 frames
+		else if (temp1 < 26) { // use short anim. 2 frames
 			--enemy_y[index]; // jump
 			enemy_anim[index] = Boss1SprL;
 		}
@@ -647,12 +652,10 @@ void enemy_moves(void) {
 				++enemy_y[index]; // fall faster
 			}
 			enemy_anim[index] = Boss1SprL;
-			temp1 = enemy_y[index];
+			
 			//check ground collision
 			ENTITY1.x = enemy_x[index];
-			ENTITY1.y = enemy_y[index];
-			ENTITY1.width = 28;
-			ENTITY1.height = 28;
+			ENTITY1.y = enemy_y[index] + 28; // Bottom of the boss
 			
 			if (bg_coll_D()) {
 				enemy_y[index] -= eject_D;
