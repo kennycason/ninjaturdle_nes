@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NES Sound Editor</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>NES Sound Editor</h1>
+            <div class="controls">
+                <button id="play-btn" class="btn">Play</button>
+                <button id="stop-btn" class="btn">Stop</button>
+                <button id="save-btn" class="btn">Save .s</button>
+                <button id="load-btn" class="btn">Load .s</button>
+                <input type="file" id="file-input" accept=".s" style="display: none;">
+            </div>
+        </header>
+
+        <div class="editor-container">
+            <div class="track-editor">
+                <h2>Track Editor</h2>
+                <div class="track-controls">
+                    <div class="track-selector">
+                        <label for="track-select">Track:</label>
+                        <select id="track-select">
+                            <option value="0">Pulse 1</option>
+                            <option value="1">Pulse 2</option>
+                            <option value="2">Triangle</option>
+                            <option value="3">Noise</option>
+                            <option value="4">DMC</option>
+                        </select>
+                    </div>
+                    <div class="tempo-control">
+                        <label for="tempo-slider">Tempo: <span id="tempo-value">120</span> BPM</label>
+                        <input type="range" id="tempo-slider" min="30" max="240" value="120">
+                    </div>
+                </div>
+                <div class="piano-roll">
+                    <div class="piano-roll-header">
+                        <div class="note-labels"></div>
+                        <div class="time-markers"></div>
+                    </div>
+                    <div class="piano-roll-content">
+                        <div class="piano-keys"></div>
+                        <div class="note-grid"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="instrument-editor">
+                <h2>Instrument Editor</h2>
+                <div class="instrument-controls">
+                    <div class="instrument-selector">
+                        <label for="instrument-select">Instrument:</label>
+                        <select id="instrument-select">
+                            <option value="0">Instrument 1</option>
+                            <option value="1">Instrument 2</option>
+                            <option value="2">Instrument 3</option>
+                            <option value="3">Instrument 4</option>
+                        </select>
+                    </div>
+                    <div class="instrument-params">
+                        <div class="param">
+                            <label for="duty-cycle">Duty Cycle:</label>
+                            <select id="duty-cycle">
+                                <option value="0">12.5%</option>
+                                <option value="1">25%</option>
+                                <option value="2">50%</option>
+                                <option value="3">75%</option>
+                            </select>
+                        </div>
+                        <div class="param">
+                            <label for="volume">Volume:</label>
+                            <input type="range" id="volume" min="0" max="15" value="12">
+                        </div>
+                        <div class="param">
+                            <label for="sweep">Sweep:</label>
+                            <input type="range" id="sweep" min="0" max="7" value="0">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="song-info">
+            <h2>Song Information</h2>
+            <div class="info-fields">
+                <div class="field">
+                    <label for="song-name">Song Name:</label>
+                    <input type="text" id="song-name" value="New Song">
+                </div>
+                <div class="field">
+                    <label for="song-author">Author:</label>
+                    <input type="text" id="song-author" value="Unknown">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
