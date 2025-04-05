@@ -1,9 +1,5 @@
-/*	example code for cc65, for NES
- *  Scrolling Right with metatile system
- *	, basic platformer
- *	, with coins and enemies
- *	using neslib
- *	Doug Fraker 2018 (edit 2023)
+/*	
+ * Ninja Turdle II - NES
  */	
  
 #include "LIB/neslib.h"
@@ -45,6 +41,7 @@ void main(void) {
 	player_health = MAX_HEALTH; // Initialize player health
 	damage_cooldown = 0;
 	boss_health = BOSS_MAX_HEALTH; // Initialize boss health
+	corn_mode = 0; // Initialize to turd mode
 	
 	direction = RIGHT; // Initialize direction to face right
 	
@@ -391,13 +388,19 @@ void draw_sprites(void) {
 	
 	
 	// Draw coin icon in upper right
-	oam_meta_spr(0xDD, 0x10, CoinSpr);
+	if (corn_mode) {
+		oam_meta_spr(0xDD, 0x10, CornSelectedSpr);
+	}
+	else {
+		oam_meta_spr(0xDD, 0x10, CoinSpr);
+	}
 	
 	// Draw coin count
 	temp1 = (coins / 10) + 0xF0; // Convert to tile number
 	temp2 = (coins % 10) + 0xF0;
 	oam_spr(0xE8, 0x10, temp1, 1); // Tens digit
 	oam_spr(0xF0, 0x10, temp2, 1); // Ones digit
+	
 }
 
 	
@@ -570,9 +573,22 @@ void movement(void) {
 		--turd_cooldown;
 	}
 	
+	// Toggle corn mode with Select button
+	if (pad1_new & PAD_SELECT) {
+		corn_mode = !corn_mode; // Toggle between 0 and 1
+		sfx_play(SFX_DING, 0); // Play a sound to indicate mode change
+	}
+	
 	if (has_turd_power && pad1_new & PAD_B && turd_cooldown == 0) {
-		fire_turd();
-		turd_cooldown = TURD_COOLDOWN;
+		// Check if we have enough corn in corn mode
+		if (corn_mode && coins > 0) {
+			fire_turd();
+			--coins; // Use one corn
+			turd_cooldown = TURD_COOLDOWN;
+		} else if (!corn_mode) {
+			fire_turd();
+			turd_cooldown = TURD_COOLDOWN;
+		}
 	}
 	
 	// Update active turds
@@ -1300,16 +1316,44 @@ void update_turds(void) {
                 if (enemy_active[index2]) {
                     ENTITY2.x = enemy_x[index2];
                     ENTITY2.y = enemy_y[index2];
-                    ENTITY2.width = ENEMY_WIDTH;
-                    ENTITY2.height = ENEMY_HEIGHT;
                     
-                    if (check_collision(&ENTITY1, &ENTITY2)) {
-                        // Hit enemy
-                        enemy_y[index2] = TURN_OFF;
-                        enemy_active[index2] = 0;
-                        turd_active[index] = 0;
-                        sfx_play(SFX_DING, 0); // Play hit sound
-                        break;
+                    // Use different collision box for boss
+                    if (enemy_type[index2] == ENEMY_BOSS1) {
+                        ENTITY2.width = 28;  // 32 pixels - 4 pixels for safety
+                        ENTITY2.height = 28; // 32 pixels - 4 pixels for safety
+                        
+                        if (check_collision(&ENTITY1, &ENTITY2)) {
+                            // Hit boss
+                            if (corn_mode) {
+                                // Double damage in corn mode
+                                boss_health -= BOSS_DAMAGE_PER_HIT * CORN_DAMAGE_MULTIPLIER;
+                            } else {
+                                boss_health -= BOSS_DAMAGE_PER_HIT;
+                            }
+                            
+                            turd_active[index] = 0;
+                            sfx_play(SFX_DING, 0); // Play hit sound
+                            
+                            // Check if boss is defeated
+                            if (boss_health <= 0) {
+                                enemy_y[index2] = TURN_OFF;
+                                enemy_active[index2] = 0;
+                                ++level_up; // Advance to next level
+                            }
+                            break;
+                        }
+                    } else {
+                        ENTITY2.width = ENEMY_WIDTH;
+                        ENTITY2.height = ENEMY_HEIGHT;
+                        
+                        if (check_collision(&ENTITY1, &ENTITY2)) {
+                            // Hit enemy
+                            enemy_y[index2] = TURN_OFF;
+                            enemy_active[index2] = 0;
+                            turd_active[index] = 0;
+                            sfx_play(SFX_DING, 0); // Play hit sound
+                            break;
+                        }
                     }
                 }
             }
@@ -1321,7 +1365,13 @@ void update_turds(void) {
 void draw_turds(void) {
 	for(index = 0; index < MAX_TURDS; ++index) {
 		if (turd_active[index]) {
-			oam_meta_spr(turd_x[index], turd_y[index], TurdSpr);
+			if (corn_mode) {
+				// Use the corn sprite for corn mode
+				oam_meta_spr(turd_x[index], turd_y[index], CoinSpr);
+			} else {
+				// Use the regular turd sprite
+				oam_meta_spr(turd_x[index], turd_y[index], TurdSpr);
+			}
 		}
 	}
 }

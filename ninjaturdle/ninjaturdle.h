@@ -248,6 +248,10 @@ signed char turd_vel_x[MAX_TURDS];
 signed char turd_vel_y[MAX_TURDS];
 unsigned char turd_direction[MAX_TURDS];
 
+// Corn mode variables
+unsigned char corn_mode; // 0 = turd mode, 1 = corn mode
+#define CORN_DAMAGE_MULTIPLIER 2 // Corn chunks do double damage
+
 // Add these definitions for enemy bullets
 #define MAX_ENEMY_BULLETS 8  // Maximum number of enemy bullets on screen at once
 #define ENEMY_BULLET_WIDTH 13  // Make bullets bigger (same as HERO_WIDTH)

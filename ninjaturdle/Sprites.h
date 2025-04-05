@@ -24,6 +24,11 @@ const unsigned char CoinSpr[]={
 	128
 };
 
+const unsigned char CornSelectedSpr[]={
+	  0xff,  0xff,0x20,2,
+	  0xff,  7,0x30,2,
+	128
+};
 
 const unsigned char BigCoinSpr[]={
 	  0xff,  0xff,0x21,0,

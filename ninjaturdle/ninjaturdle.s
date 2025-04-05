@@ -59,6 +59,7 @@
 	.export		_NinjaSprL
 	.export		_NinjaSprR
 	.export		_CoinSpr
+	.export		_CornSelectedSpr
 	.export		_BigCoinSpr
 	.export		_CoinHud
 	.export		_EnemyWaspSprL
@@ -172,6 +173,7 @@
 	.export		_turd_vel_x
 	.export		_turd_vel_y
 	.export		_turd_direction
+	.export		_corn_mode
 	.export		_enemy_bullet_x
 	.export		_enemy_bullet_y
 	.export		_enemy_bullet_active
@@ -291,6 +293,16 @@ _CoinSpr:
 	.byte	$07
 	.byte	$30
 	.byte	$01
+	.byte	$80
+_CornSelectedSpr:
+	.byte	$FF
+	.byte	$FF
+	.byte	$20
+	.byte	$02
+	.byte	$FF
+	.byte	$07
+	.byte	$30
+	.byte	$02
 	.byte	$80
 _BigCoinSpr:
 	.byte	$FF
@@ -7156,6 +7168,8 @@ _turd_vel_y:
 	.res	4,$00
 _turd_direction:
 	.res	4,$00
+_corn_mode:
+	.res	1,$00
 _enemy_bullet_x:
 	.res	8,$00
 _enemy_bullet_y:
@@ -7992,20 +8006,20 @@ L001B:	adc     #<(_Levels_list)
 ; if (temp_x > 0xfc) temp_x = 1;
 ;
 	cmp     #$FD
-	bcc     L002A
+	bcc     L002D
 	lda     #$01
 	sta     _temp_x
 ;
 ; if (temp_x == 0) temp_x = 1;
 ;
-L002A:	lda     _temp_x
-	bne     L002B
+L002D:	lda     _temp_x
+	bne     L002E
 	lda     #$01
 	sta     _temp_x
 ;
 ; if (direction == LEFT) {
 ;
-L002B:	lda     _direction
+L002E:	lda     _direction
 	bne     L0004
 ;
 ; oam_meta_spr(temp_x, high_byte(NINJA.y), NinjaSprL);
@@ -8022,7 +8036,7 @@ L002B:	lda     _direction
 ;
 ; else {
 ;
-	jmp     L0027
+	jmp     L0029
 ;
 ; oam_meta_spr(temp_x, high_byte(NINJA.y), NinjaSprR);
 ;
@@ -8035,13 +8049,13 @@ L0004:	jsr     decsp2
 	sta     (sp),y
 	lda     #<(_NinjaSprR)
 	ldx     #>(_NinjaSprR)
-L0027:	jsr     _oam_meta_spr
+L0029:	jsr     _oam_meta_spr
 ;
 ; for (index = 0; index < MAX_COINS; ++index) {
 ;
 	lda     #$00
 	sta     _index
-L002C:	lda     _index
+L002F:	lda     _index
 	cmp     #$10
 	jcs     L0007
 ;
@@ -8054,13 +8068,13 @@ L002C:	lda     _index
 ; if (temp_y == TURN_OFF) continue;
 ;
 	cmp     #$FF
-	beq     L002D
+	beq     L0030
 ;
 ; if (!coin_active[index]) continue;
 ;
 	ldy     _index
 	lda     _coin_active,y
-	beq     L002D
+	beq     L0030
 ;
 ; temp_x = coin_x[index];
 ;
@@ -8071,7 +8085,7 @@ L002C:	lda     _index
 ; if (temp_x > 0xf0) continue;
 ;
 	cmp     #$F1
-	bcs     L002D
+	bcs     L0030
 ;
 ; temp1 = get_frame_count();
 ;
@@ -8100,7 +8114,7 @@ L002C:	lda     _index
 ; if (temp_y < 0xf0) {
 ;
 	cmp     #$F0
-	bcs     L002D
+	bcs     L0030
 ;
 ; if (coin_type[index] == COIN_REG) {
 ;
@@ -8122,7 +8136,7 @@ L002C:	lda     _index
 ;
 ; else {
 ;
-	jmp     L0028
+	jmp     L002A
 ;
 ; oam_meta_spr(temp_x, temp_y, BigCoinSpr);
 ;
@@ -8135,12 +8149,12 @@ L0012:	jsr     decsp2
 	sta     (sp),y
 	lda     #<(_BigCoinSpr)
 	ldx     #>(_BigCoinSpr)
-L0028:	jsr     _oam_meta_spr
+L002A:	jsr     _oam_meta_spr
 ;
 ; for (index = 0; index < MAX_COINS; ++index) {
 ;
-L002D:	inc     _index
-	jmp     L002C
+L0030:	inc     _index
+	jmp     L002F
 ;
 ; offset = get_frame_count() & 3;
 ;
@@ -8160,7 +8174,7 @@ L0007:	jsr     _get_frame_count
 ;
 	lda     #$00
 	sta     _index
-L002E:	lda     _index
+L0031:	lda     _index
 	cmp     #$10
 	bcs     L0016
 ;
@@ -8183,13 +8197,13 @@ L002E:	lda     _index
 ; if (temp_y == TURN_OFF) continue;
 ;
 	cmp     #$FF
-	beq     L0030
+	beq     L0033
 ;
 ; if (!enemy_active[index2]) continue;
 ;
 	ldy     _index2
 	lda     _enemy_active,y
-	beq     L0030
+	beq     L0033
 ;
 ; temp_x = enemy_x[index2];
 ;
@@ -8200,21 +8214,21 @@ L002E:	lda     _index
 ; if (temp_x == 0) temp_x = 1; // problems with x = 0
 ;
 	lda     _temp_x
-	bne     L002F
+	bne     L0032
 	lda     #$01
 	sta     _temp_x
 ;
 ; if (temp_x > 0xf0) continue;
 ;
-L002F:	lda     _temp_x
+L0032:	lda     _temp_x
 	cmp     #$F1
-	bcs     L0030
+	bcs     L0033
 ;
 ; if (temp_y < 0xf0) {
 ;
 	lda     _temp_y
 	cmp     #$F0
-	bcs     L0030
+	bcs     L0033
 ;
 ; oam_meta_spr(temp_x, temp_y, enemy_anim[index2]);
 ;
@@ -8228,10 +8242,10 @@ L002F:	lda     _temp_x
 	ldx     #$00
 	lda     _index2
 	asl     a
-	bcc     L0029
+	bcc     L002C
 	inx
 	clc
-L0029:	adc     #<(_enemy_anim)
+L002C:	adc     #<(_enemy_anim)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_anim)
@@ -8245,8 +8259,8 @@ L0029:	adc     #<(_enemy_anim)
 ;
 ; for (index = 0; index < MAX_ENEMY; ++index) {
 ;
-L0030:	inc     _index
-	jmp     L002E
+L0033:	inc     _index
+	jmp     L0031
 ;
 ; draw_turds();
 ;
@@ -8319,7 +8333,12 @@ L0016:	jsr     _draw_turds
 	lda     #$01
 	jsr     _oam_spr
 ;
-; oam_meta_spr(0xDD, 0x10, CoinSpr);
+; if (corn_mode) {
+;
+	lda     _corn_mode
+	beq     L0024
+;
+; oam_meta_spr(0xDD, 0x10, CornSelectedSpr);
 ;
 	jsr     decsp2
 	lda     #$DD
@@ -8328,9 +8347,25 @@ L0016:	jsr     _draw_turds
 	lda     #$10
 	dey
 	sta     (sp),y
+	lda     #<(_CornSelectedSpr)
+	ldx     #>(_CornSelectedSpr)
+;
+; else {
+;
+	jmp     L002B
+;
+; oam_meta_spr(0xDD, 0x10, CoinSpr);
+;
+L0024:	jsr     decsp2
+	lda     #$DD
+	ldy     #$01
+	sta     (sp),y
+	lda     #$10
+	dey
+	sta     (sp),y
 	lda     #<(_CoinSpr)
 	ldx     #>(_CoinSpr)
-	jsr     _oam_meta_spr
+L002B:	jsr     _oam_meta_spr
 ;
 ; temp1 = (coins / 10) + 0xF0; // Convert to tile number
 ;
@@ -8406,7 +8441,7 @@ L0016:	jsr     _draw_turds
 ;
 	lda     _pad1
 	and     #$02
-	beq     L0054
+	beq     L005C
 ;
 ; direction = LEFT;
 ;
@@ -8450,7 +8485,7 @@ L0008:	bpl     L0007
 ;
 ; else {
 ;
-	jmp     L0056
+	jmp     L005E
 ;
 ; NINJA.vel_x -= ACCEL;
 ;
@@ -8475,8 +8510,8 @@ L000C:	jpl     L0020
 ;
 ; else if (pad1 & PAD_RIGHT) {
 ;
-	jmp     L0056
-L0054:	lda     _pad1
+	jmp     L005E
+L005C:	lda     _pad1
 	and     #$01
 	beq     L000E
 ;
@@ -8518,7 +8553,7 @@ L000F:	ldx     _NINJA+4+1
 ;
 ; else {
 ;
-	jmp     L0056
+	jmp     L005E
 ;
 ; NINJA.vel_x += ACCEL;
 ;
@@ -8543,7 +8578,7 @@ L0017:	bpl     L0020
 ;
 ; else { // nothing pressed
 ;
-	jmp     L0056
+	jmp     L005E
 ;
 ; if (NINJA.vel_x >= ACCEL) NINJA.vel_x -= ACCEL;
 ;
@@ -8573,7 +8608,7 @@ L0019:	lda     _NINJA+4
 L001E:	asl     a
 	lda     #$00
 	tax
-	bcc     L0056
+	bcc     L005E
 	lda     #$1E
 	clc
 	adc     _NINJA+4
@@ -8584,7 +8619,7 @@ L001E:	asl     a
 ; else NINJA.vel_x = 0;
 ;
 	jmp     L0020
-L0056:	sta     _NINJA+4
+L005E:	sta     _NINJA+4
 	stx     _NINJA+4+1
 ;
 ; NINJA.x += NINJA.vel_x;
@@ -8603,7 +8638,7 @@ L0020:	lda     _NINJA+4
 	cmp     #$01
 	lda     _NINJA+1
 	sbc     #$F0
-	bcc     L0059
+	bcc     L0061
 ;
 ; if (old_x >= 0x8000) {
 ;
@@ -8613,7 +8648,7 @@ L0020:	lda     _NINJA+4
 	sbc     #$80
 	lda     #$00
 	tax
-	bcc     L0058
+	bcc     L0060
 ;
 ; NINJA.x = 0xf000; // max right
 ;
@@ -8621,7 +8656,7 @@ L0020:	lda     _NINJA+4
 ;
 ; NINJA.x = 0x0000; // max left
 ;
-L0058:	sta     _NINJA
+L0060:	sta     _NINJA
 	stx     _NINJA+1
 ;
 ; NINJA.vel_x = 0;
@@ -8631,7 +8666,7 @@ L0058:	sta     _NINJA
 ;
 ; ENTITY1.x = high_byte(NINJA.x); // this is much faster than passing a pointer to NINJA
 ;
-L0059:	lda     _NINJA+1
+L0061:	lda     _NINJA+1
 	sta     _ENTITY1
 ;
 ; ENTITY1.y = high_byte(NINJA.y);
@@ -8688,7 +8723,7 @@ L0059:	lda     _NINJA+1
 ;
 ; else if (NINJA.vel_x > 0) {
 ;
-	jmp     L0066
+	jmp     L0073
 L0024:	lda     _NINJA+4
 	cmp     #$01
 	lda     _NINJA+4+1
@@ -8727,7 +8762,7 @@ L0029:	bpl     L002B
 ; NINJA.x = 0x0000;
 ;
 	ldx     #$00
-L0066:	lda     #$00
+L0073:	lda     #$00
 	sta     _NINJA
 	stx     _NINJA+1
 ;
@@ -8795,7 +8830,7 @@ L0031:	bpl     L0030
 ;
 	jsr     _bg_coll_D
 	tax
-	beq     L005A
+	beq     L0062
 ;
 ; high_byte(NINJA.y) = high_byte(NINJA.y) - eject_D;
 ;
@@ -8819,20 +8854,20 @@ L0031:	bpl     L0030
 	sbc     #$00
 	bvs     L0034
 	eor     #$80
-L0034:	bpl     L005A
+L0034:	bpl     L0062
 ;
 ; else if (NINJA.vel_y < 0) {
 ;
-	jmp     L0067
+	jmp     L0074
 L0030:	ldx     _NINJA+6+1
 	cpx     #$80
-	bcc     L005A
+	bcc     L0062
 ;
 ; if (bg_coll_U() ) { // check collision above
 ;
 	jsr     _bg_coll_U
 	tax
-	beq     L005A
+	beq     L0062
 ;
 ; high_byte(NINJA.y) = high_byte(NINJA.y) - eject_U;
 ;
@@ -8843,13 +8878,13 @@ L0030:	ldx     _NINJA+6+1
 ;
 ; NINJA.vel_y = 0;
 ;
-L0067:	lda     #$00
+L0074:	lda     #$00
 	sta     _NINJA+6
 	sta     _NINJA+6+1
 ;
 ; ENTITY1.y = high_byte(NINJA.y); // the rest should be the same
 ;
-L005A:	lda     _NINJA+3
+L0062:	lda     _NINJA+3
 	sta     _ENTITY1+1
 ;
 ; if (pad1_new & PAD_A) {
@@ -8928,7 +8963,7 @@ L003F:	bpl     L003C
 ;
 L003C:	lda     _scroll_x
 	cmp     #$04
-	bcs     L005E
+	bcs     L0066
 ;
 ; if (!map_loaded) {
 ;
@@ -8945,12 +8980,12 @@ L003C:	lda     _scroll_x
 ;
 ; else {
 ;
-	jmp     L0053
+	jmp     L005A
 ;
 ; map_loaded = 0;
 ;
-L005E:	lda     #$00
-L0053:	sta     _map_loaded
+L0066:	lda     #$00
+L005A:	sta     _map_loaded
 ;
 ; temp5 = NINJA.x;
 ;
@@ -8976,13 +9011,13 @@ L0045:	lda     _NINJA+1
 ; if (temp1 > 3) temp1 = 3; // max scroll change
 ;
 	cmp     #$04
-	bcc     L005F
+	bcc     L0067
 	lda     #$03
 	sta     _temp1
 ;
 ; scroll_x += temp1;
 ;
-L005F:	lda     _temp1
+L0067:	lda     _temp1
 	clc
 	adc     _scroll_x
 	sta     _scroll_x
@@ -9003,7 +9038,7 @@ L0046:	lda     _scroll_x
 	cmp     #$FF
 	lda     _scroll_x+1
 	sbc     #$06
-	bcc     L0060
+	bcc     L0068
 ;
 ; scroll_x = MAX_SCROLL; // stop scrolling right, end of level
 ;
@@ -9023,7 +9058,7 @@ L0046:	lda     _scroll_x
 ;
 	lda     _NINJA+1
 	cmp     #$F1
-	bcc     L0060
+	bcc     L0068
 ;
 ; NINJA.x = 0xf100;
 ;
@@ -9034,22 +9069,62 @@ L0046:	lda     _scroll_x
 ;
 ; if (turd_cooldown > 0) {
 ;
-L0060:	lda     _turd_cooldown
-	beq     L004A
+L0068:	lda     _turd_cooldown
+	beq     L0069
 ;
 ; --turd_cooldown;
 ;
 	dec     _turd_cooldown
 ;
+; if (pad1_new & PAD_SELECT) {
+;
+L0069:	lda     _pad1_new
+	and     #$20
+	beq     L004B
+;
+; corn_mode = !corn_mode; // Toggle between 0 and 1
+;
+	lda     _corn_mode
+	jsr     bnega
+	sta     _corn_mode
+;
+; sfx_play(SFX_DING, 0); // Play a sound to indicate mode change
+;
+	lda     #$01
+	jsr     pusha
+	lda     #$00
+	jsr     _sfx_play
+;
 ; if (has_turd_power && pad1_new & PAD_B && turd_cooldown == 0) {
 ;
-L004A:	lda     _has_turd_power
-	beq     L004B
+L004B:	lda     _has_turd_power
+	beq     L0055
 	lda     _pad1_new
 	and     #$40
-	beq     L004B
+	beq     L0055
 	lda     _turd_cooldown
-	bne     L004B
+	bne     L0055
+;
+; if (corn_mode && coins > 0) {
+;
+	lda     _corn_mode
+	beq     L0050
+	lda     _coins
+	beq     L0050
+;
+; fire_turd();
+;
+	jsr     _fire_turd
+;
+; --coins; // Use one corn
+;
+	dec     _coins
+;
+; } else if (!corn_mode) {
+;
+	jmp     L0072
+L0050:	lda     _corn_mode
+	bne     L0055
 ;
 ; fire_turd();
 ;
@@ -9057,12 +9132,12 @@ L004A:	lda     _has_turd_power
 ;
 ; turd_cooldown = TURD_COOLDOWN;
 ;
-	lda     #$0F
+L0072:	lda     #$0F
 	sta     _turd_cooldown
 ;
 ; update_turds();
 ;
-L004B:	jmp     _update_turds
+L0055:	jmp     _update_turds
 
 .endproc
 
@@ -12508,9 +12583,9 @@ L0046:	inc     _index
 ;
 	lda     #$00
 	sta     _index
-L002D:	lda     _index
+L0037:	lda     _index
 	cmp     #$04
-	bcc     L0037
+	bcc     L0042
 ;
 ; }
 ;
@@ -12518,9 +12593,9 @@ L002D:	lda     _index
 ;
 ; if (turd_active[index]) {
 ;
-L0037:	ldy     _index
+L0042:	ldy     _index
 	lda     _turd_active,y
-	jeq     L0036
+	jeq     L0041
 ;
 ; turd_x[index] += turd_vel_x[index];
 ;
@@ -12541,9 +12616,9 @@ L0008:	sta     ptr2
 	ldx     #>(_turd_vel_x)
 	clc
 	adc     _index
-	bcc     L002E
+	bcc     L0038
 	inx
-L002E:	jsr     ldaidx
+L0038:	jsr     ldaidx
 	clc
 	adc     sreg
 	sta     (ptr2),y
@@ -12566,9 +12641,9 @@ L000A:	sta     ptr2
 	ldx     #>(_turd_vel_y)
 	clc
 	adc     _index
-	bcc     L002F
+	bcc     L0039
 	inx
-L002F:	jsr     ldaidx
+L0039:	jsr     ldaidx
 	clc
 	adc     sreg
 	sta     (ptr2),y
@@ -12594,9 +12669,9 @@ L000C:	sta     sreg
 	ldx     #>(_turd_vel_y)
 	clc
 	adc     _index
-	bcc     L0030
+	bcc     L003A
 	inx
-L0030:	jsr     ldaidx
+L003A:	jsr     ldaidx
 	sec
 	sbc     #$06
 	bvs     L000F
@@ -12614,15 +12689,15 @@ L000F:	bpl     L000D
 L000D:	ldy     _index
 	lda     _turd_x,y
 	cmp     #$FB
-	bcs     L0031
+	bcs     L003B
 	ldy     _index
 	lda     _turd_y,y
 	cmp     #$F1
-	bcs     L0031
+	bcs     L003B
 	ldy     _index
 	lda     _turd_x,y
 	cmp     #$05
-	bcc     L0031
+	bcc     L003B
 	ldy     _index
 	lda     _turd_y,y
 	cmp     #$05
@@ -12630,13 +12705,13 @@ L000D:	ldy     _index
 ;
 ; turd_active[index] = 0;
 ;
-L0031:	ldy     _index
+L003B:	ldy     _index
 	lda     #$00
 	sta     _turd_active,y
 ;
 ; continue;
 ;
-	jmp     L0036
+	jmp     L0041
 ;
 ; ENTITY1.x = turd_x[index];
 ;
@@ -12672,7 +12747,7 @@ L0011:	ldy     _index
 	bne     L001C
 	jsr     _bg_coll_D
 	tax
-	beq     L0033
+	beq     L003D
 ;
 ; turd_active[index] = 0;
 ;
@@ -12682,20 +12757,20 @@ L001C:	ldy     _index
 ;
 ; continue;
 ;
-	jmp     L0036
+	jmp     L0041
 ;
 ; for (index2 = 0; index2 < MAX_ENEMY; ++index2) {
 ;
-L0033:	sta     _index2
-L0034:	lda     _index2
+L003D:	sta     _index2
+L003E:	lda     _index2
 	cmp     #$10
-	bcs     L0036
+	jcs     L0041
 ;
 ; if (enemy_active[index2]) {
 ;
 	ldy     _index2
 	lda     _enemy_active,y
-	beq     L0035
+	jeq     L0040
 ;
 ; ENTITY2.x = enemy_x[index2];
 ;
@@ -12709,9 +12784,94 @@ L0034:	lda     _index2
 	lda     _enemy_y,y
 	sta     _ENTITY2+1
 ;
+; if (enemy_type[index2] == ENEMY_BOSS1) {
+;
+	ldy     _index2
+	lda     _enemy_type,y
+	cmp     #$02
+	bne     L003F
+;
+; ENTITY2.width = 28;  // 32 pixels - 4 pixels for safety
+;
+	lda     #$1C
+	sta     _ENTITY2+2
+;
+; ENTITY2.height = 28; // 32 pixels - 4 pixels for safety
+;
+	sta     _ENTITY2+3
+;
+; if (check_collision(&ENTITY1, &ENTITY2)) {
+;
+	lda     #<(_ENTITY1)
+	ldx     #>(_ENTITY1)
+	jsr     pushax
+	lda     #<(_ENTITY2)
+	ldx     #>(_ENTITY2)
+	jsr     _check_collision
+	tax
+	beq     L0040
+;
+; if (corn_mode) {
+;
+	lda     _corn_mode
+	beq     L002A
+;
+; boss_health -= BOSS_DAMAGE_PER_HIT * CORN_DAMAGE_MULTIPLIER;
+;
+	lda     _boss_health
+	sec
+	sbc     #$02
+	sta     _boss_health
+;
+; } else {
+;
+	jmp     L002B
+;
+; boss_health -= BOSS_DAMAGE_PER_HIT;
+;
+L002A:	dec     _boss_health
+;
+; turd_active[index] = 0;
+;
+L002B:	ldy     _index
+	lda     #$00
+	sta     _turd_active,y
+;
+; sfx_play(SFX_DING, 0); // Play hit sound
+;
+	lda     #$01
+	jsr     pusha
+	lda     #$00
+	jsr     _sfx_play
+;
+; if (boss_health <= 0) {
+;
+	lda     _boss_health
+	bne     L0041
+;
+; enemy_y[index2] = TURN_OFF;
+;
+	ldy     _index2
+	lda     #$FF
+	sta     _enemy_y,y
+;
+; enemy_active[index2] = 0;
+;
+	ldy     _index2
+	lda     #$00
+	sta     _enemy_active,y
+;
+; ++level_up; // Advance to next level
+;
+	inc     _level_up
+;
+; break;
+;
+	jmp     L0041
+;
 ; ENTITY2.width = ENEMY_WIDTH;
 ;
-	lda     #$0D
+L003F:	lda     #$0D
 	sta     _ENTITY2+2
 ;
 ; ENTITY2.height = ENEMY_HEIGHT;
@@ -12727,7 +12887,7 @@ L0034:	lda     _index2
 	ldx     #>(_ENTITY2)
 	jsr     _check_collision
 	tax
-	beq     L0035
+	beq     L0040
 ;
 ; enemy_y[index2] = TURN_OFF;
 ;
@@ -12755,17 +12915,17 @@ L0034:	lda     _index2
 ;
 ; break;
 ;
-	jmp     L0036
+	jmp     L0041
 ;
 ; for (index2 = 0; index2 < MAX_ENEMY; ++index2) {
 ;
-L0035:	inc     _index2
-	jmp     L0034
+L0040:	inc     _index2
+	jmp     L003E
 ;
 ; for(index = 0; index < MAX_TURDS; ++index) {
 ;
-L0036:	inc     _index
-	jmp     L002D
+L0041:	inc     _index
+	jmp     L0037
 
 .endproc
 
@@ -12784,7 +12944,7 @@ L0036:	inc     _index
 ;
 	lda     #$00
 	sta     _index
-L000A:	lda     _index
+L000F:	lda     _index
 	cmp     #$04
 	bcs     L0003
 ;
@@ -12792,9 +12952,14 @@ L000A:	lda     _index
 ;
 	ldy     _index
 	lda     _turd_active,y
-	beq     L000B
+	beq     L0010
 ;
-; oam_meta_spr(turd_x[index], turd_y[index], TurdSpr);
+; if (corn_mode) {
+;
+	lda     _corn_mode
+	beq     L0008
+;
+; oam_meta_spr(turd_x[index], turd_y[index], CoinSpr);
 ;
 	jsr     decsp2
 	ldy     _index
@@ -12805,14 +12970,32 @@ L000A:	lda     _index
 	lda     _turd_y,y
 	ldy     #$00
 	sta     (sp),y
+	lda     #<(_CoinSpr)
+	ldx     #>(_CoinSpr)
+;
+; } else {
+;
+	jmp     L000E
+;
+; oam_meta_spr(turd_x[index], turd_y[index], TurdSpr);
+;
+L0008:	jsr     decsp2
+	ldy     _index
+	lda     _turd_x,y
+	ldy     #$01
+	sta     (sp),y
+	ldy     _index
+	lda     _turd_y,y
+	ldy     #$00
+	sta     (sp),y
 	lda     #<(_TurdSpr)
 	ldx     #>(_TurdSpr)
-	jsr     _oam_meta_spr
+L000E:	jsr     _oam_meta_spr
 ;
 ; for(index = 0; index < MAX_TURDS; ++index) {
 ;
-L000B:	inc     _index
-	jmp     L000A
+L0010:	inc     _index
+	jmp     L000F
 ;
 ; }
 ;
@@ -13362,6 +13545,11 @@ L0003:	rts
 ;
 	lda     #$14
 	sta     _boss_health
+;
+; corn_mode = 0; // Initialize to turd mode
+;
+	lda     #$00
+	sta     _corn_mode
 ;
 ; direction = RIGHT; // Initialize direction to face right
 ;
