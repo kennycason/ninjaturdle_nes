@@ -620,6 +620,46 @@ void enemy_moves(void) {
         // note, ENTITY2 is the hero's x position
 		
 		if (enemy_frames & 1) return; // half speed
+		
+		// Jump behavior
+		temp1 = enemy_frames + (index << 3);
+		temp1 &= 0x3f;
+		if (temp1 < 12) { // stand still
+			enemy_anim[index] = Boss1SprL; // Use left-facing sprite
+		}
+		else if (temp1 < 18) {
+			--enemy_y[index]; // jump
+			--enemy_y[index]; // jump faster
+			enemy_anim[index] = Boss1SprL;
+		}
+		else if (temp1 < 28) {
+			--enemy_y[index]; // jump
+			--enemy_y[index]; // jump even faster
+			enemy_anim[index] = Boss1SprL;
+		}
+		else if (temp1 < 30) { // use short anim. 2 frames
+			--enemy_y[index]; // jump
+			enemy_anim[index] = Boss1SprL;
+		}
+		else {
+			++enemy_y[index]; // fall
+			if (temp1 < 62) {
+				++enemy_y[index]; // fall faster
+			}
+			enemy_anim[index] = Boss1SprL;
+			temp1 = enemy_y[index];
+			//check ground collision
+			ENTITY1.x = enemy_x[index];
+			ENTITY1.y = enemy_y[index];
+			ENTITY1.width = 28;
+			ENTITY1.height = 28;
+			
+			if (bg_coll_D()) {
+				enemy_y[index] -= eject_D;
+			}
+		}
+		
+		// Movement towards player
 		if (enemy_x[index] > ENTITY2.x) {
 			ENTITY1.x -= 1; // test going left
             bg_collision_fast();
@@ -627,7 +667,6 @@ void enemy_moves(void) {
             // else, no collision, do the move.
 			if (enemy_actual_x[index] == 0) --enemy_room[index];
 			--enemy_actual_x[index];
-			enemy_anim[index] = Boss1SprL; // Use left-facing sprite
 		}
 		else if (enemy_x[index] < ENTITY2.x) {
 			ENTITY1.x += 1; // test going right
@@ -635,7 +674,6 @@ void enemy_moves(void) {
 			if (collision_R) return;
 			++enemy_actual_x[index];
 			if (enemy_actual_x[index] == 0) ++enemy_room[index];
-			enemy_anim[index] = Boss1SprL; // Use right-facing sprite
 		}
 	}
 	else if (enemy_type[index] == ENEMY_WASP) {
