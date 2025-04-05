@@ -248,6 +248,31 @@ signed char turd_vel_x[MAX_TURDS];
 signed char turd_vel_y[MAX_TURDS];
 unsigned char turd_direction[MAX_TURDS];
 
+// Add these definitions for enemy bullets
+#define MAX_ENEMY_BULLETS 8  // Maximum number of enemy bullets on screen at once
+#define ENEMY_BULLET_WIDTH 13  // Make bullets bigger (same as HERO_WIDTH)
+#define ENEMY_BULLET_HEIGHT 11 // Make bullets bigger (same as HERO_HEIGHT)
+#define ENEMY_BULLET_DAMAGE 2  // Damage per hit
+#define ENEMY_BULLET_COOLDOWN 90  // Frames between shots (slower than player)
+
+// Enemy bullet types
+#define BULLET_LINEAR 0  // Moves in a straight line
+#define BULLET_THROW 1   // Thrown like player turds with gravity
+
+// Enemy bullet velocities
+#define ENEMY_BULLET_SPEED 4     // Faster than player turds
+#define ENEMY_BULLET_JUMP -6     // Higher arc than player turds
+#define ENEMY_BULLET_GRAVITY 1   // Same gravity as player turds
+
+// Enemy bullet arrays
+unsigned char enemy_bullet_x[MAX_ENEMY_BULLETS];
+unsigned char enemy_bullet_y[MAX_ENEMY_BULLETS];
+unsigned char enemy_bullet_active[MAX_ENEMY_BULLETS];
+signed char enemy_bullet_vel_x[MAX_ENEMY_BULLETS];
+signed char enemy_bullet_vel_y[MAX_ENEMY_BULLETS];
+unsigned char enemy_bullet_type[MAX_ENEMY_BULLETS];
+unsigned char enemy_bullet_cooldown[MAX_ENEMY_BULLETS];  // Cooldown for each enemy
+
 // Turd power flag (default to true for now)
 unsigned char has_turd_power;
 unsigned char turd_cooldown;
@@ -256,6 +281,11 @@ unsigned char turd_cooldown;
 void fire_turd(void);
 void update_turds(void);
 void draw_turds(void);
+
+// Enemy bullet function prototypes
+void fire_enemy_bullet(unsigned char enemy_index, unsigned char bullet_type);
+void update_enemy_bullets(void);
+void draw_enemy_bullets(void);
 
 // Add player health variables
 #define MAX_HEALTH 10

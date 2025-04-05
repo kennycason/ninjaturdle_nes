@@ -95,6 +95,9 @@ void main(void) {
 			
 			sprite_collisions();
 			
+			// Update enemy bullets
+			update_enemy_bullets();
+			
 			// set scroll
 			set_scroll_x(scroll_x);
 			set_scroll_y(scroll_y);
@@ -371,6 +374,9 @@ void draw_sprites(void) {
 	// Draw turds
 	draw_turds();
 	
+	// Draw enemy bullets
+	draw_enemy_bullets();
+	
 	// Draw HUD elements as sprites (fixed position)
 
 	// Draw health icon in upper left
@@ -631,6 +637,11 @@ void enemy_moves(void) {
 		temp1 &= 0x3f;
 		if (temp1 < 8) { // stand still
 			enemy_anim[index] = Boss1SprL; // Use left-facing sprite
+            
+            // Shoot linear bullet during standing phase
+            if (enemy_bullet_cooldown[index] == 0) {
+                fire_enemy_bullet(index, BULLET_LINEAR);
+            }
 		}
 		else if (temp1 < 14) {
 			--enemy_y[index]; // jump
@@ -641,6 +652,11 @@ void enemy_moves(void) {
 			--enemy_y[index]; // jump
 			--enemy_y[index]; // jump even faster
 			enemy_anim[index] = Boss1SprL;
+            
+            // Shoot thrown bullet at peak of jump
+            if (temp1 == 20 && enemy_bullet_cooldown[index] == 0) {
+                fire_enemy_bullet(index, BULLET_THROW);
+            }
 		}
 		else if (temp1 < 26) { // use short anim. 2 frames
 			--enemy_y[index]; // jump
@@ -660,6 +676,11 @@ void enemy_moves(void) {
 			if (bg_coll_D()) {
 				enemy_y[index] -= eject_D;
 			}
+		}
+		
+		// Update bullet cooldown
+		if (enemy_bullet_cooldown[index] > 0) {
+		    --enemy_bullet_cooldown[index];
 		}
 		
 		// Movement towards player
@@ -1278,4 +1299,104 @@ void draw_turds(void) {
 			oam_meta_spr(turd_x[index], turd_y[index], TurdSpr);
 		}
 	}
+}
+
+// Function to fire enemy bullets
+void fire_enemy_bullet(unsigned char enemy_index, unsigned char bullet_type) {
+    // Find an inactive bullet slot
+    for(index = 0; index < MAX_ENEMY_BULLETS; ++index) {
+        if (!enemy_bullet_active[index]) {
+            enemy_bullet_active[index] = 1;
+            enemy_bullet_type[index] = bullet_type;
+            
+            // Set initial position based on enemy position
+            // Fire from the middle-front of the boss
+            if (enemy_x[enemy_index] > ENTITY2.x) {
+                // Boss is to the right of player, fire left
+                enemy_bullet_x[index] = enemy_x[enemy_index] - 4;
+                enemy_bullet_vel_x[index] = -ENEMY_BULLET_SPEED;
+            } else {
+                // Boss is to the left of player, fire right
+                enemy_bullet_x[index] = enemy_x[enemy_index] + 28;
+                enemy_bullet_vel_x[index] = ENEMY_BULLET_SPEED;
+            }
+            enemy_bullet_y[index] = enemy_y[enemy_index] + 16; // From middle of boss
+            
+            // Always throw with an upward arc like ninja's turds
+            enemy_bullet_vel_y[index] = ENEMY_BULLET_JUMP;
+            
+            // Set cooldown for this enemy
+            enemy_bullet_cooldown[enemy_index] = ENEMY_BULLET_COOLDOWN;
+            
+            // Play sound effect
+            sfx_play(SFX_NOISE, 0);
+            break;
+        }
+    }
+}
+
+// Function to update enemy bullets
+void update_enemy_bullets(void) {
+    for(index = 0; index < MAX_ENEMY_BULLETS; ++index) {
+        if (enemy_bullet_active[index]) {
+            // Move bullet
+            enemy_bullet_x[index] += enemy_bullet_vel_x[index];
+            enemy_bullet_y[index] += enemy_bullet_vel_y[index];
+            
+            // Apply gravity to all bullets
+            enemy_bullet_vel_y[index] += ENEMY_BULLET_GRAVITY;
+            
+            // Cap falling speed
+            if (enemy_bullet_vel_y[index] > 5) {
+                enemy_bullet_vel_y[index] = 5;
+            }
+            
+            // Check if bullet is off screen
+            if (enemy_bullet_x[index] > 250 || enemy_bullet_y[index] > 240 || 
+                enemy_bullet_x[index] < 5 || enemy_bullet_y[index] < 5) {
+                enemy_bullet_active[index] = 0;
+                continue;
+            }
+            
+            // Check collision with background
+            ENTITY1.x = enemy_bullet_x[index];
+            ENTITY1.y = enemy_bullet_y[index];
+            ENTITY1.width = ENEMY_BULLET_WIDTH;
+            ENTITY1.height = ENEMY_BULLET_HEIGHT;
+            
+            if (bg_coll_L() || bg_coll_R() || bg_coll_U() || bg_coll_D()) {
+                enemy_bullet_active[index] = 0;
+                continue;
+            }
+            
+            // Check collision with player
+            ENTITY2.x = high_byte(NINJA.x);
+            ENTITY2.y = high_byte(NINJA.y);
+            ENTITY2.width = HERO_WIDTH;
+            ENTITY2.height = HERO_HEIGHT;
+            
+            if (check_collision(&ENTITY1, &ENTITY2)) {
+                if (damage_cooldown == 0) {
+                    player_health -= ENEMY_BULLET_DAMAGE;
+                    damage_cooldown = DAMAGE_COOLDOWN_TIME;
+                    sfx_play(SFX_NOISE, 0);
+                    
+                    if (player_health <= 0) {
+                        death = 1;
+                    }
+                }
+                enemy_bullet_active[index] = 0;
+            }
+        }
+    }
+}
+
+// Function to draw enemy bullets
+void draw_enemy_bullets(void) {
+    for(index = 0; index < MAX_ENEMY_BULLETS; ++index) {
+        if (enemy_bullet_active[index]) {
+            // Use the same sprite as player turds for now
+            oam_meta_spr(enemy_bullet_x[index], enemy_bullet_y[index], TurdSpr);
+        }
+    }
 }
