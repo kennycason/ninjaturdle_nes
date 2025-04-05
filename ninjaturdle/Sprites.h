@@ -102,6 +102,33 @@ const unsigned char Boss1SprL[]={
     128
 };
 
+const unsigned char Boss1SprR[]={
+	// Top-left 16x16 block
+    0xff, 0xff, 0x6C, 1,  // Top-left tile
+    7,    0xff, 0x6D, 1,   // Top-right tile
+    0xff, 7,    0x7C, 1,   // Bottom-left tile
+    7,    7,    0x7D, 1,    // Bottom-right tile
+
+    // Top-right 16x16 block
+    15,  0xff, 0x6E, 1,   // Top-left tile
+    23,  0xff, 0x6F, 1,   // Top-right tile
+    15,  7,    0x7E, 1,    // Bottom-left tile
+    23,  7,    0x7F, 1,    // Bottom-right tile
+
+    // Bottom-left 16x16 block
+    0xff, 15,  0x8C, 1,   // Top-left tile
+    7,    15,  0x8D, 1,    // Top-right tile
+    0xff, 23,  0x9C, 1,   // Bottom-left tile
+    7,    23,  0x9D, 1,    // Bottom-right tile
+
+    // Bottom-right 16x16 block
+    15,  15,  0x8E, 1,    // Top-left tile
+    23,  15,  0x8F, 1,    // Top-right tile
+    15,  23,  0x9E, 1,    // Bottom-left tile
+    23,  23,  0x9F, 1,    // Bottom-right tile
+    128
+};
+
 //enum{ANIM_CHASE1, ANIM_BOUNCE1, ANIM_BOUNCE2};
 //const unsigned char * const enemy_anim_list[]={
 //	EnemyChaseSpr, EnemyBounceSpr, EnemyBounceSpr2

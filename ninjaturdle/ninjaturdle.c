@@ -636,7 +636,12 @@ void enemy_moves(void) {
 		temp1 = enemy_frames + (index << 3);
 		temp1 &= 0x3f;
 		if (temp1 < 8) { // stand still
-			enemy_anim[index] = Boss1SprL; // Use left-facing sprite
+			// Face the ninja
+			if (enemy_x[index] > ENTITY2.x) {
+				enemy_anim[index] = Boss1SprL; // Use left-facing sprite
+			} else {
+				enemy_anim[index] = Boss1SprR; // Use right-facing sprite
+			}
             
             // Shoot linear bullet during standing phase
             if (enemy_bullet_cooldown[index] == 0) {
@@ -646,12 +651,22 @@ void enemy_moves(void) {
 		else if (temp1 < 14) {
 			--enemy_y[index]; // jump
 			--enemy_y[index]; // jump faster
-			enemy_anim[index] = Boss1SprL;
+			// Face the ninja
+			if (enemy_x[index] > ENTITY2.x) {
+				enemy_anim[index] = Boss1SprL;
+			} else {
+				enemy_anim[index] = Boss1SprR;
+			}
 		}
 		else if (temp1 < 24) {
 			--enemy_y[index]; // jump
 			--enemy_y[index]; // jump even faster
-			enemy_anim[index] = Boss1SprL;
+			// Face the ninja
+			if (enemy_x[index] > ENTITY2.x) {
+				enemy_anim[index] = Boss1SprL;
+			} else {
+				enemy_anim[index] = Boss1SprR;
+			}
             
             // Shoot thrown bullet at peak of jump
             if (temp1 == 20 && enemy_bullet_cooldown[index] == 0) {
@@ -660,14 +675,24 @@ void enemy_moves(void) {
 		}
 		else if (temp1 < 26) { // use short anim. 2 frames
 			--enemy_y[index]; // jump
-			enemy_anim[index] = Boss1SprL;
+			// Face the ninja
+			if (enemy_x[index] > ENTITY2.x) {
+				enemy_anim[index] = Boss1SprL;
+			} else {
+				enemy_anim[index] = Boss1SprR;
+			}
 		}
 		else {
 			++enemy_y[index]; // fall
 			if (temp1 < 62) {
 				++enemy_y[index]; // fall faster
 			}
-			enemy_anim[index] = Boss1SprL;
+			// Face the ninja
+			if (enemy_x[index] > ENTITY2.x) {
+				enemy_anim[index] = Boss1SprL;
+			} else {
+				enemy_anim[index] = Boss1SprR;
+			}
 			
 			//check ground collision
 			ENTITY1.x = enemy_x[index];
