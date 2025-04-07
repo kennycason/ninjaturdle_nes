@@ -27,7 +27,7 @@ crt0.o: crt0.s ninjaturdle.chr ninjaturdle2.chr MUSIC/TestMusic3.s MUSIC/SoundFx
 $(NAME).o: $(NAME).s
 	$(CA65) $(NAME).s -g
 
-$(NAME).s: $(NAME).c sprites.h ninjaturdle.h level_data.c NES_ST/title.h BG/Level1.c BG/Level2.c BG/Level3.c
+$(NAME).s: $(NAME).c sprites.h ninjaturdle.h level_data.c NES_ST/title.h BG/Level1.c BG/Level2.c BG/Level3.c BG/w1l1_main.c BG/w1l1_object.c BG/Level1_SP.c
 	$(CC65) -Oirs $(NAME).c --add-source
 
 clean:
