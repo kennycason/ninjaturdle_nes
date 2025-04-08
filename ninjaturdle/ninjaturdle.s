@@ -808,23 +808,23 @@ _title:
 	.byte	$00
 	.byte	$01
 	.byte	$AF
-	.byte	$32
-	.byte	$30
-	.byte	$32
-	.byte	$35
+	.byte	$12
+	.byte	$10
+	.byte	$12
+	.byte	$15
 	.byte	$00
 	.byte	$00
-	.byte	$4B
-	.byte	$65
-	.byte	$6E
-	.byte	$6E
-	.byte	$79
+	.byte	$2B
+	.byte	$45
+	.byte	$4E
+	.byte	$4E
+	.byte	$59
 	.byte	$00
-	.byte	$43
-	.byte	$61
-	.byte	$73
-	.byte	$6F
-	.byte	$6E
+	.byte	$23
+	.byte	$41
+	.byte	$53
+	.byte	$4F
+	.byte	$4E
 	.byte	$00
 	.byte	$01
 	.byte	$FE
@@ -9878,7 +9878,7 @@ L0003:	jmp     incsp6
 	lda     #$12
 	jsr     _mmc1_write
 ;
-; mmc1_write(MMC1_CHR0, CHR_BANK_MAP);     // Map tiles
+; mmc1_write(MMC1_CHR0, CHR_BANK_MAP);     // Pattern Table 0 (background) uses map tiles
 ;
 	ldx     #$A0
 	lda     #$00
@@ -9886,7 +9886,7 @@ L0003:	jmp     incsp6
 	lda     #$02
 	jsr     _mmc1_write
 ;
-; mmc1_write(MMC1_CHR1, CHR_BANK_SPRITES); // Sprite tiles
+; mmc1_write(MMC1_CHR1, CHR_BANK_SPRITES); // Pattern Table 1 (sprites) uses sprite tiles
 ;
 	ldx     #$C0
 	lda     #$00
