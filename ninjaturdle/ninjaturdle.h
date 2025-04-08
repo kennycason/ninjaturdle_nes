@@ -8,9 +8,23 @@
 
 #pragma bss-name(push, "ZEROPAGE")
 
-// CHR bank definitions
-#define CHR_BANK_0 0  // First tileset (font + title + sprites)
-#define CHR_BANK_1 1  // Second tileset (map tiles)
+// CHR bank definitions for MMC1 4KB mode
+#define CHR_BANK_FONT 0     // Font tiles and title screen (top half)
+#define CHR_BANK_TITLE 1    // Title screen graphics (bottom half)
+#define CHR_BANK_MAP 2      // Map tiles (top half)
+#define CHR_BANK_SPRITES 3  // Sprite tiles (bottom half)
+
+// MMC1 registers
+#define MMC1_CONTROL    0x8000
+#define MMC1_CHR0       0xA000
+#define MMC1_CHR1       0xC000
+#define MMC1_PRG        0xE000
+
+// MMC1 control flags
+#define MMC1_MIRROR_ONE_SCREEN_LOW    0x00
+#define MMC1_MIRROR_ONE_SCREEN_HIGH   0x01
+#define MMC1_MIRROR_VERTICAL          0x02
+#define MMC1_MIRROR_HORIZONTAL        0x03
 
 // GLOBAL VARIABLES
 unsigned char pad1;

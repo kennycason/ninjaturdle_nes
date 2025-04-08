@@ -27,9 +27,8 @@
 	.import		_music_stop
 	.import		_sfx_play
 	.import		_pad_poll
-	.import		_bank_spr
-	.import		_bank_bg
 	.import		_vram_adr
+	.import		_vram_put
 	.import		_vram_fill
 	.import		_vram_unrle
 	.import		_memcpy
@@ -58,6 +57,7 @@
 	.export		_fade_out_palette
 	.export		_create_sprite
 	.export		_update_sprite_pos
+	.export		_draw_border
 	.export		_NinjaSprL
 	.export		_NinjaSprR
 	.export		_CoinSpr
@@ -9218,27 +9218,26 @@ L0003:	jmp     incsp4
 	lda     #$80
 	sta     $8000
 ;
-; mmc1_write(MMC1_CONTROL, 0x0C);  // Changed from 0x0E to 0x0C for 4KB CHR mode
+; mmc1_write(MMC1_CONTROL, 0x12);  // 0001 0010
 ;
 	tax
 	lda     #$00
 	jsr     pushax
-	lda     #$0C
+	lda     #$12
 	jsr     _mmc1_write
 ;
-; mmc1_write(MMC1_CHR0, CHR_BANK_FONT * 2);      // Pattern table 0: Font (4KB)
+; mmc1_write(MMC1_CHR0, 0);  // First 4KB bank
 ;
 	ldx     #$A0
 	lda     #$00
 	jsr     pushax
 	jsr     _mmc1_write
 ;
-; mmc1_write(MMC1_CHR1, CHR_BANK_FONT * 2 + 1);  // Pattern table 0: Font (4KB)
+; mmc1_write(MMC1_CHR1, 0);  // Second 4KB bank
 ;
 	ldx     #$C0
 	lda     #$00
 	jsr     pushax
-	lda     #$01
 	jmp     _mmc1_write
 
 .endproc
@@ -9380,7 +9379,7 @@ L000E:	sta     (sp),y
 	cmp     (sp),y
 	bcs     L000B
 ;
-; ppu_wait_nmi(); // Wait for NMI to complete
+; ppu_wait_nmi();
 ;
 	jsr     _ppu_wait_nmi
 ;
@@ -9533,7 +9532,7 @@ L000D:	ldy     #$20
 	adc     (sp),y
 	jmp     L001A
 ;
-; ppu_wait_nmi(); // Wait for NMI to complete
+; ppu_wait_nmi();
 ;
 L000C:	jsr     _ppu_wait_nmi
 ;
@@ -9553,7 +9552,7 @@ L001B:	sta     (sp),y
 	cmp     (sp),y
 	bcs     L0016
 ;
-; ppu_wait_nmi(); // Wait for NMI to complete
+; ppu_wait_nmi();
 ;
 	jsr     _ppu_wait_nmi
 ;
@@ -9702,6 +9701,92 @@ L0004:	jsr     decsp3
 .endproc
 
 ; ---------------------------------------------------------------
+; void __near__ draw_border (unsigned char x, unsigned char y, unsigned char width, unsigned char height)
+; ---------------------------------------------------------------
+
+.segment	"CODE"
+
+.proc	_draw_border: near
+
+.segment	"CODE"
+
+;
+; void draw_border(unsigned char x, unsigned char y, unsigned char width, unsigned char height) {
+;
+	jsr     pusha
+;
+; for(row = 0; row < height; row++) {
+;
+	jsr     decsp2
+	lda     #$00
+	ldy     #$01
+L000C:	sta     (sp),y
+	iny
+	cmp     (sp),y
+	bcs     L0003
+;
+; vram_adr(NTADR_A(x, y + row));
+;
+	ldx     #$00
+	dey
+	lda     (sp),y
+	clc
+	ldy     #$04
+	adc     (sp),y
+	bcc     L000A
+	inx
+L000A:	jsr     aslax4
+	stx     tmp1
+	asl     a
+	rol     tmp1
+	sta     ptr1
+	iny
+	lda     (sp),y
+	ora     ptr1
+	pha
+	lda     tmp1
+	ora     #$20
+	tax
+	pla
+	jsr     _vram_adr
+;
+; for(col = 0; col < width; col++) {
+;
+	lda     #$00
+	tay
+L000B:	sta     (sp),y
+	ldy     #$03
+	cmp     (sp),y
+	bcs     L0004
+;
+; vram_put(TILE_BLANK);
+;
+	lda     #$FF
+	jsr     _vram_put
+;
+; for(col = 0; col < width; col++) {
+;
+	ldy     #$00
+	clc
+	lda     #$01
+	adc     (sp),y
+	jmp     L000B
+;
+; for(row = 0; row < height; row++) {
+;
+L0004:	ldy     #$01
+	clc
+	tya
+	adc     (sp),y
+	jmp     L000C
+;
+; }
+;
+L0003:	jmp     incsp6
+
+.endproc
+
+; ---------------------------------------------------------------
 ; void __near__ load_title (void)
 ; ---------------------------------------------------------------
 
@@ -9712,10 +9797,28 @@ L0004:	jsr     decsp3
 .segment	"CODE"
 
 ;
-; bank_bg(CHR_BANK_0);
+; mmc1_write(MMC1_CONTROL, 0x12);  // 4KB CHR mode
 ;
+	ldx     #$80
 	lda     #$00
-	jsr     _bank_bg
+	jsr     pushax
+	lda     #$12
+	jsr     _mmc1_write
+;
+; mmc1_write(MMC1_CHR0, CHR_BANK_FONT);   // Font tiles
+;
+	ldx     #$A0
+	lda     #$00
+	jsr     pushax
+	jsr     _mmc1_write
+;
+; mmc1_write(MMC1_CHR1, CHR_BANK_TITLE);  // Title graphics
+;
+	ldx     #$C0
+	lda     #$00
+	jsr     pushax
+	lda     #$01
+	jsr     _mmc1_write
 ;
 ; pal_bg(palette_title);
 ;
@@ -9767,10 +9870,29 @@ L0004:	jsr     decsp3
 ;
 	jsr     _clear_vram_buffer
 ;
-; bank_bg(CHR_BANK_0);
+; mmc1_write(MMC1_CONTROL, 0x12);  // 4KB CHR mode
 ;
+	ldx     #$80
 	lda     #$00
-	jsr     _bank_bg
+	jsr     pushax
+	lda     #$12
+	jsr     _mmc1_write
+;
+; mmc1_write(MMC1_CHR0, CHR_BANK_MAP);     // Map tiles
+;
+	ldx     #$A0
+	lda     #$00
+	jsr     pushax
+	lda     #$02
+	jsr     _mmc1_write
+;
+; mmc1_write(MMC1_CHR1, CHR_BANK_SPRITES); // Sprite tiles
+;
+	ldx     #$C0
+	lda     #$00
+	jsr     pushax
+	lda     #$03
+	jsr     _mmc1_write
 ;
 ; offset = Level_offsets[level];
 ;
@@ -15546,15 +15668,9 @@ L0003:	rts
 ;
 	jsr     _ppu_off
 ;
-; bank_spr(CHR_BANK_1);    // Sprite pattern table
+; mmc1_init();
 ;
-	lda     #$01
-	jsr     _bank_spr
-;
-; bank_bg(CHR_BANK_0);     // Background pattern table for map tiles
-;
-	lda     #$00
-	jsr     _bank_bg
+	jsr     _mmc1_init
 ;
 ; set_vram_buffer(); // do at least once
 ;

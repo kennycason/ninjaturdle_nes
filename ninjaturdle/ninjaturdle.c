@@ -16,15 +16,11 @@ unsigned char bounce[] = {
     0, 0, 0, 1, 2, 2, 2, 1
 };
 	
-	
 void main(void) {
-	
 	ppu_off(); // screen off
 	
-	// use the second set of tiles for sprites
-	// both bg and sprites are set to 0 by default
-	bank_spr(CHR_BANK_1);    // Sprite pattern table
-	bank_bg(CHR_BANK_0);     // Background pattern table for map tiles
+	// Initialize MMC1
+	mmc1_init();
 	
 	set_vram_buffer(); // do at least once
 	
@@ -244,8 +240,10 @@ void main(void) {
 }
 
 void load_title(void) {
-	// Switch to the font/title bank
-	bank_bg(CHR_BANK_0);
+	// Make sure MMC1 is in 4KB mode and set banks for title screen
+	mmc1_write(MMC1_CONTROL, 0x12);  // 4KB CHR mode
+	mmc1_write(MMC1_CHR0, CHR_BANK_FONT);   // Font tiles
+	mmc1_write(MMC1_CHR1, CHR_BANK_TITLE);  // Title graphics
 	
 	pal_bg(palette_title);
 	pal_spr(palette_sp);
@@ -257,8 +255,10 @@ void load_title(void) {
 void load_room(void) {
 	clear_vram_buffer();
 	
-	// Switch to the map tiles bank
-	bank_bg(CHR_BANK_0);
+	// Set MMC1 banks for gameplay - different banks for BG and sprites
+	mmc1_write(MMC1_CONTROL, 0x12);  // 4KB CHR mode
+	mmc1_write(MMC1_CHR0, CHR_BANK_MAP);     // Pattern Table 0 (background) uses map tiles
+	mmc1_write(MMC1_CHR1, CHR_BANK_SPRITES); // Pattern Table 1 (sprites) uses sprite tiles
 	
 	offset = Level_offsets[level];
 	
