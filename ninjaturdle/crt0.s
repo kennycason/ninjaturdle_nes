@@ -286,3 +286,4 @@ sounds_data:
 .segment "CHARS"
 
 	.incbin "ninjaturdle.chr"
+	.incbin "ninjaturdle2.chr"

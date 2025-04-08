@@ -51,6 +51,8 @@
 	.import		_buffer_4_mt
 	.import		_flush_vram_update2
 	.import		_color_emphasis
+	.export		_mmc1_write
+	.export		_mmc1_init
 	.export		_setup_pattern_tables
 	.export		_fade_in_palette
 	.export		_fade_out_palette
@@ -9142,6 +9144,106 @@ _boss_health:
 	.res	1,$00
 
 ; ---------------------------------------------------------------
+; void __near__ mmc1_write (unsigned int address, unsigned char value)
+; ---------------------------------------------------------------
+
+.segment	"CODE"
+
+.proc	_mmc1_write: near
+
+.segment	"CODE"
+
+;
+; void mmc1_write(unsigned int address, unsigned char value) {
+;
+	jsr     pusha
+;
+; for (i = 0; i < 5; ++i) {
+;
+	jsr     decsp1
+	lda     #$00
+	tay
+L0006:	sta     (sp),y
+	cmp     #$05
+	bcs     L0003
+;
+; *((unsigned char*)address) = value & 1;
+;
+	ldy     #$03
+	lda     (sp),y
+	sta     ptr1+1
+	dey
+	lda     (sp),y
+	sta     ptr1
+	dey
+	lda     (sp),y
+	and     #$01
+	dey
+	sta     (ptr1),y
+;
+; value = value >> 1;
+;
+	iny
+	lda     (sp),y
+	lsr     a
+	sta     (sp),y
+;
+; for (i = 0; i < 5; ++i) {
+;
+	dey
+	clc
+	lda     #$01
+	adc     (sp),y
+	jmp     L0006
+;
+; }
+;
+L0003:	jmp     incsp4
+
+.endproc
+
+; ---------------------------------------------------------------
+; void __near__ mmc1_init (void)
+; ---------------------------------------------------------------
+
+.segment	"CODE"
+
+.proc	_mmc1_init: near
+
+.segment	"CODE"
+
+;
+; *((unsigned char*)MMC1_CONTROL) = 0x80;
+;
+	lda     #$80
+	sta     $8000
+;
+; mmc1_write(MMC1_CONTROL, 0x0C);  // Changed from 0x0E to 0x0C for 4KB CHR mode
+;
+	tax
+	lda     #$00
+	jsr     pushax
+	lda     #$0C
+	jsr     _mmc1_write
+;
+; mmc1_write(MMC1_CHR0, CHR_BANK_FONT * 2);      // Pattern table 0: Font (4KB)
+;
+	ldx     #$A0
+	lda     #$00
+	jsr     pushax
+	jsr     _mmc1_write
+;
+; mmc1_write(MMC1_CHR1, CHR_BANK_FONT * 2 + 1);  // Pattern table 0: Font (4KB)
+;
+	ldx     #$C0
+	lda     #$00
+	jsr     pushax
+	lda     #$01
+	jmp     _mmc1_write
+
+.endproc
+
+; ---------------------------------------------------------------
 ; void __near__ setup_pattern_tables (unsigned char bg_bank, unsigned char spr_bank)
 ; ---------------------------------------------------------------
 
@@ -9156,17 +9258,27 @@ _boss_health:
 ;
 	jsr     pusha
 ;
-; bank_bg(bg_bank);
+; mmc1_write(MMC1_CHR0, bg_bank * 2);      // First 4KB
 ;
-	ldy     #$01
+	ldx     #$A0
+	lda     #$00
+	jsr     pushax
+	ldy     #$03
 	lda     (sp),y
-	jsr     _bank_bg
+	asl     a
+	jsr     _mmc1_write
 ;
-; bank_spr(spr_bank);
+; mmc1_write(MMC1_CHR1, bg_bank * 2 + 1);  // Second 4KB
 ;
-	ldy     #$00
+	ldx     #$C0
+	lda     #$00
+	jsr     pushax
+	ldy     #$03
 	lda     (sp),y
-	jsr     _bank_spr
+	asl     a
+	clc
+	adc     #$01
+	jsr     _mmc1_write
 ;
 ; }
 ;

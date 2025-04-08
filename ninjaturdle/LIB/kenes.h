@@ -13,7 +13,7 @@
 #define K_STR(x) ((const char *)(x))
 #define K_CHR(x) ((const char *)(x))
 
-// MMC1 registers (for future reference)
+// MMC1 registers
 #define MMC1_CONTROL    0x8000
 #define MMC1_CHR0       0xA000
 #define MMC1_CHR1       0xC000
@@ -25,30 +25,46 @@
 #define MMC1_MIRROR_VERTICAL          0x02
 #define MMC1_MIRROR_HORIZONTAL        0x03
 
-// NROM CHR bank definitions
-#define CHR_BANK_0 0  // First pattern table (0-4KB)
-#define CHR_BANK_1 1  // Second pattern table (4-8KB)
+// MMC1 CHR bank definitions
+#define CHR_BANK_FONT      0  // Font tiles (top half of ninjaturtle2.png)
+#define CHR_BANK_TITLE     1  // Title screen tiles (bottom half of ninjaturtle2.png)
+#define CHR_BANK_MAP       2  // Map tiles (top half of ninjaturtle.png)
+#define CHR_BANK_SPRITES   3  // Sprite tiles (bottom half of ninjaturtle.png)
 
-// NROM sprite sheet organization
-// Pattern Table 0 (0-4KB): Font, UI elements, and common sprites
-// Pattern Table 1 (4-8KB): Background tiles and level-specific sprites
+// MMC1 functions
+void mmc1_write(unsigned int address, unsigned char value) {
+    char i;
+    // Write 5-bit value to MMC1 register, one bit at a time
+    for (i = 0; i < 5; ++i) {
+        *((unsigned char*)address) = value & 1;
+        value = value >> 1;
+    }
+}
 
-// Function declarations for MMC1 (for future reference)
-// These are commented out to avoid compilation errors
-/*
-void mmc1_write(unsigned int address, unsigned char value);
-void mmc1_init(void);
-*/
-
-// NROM-specific utilities
+void mmc1_init(void) {
+    // Reset MMC1 by writing any value with bit 7 set
+    *((unsigned char*)MMC1_CONTROL) = 0x80;
+    
+    // Configure MMC1:
+    // - 4KB CHR bank mode (bit 4 = 0)
+    // - 32KB PRG ROM mode (bits 2-3 = 0)
+    // - Vertical mirroring (bit 0 = 0)
+    mmc1_write(MMC1_CONTROL, 0x0C);  // Changed from 0x0E to 0x0C for 4KB CHR mode
+    
+    // Set initial CHR banks
+    mmc1_write(MMC1_CHR0, CHR_BANK_FONT * 2);      // Pattern table 0: Font (4KB)
+    mmc1_write(MMC1_CHR1, CHR_BANK_FONT * 2 + 1);  // Pattern table 0: Font (4KB)
+}
 
 // Set up both pattern tables for a specific scene
-// bg_bank: 0 or 1 for background pattern table
-// spr_bank: 0 or 1 for sprite pattern table
 void setup_pattern_tables(unsigned char bg_bank, unsigned char spr_bank) {
-    bank_bg(bg_bank);
-    bank_spr(spr_bank);
+    // In 4KB mode, each bank number needs to be multiplied by 2
+    // since each 8KB bank is split into two 4KB banks
+    mmc1_write(MMC1_CHR0, bg_bank * 2);      // First 4KB
+    mmc1_write(MMC1_CHR1, bg_bank * 2 + 1);  // Second 4KB
 }
+
+// NROM-specific utilities
 
 // Fade in a specific palette with a delay
 // palette: pointer to palette data
