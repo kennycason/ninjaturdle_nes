@@ -11,6 +11,7 @@
 	.importzp	tmp1, tmp2, tmp3, tmp4, ptr1, ptr2, ptr3, ptr4
 	.macpack	longbranch
 	.forceimport	__STARTUP__
+	.import		_pal_all
 	.import		_pal_col
 	.import		_pal_clear
 	.import		_ppu_wait_nmi
@@ -18,7 +19,7 @@
 	.import		_ppu_on_all
 	.import		_oam_spr
 	.import		_oam_get
-	.import		_pad_poll
+	.import		_pad_trigger
 	.import		_vram_adr
 	.import		_vram_put
 	.export		_mmc1_write
@@ -28,24 +29,20 @@
 	.export		_fade_out_palette
 	.export		_create_sprite
 	.export		_update_sprite_pos
-	.export		_current_bank
-	.export		_show_bottom_half
-	.export		_current_palette
+	.export		_draw_border
 	.export		_str_bank
 	.export		_str_pt
 	.export		_str_pal
 	.export		_palettes
-	.export		_draw_text
-	.export		_draw_number
+	.export		_draw_text_at
+	.export		_draw_number_at
 	.export		_draw_border_and_text
 	.export		_draw_tile_grid
 	.export		_main
 
 .segment	"DATA"
 
-_current_bank:
-	.byte	$00
-_show_bottom_half:
+_current_block:
 	.byte	$00
 _current_palette:
 	.byte	$00
@@ -99,6 +96,10 @@ _palettes:
 	.byte	$03
 	.byte	$13
 	.byte	$23
+S0004:
+	.byte	$42,$41,$4E,$4B,$3A,$00
+S0005:
+	.byte	$50,$41,$4C,$3A,$00
 
 ; ---------------------------------------------------------------
 ; void __near__ mmc1_write (unsigned int address, unsigned char value)
@@ -175,27 +176,26 @@ L0003:	jmp     incsp4
 	lda     #$80
 	sta     $8000
 ;
-; mmc1_write(MMC1_CONTROL, 0x0C);  // Changed from 0x0E to 0x0C for 4KB CHR mode
+; mmc1_write(MMC1_CONTROL, 0x12);  // 0001 0010
 ;
 	tax
 	lda     #$00
 	jsr     pushax
-	lda     #$0C
+	lda     #$12
 	jsr     _mmc1_write
 ;
-; mmc1_write(MMC1_CHR0, CHR_BANK_FONT * 2);      // Pattern table 0: Font (4KB)
+; mmc1_write(MMC1_CHR0, 0);  // First 4KB bank
 ;
 	ldx     #$A0
 	lda     #$00
 	jsr     pushax
 	jsr     _mmc1_write
 ;
-; mmc1_write(MMC1_CHR1, CHR_BANK_FONT * 2 + 1);  // Pattern table 0: Font (4KB)
+; mmc1_write(MMC1_CHR1, 0);  // Second 4KB bank
 ;
 	ldx     #$C0
 	lda     #$00
 	jsr     pushax
-	lda     #$01
 	jmp     _mmc1_write
 
 .endproc
@@ -337,7 +337,7 @@ L000E:	sta     (sp),y
 	cmp     (sp),y
 	bcs     L000B
 ;
-; ppu_wait_nmi(); // Wait for NMI to complete
+; ppu_wait_nmi();
 ;
 	jsr     _ppu_wait_nmi
 ;
@@ -490,7 +490,7 @@ L000D:	ldy     #$20
 	adc     (sp),y
 	jmp     L001A
 ;
-; ppu_wait_nmi(); // Wait for NMI to complete
+; ppu_wait_nmi();
 ;
 L000C:	jsr     _ppu_wait_nmi
 ;
@@ -510,7 +510,7 @@ L001B:	sta     (sp),y
 	cmp     (sp),y
 	bcs     L0016
 ;
-; ppu_wait_nmi(); // Wait for NMI to complete
+; ppu_wait_nmi();
 ;
 	jsr     _ppu_wait_nmi
 ;
@@ -659,74 +659,200 @@ L0004:	jsr     decsp3
 .endproc
 
 ; ---------------------------------------------------------------
-; void __near__ draw_text (const unsigned char *str, unsigned char len)
+; void __near__ draw_border (unsigned char x, unsigned char y, unsigned char width, unsigned char height)
 ; ---------------------------------------------------------------
 
 .segment	"CODE"
 
-.proc	_draw_text: near
+.proc	_draw_border: near
 
 .segment	"CODE"
 
 ;
-; void draw_text(const unsigned char* str, unsigned char len) {
+; void draw_border(unsigned char x, unsigned char y, unsigned char width, unsigned char height) {
 ;
 	jsr     pusha
 ;
-; for(i = 0; i < len; ++i) {
+; for(row = 0; row < height; row++) {
 ;
-	jsr     decsp1
+	jsr     decsp2
 	lda     #$00
-	tay
-L0007:	sta     (sp),y
+	ldy     #$01
+L000C:	sta     (sp),y
 	iny
 	cmp     (sp),y
 	bcs     L0003
 ;
-; vram_put(str[i] - 0x20);
+; vram_adr(NTADR_A(x, y + row));
 ;
-	ldy     #$03
-	lda     (sp),y
-	sta     ptr1+1
+	ldx     #$00
 	dey
 	lda     (sp),y
+	clc
+	ldy     #$04
+	adc     (sp),y
+	bcc     L000A
+	inx
+L000A:	jsr     aslax4
+	stx     tmp1
+	asl     a
+	rol     tmp1
 	sta     ptr1
-	ldy     #$00
+	iny
 	lda     (sp),y
+	ora     ptr1
+	pha
+	lda     tmp1
+	ora     #$20
+	tax
+	pla
+	jsr     _vram_adr
+;
+; for(col = 0; col < width; col++) {
+;
+	lda     #$00
 	tay
-	lda     (ptr1),y
-	sec
-	sbc     #$20
+L000B:	sta     (sp),y
+	ldy     #$03
+	cmp     (sp),y
+	bcs     L0004
+;
+; vram_put(TILE_BLANK);
+;
+	lda     #$FF
 	jsr     _vram_put
 ;
-; for(i = 0; i < len; ++i) {
+; for(col = 0; col < width; col++) {
 ;
 	ldy     #$00
 	clc
 	lda     #$01
 	adc     (sp),y
-	jmp     L0007
+	jmp     L000B
+;
+; for(row = 0; row < height; row++) {
+;
+L0004:	ldy     #$01
+	clc
+	tya
+	adc     (sp),y
+	jmp     L000C
 ;
 ; }
 ;
-L0003:	jmp     incsp4
+L0003:	jmp     incsp6
 
 .endproc
 
 ; ---------------------------------------------------------------
-; void __near__ draw_number (unsigned char num)
+; void __near__ draw_text_at (unsigned char x, unsigned char y, const char *str)
 ; ---------------------------------------------------------------
 
 .segment	"CODE"
 
-.proc	_draw_number: near
+.proc	_draw_text_at: near
 
 .segment	"CODE"
 
 ;
-; void draw_number(unsigned char num) {
+; void draw_text_at(unsigned char x, unsigned char y, const char* str) {
+;
+	jsr     pushax
+;
+; vram_adr(NTADR_A(x, y));
+;
+	ldy     #$02
+	ldx     #$00
+	lda     (sp),y
+	jsr     aslax4
+	stx     tmp1
+	asl     a
+	rol     tmp1
+	sta     ptr1
+	iny
+	lda     (sp),y
+	ora     ptr1
+	pha
+	lda     tmp1
+	ora     #$20
+	tax
+	pla
+	jsr     _vram_adr
+;
+; while (*str) {
+;
+	jmp     L0004
+;
+; vram_put(*str - 0x20);
+;
+L0002:	ldy     #$01
+	lda     (sp),y
+	sta     ptr1+1
+	dey
+	lda     (sp),y
+	sta     ptr1
+	lda     (ptr1),y
+	sec
+	sbc     #$20
+	jsr     _vram_put
+;
+; str++;
+;
+	ldx     #$00
+	lda     #$01
+	jsr     addeq0sp
+;
+; while (*str) {
+;
+L0004:	ldy     #$01
+	lda     (sp),y
+	sta     ptr1+1
+	dey
+	lda     (sp),y
+	sta     ptr1
+	lda     (ptr1),y
+	bne     L0002
+;
+; }
+;
+	jmp     incsp4
+
+.endproc
+
+; ---------------------------------------------------------------
+; void __near__ draw_number_at (unsigned char x, unsigned char y, unsigned char num)
+; ---------------------------------------------------------------
+
+.segment	"CODE"
+
+.proc	_draw_number_at: near
+
+.segment	"CODE"
+
+;
+; void draw_number_at(unsigned char x, unsigned char y, unsigned char num) {
 ;
 	jsr     pusha
+;
+; vram_adr(NTADR_A(x, y));
+;
+	ldy     #$01
+	ldx     #$00
+	lda     (sp),y
+	jsr     aslax4
+	stx     tmp1
+	asl     a
+	rol     tmp1
+	sta     ptr1
+	iny
+	lda     (sp),y
+	ora     ptr1
+	pha
+	lda     tmp1
+	ora     #$20
+	tax
+	pla
+	jsr     _vram_adr
 ;
 ; vram_put('0' + num - 0x20);
 ;
@@ -740,7 +866,7 @@ L0003:	jmp     incsp4
 ;
 ; }
 ;
-	jmp     incsp1
+	jmp     incsp3
 
 .endproc
 
@@ -885,18 +1011,29 @@ L000D:	ldx     #$20
 	lda     #$42
 	jsr     _vram_adr
 ;
-; draw_text(str_bank, 5);
+; draw_text_at(2, 2, "BANK:");
 ;
-	lda     #<(_str_bank)
-	ldx     #>(_str_bank)
-	jsr     pushax
-	lda     #$05
-	jsr     _draw_text
+	jsr     decsp2
+	lda     #$02
+	ldy     #$01
+	sta     (sp),y
+	dey
+	sta     (sp),y
+	lda     #<(S0004)
+	ldx     #>(S0004)
+	jsr     _draw_text_at
 ;
-; draw_number(current_bank);
+; draw_number_at(7, 2, current_block);
 ;
-	lda     _current_bank
-	jsr     _draw_number
+	jsr     decsp2
+	lda     #$07
+	ldy     #$01
+	sta     (sp),y
+	lda     #$02
+	dey
+	sta     (sp),y
+	lda     _current_block
+	jsr     _draw_number_at
 ;
 ; vram_adr(NTADR_A(18,2));
 ;
@@ -904,18 +1041,30 @@ L000D:	ldx     #$20
 	lda     #$52
 	jsr     _vram_adr
 ;
-; draw_text(str_pal, 4);
+; draw_text_at(18, 2, "PAL:");
 ;
-	lda     #<(_str_pal)
-	ldx     #>(_str_pal)
-	jsr     pushax
-	lda     #$04
-	jsr     _draw_text
+	jsr     decsp2
+	lda     #$12
+	ldy     #$01
+	sta     (sp),y
+	lda     #$02
+	dey
+	sta     (sp),y
+	lda     #<(S0005)
+	ldx     #>(S0005)
+	jsr     _draw_text_at
 ;
-; draw_number(current_palette);
+; draw_number_at(22, 2, current_palette);
 ;
+	jsr     decsp2
+	lda     #$16
+	ldy     #$01
+	sta     (sp),y
+	lda     #$02
+	dey
+	sta     (sp),y
 	lda     _current_palette
-	jsr     _draw_number
+	jsr     _draw_number_at
 ;
 ; }
 ;
@@ -934,16 +1083,9 @@ L000D:	ldx     #$20
 .segment	"CODE"
 
 ;
-; unsigned char tile_offset = show_bottom_half ? 128 : 0;  // Start at 128 for bottom half
-;
-	jsr     decsp2
-	lda     _show_bottom_half
-	beq     L0014
-	lda     #$80
-L0014:	jsr     pusha
-;
 ; pal_col(0, palettes[current_palette * 4 + 0]);
 ;
+	jsr     decsp2
 	lda     #$00
 	jsr     pusha
 	tax
@@ -967,9 +1109,9 @@ L0014:	jsr     pusha
 	jsr     shlax2
 	clc
 	adc     #$01
-	bcc     L0004
+	bcc     L0002
 	inx
-L0004:	sta     ptr1
+L0002:	sta     ptr1
 	txa
 	clc
 	adc     #>(_palettes)
@@ -987,9 +1129,9 @@ L0004:	sta     ptr1
 	jsr     shlax2
 	clc
 	adc     #$02
-	bcc     L0005
+	bcc     L0003
 	inx
-L0005:	sta     ptr1
+L0003:	sta     ptr1
 	txa
 	clc
 	adc     #>(_palettes)
@@ -1007,9 +1149,9 @@ L0005:	sta     ptr1
 	jsr     shlax2
 	clc
 	adc     #$03
-	bcc     L0006
+	bcc     L0004
 	inx
-L0006:	sta     ptr1
+L0004:	sta     ptr1
 	txa
 	clc
 	adc     #>(_palettes)
@@ -1022,14 +1164,22 @@ L0006:	sta     ptr1
 ;
 	jsr     _ppu_off
 ;
-; mmc1_write(MMC1_CHR0, BANK0_TOP);
+; mmc1_write(MMC1_CTRL, 0x12);  // Ensure 4KB mode is set
+;
+	ldx     #$80
+	lda     #$00
+	jsr     pushax
+	lda     #$12
+	jsr     _mmc1_write
+;
+; mmc1_write(MMC1_CHR0, 0);  // Always use bank 0 for font
 ;
 	ldx     #$A0
 	lda     #$00
 	jsr     pushax
 	jsr     _mmc1_write
 ;
-; mmc1_write(MMC1_CHR1, BANK0_TOP);
+; mmc1_write(MMC1_CHR1, 0);
 ;
 	ldx     #$C0
 	lda     #$00
@@ -1040,29 +1190,37 @@ L0006:	sta     ptr1
 ;
 	jsr     _draw_border_and_text
 ;
-; mmc1_write(MMC1_CHR0, current_bank);
+; mmc1_write(MMC1_CTRL, 0x12);  // Ensure 4KB mode is set
+;
+	ldx     #$80
+	lda     #$00
+	jsr     pushax
+	lda     #$12
+	jsr     _mmc1_write
+;
+; mmc1_write(MMC1_CHR0, current_block);
 ;
 	ldx     #$A0
 	lda     #$00
 	jsr     pushax
-	lda     _current_bank
+	lda     _current_block
 	jsr     _mmc1_write
 ;
-; mmc1_write(MMC1_CHR1, current_bank);
+; mmc1_write(MMC1_CHR1, current_block);
 ;
 	ldx     #$C0
 	lda     #$00
 	jsr     pushax
-	lda     _current_bank
+	lda     _current_block
 	jsr     _mmc1_write
 ;
 ; for (row = 0; row < 16; ++row) {
 ;
 	lda     #$00
-	ldy     #$02
-L0013:	sta     (sp),y
+	ldy     #$01
+L0010:	sta     (sp),y
 	cmp     #$10
-	bcs     L0008
+	bcs     L0006
 ;
 ; vram_adr(NTADR_A(2, row + 4));
 ;
@@ -1070,9 +1228,9 @@ L0013:	sta     (sp),y
 	lda     (sp),y
 	clc
 	adc     #$04
-	bcc     L000B
+	bcc     L0009
 	inx
-L000B:	jsr     aslax4
+L0009:	jsr     aslax4
 	stx     tmp1
 	asl     a
 	rol     tmp1
@@ -1087,12 +1245,12 @@ L000B:	jsr     aslax4
 ; for (col = 0; col < 16; ++col) {
 ;
 	lda     #$00
-	ldy     #$01
-L0012:	sta     (sp),y
+	tay
+L000F:	sta     (sp),y
 	cmp     #$10
-	bcs     L0009
+	bcs     L0007
 ;
-; vram_put(tile_offset + row * 16 + col);
+; vram_put(row * 16 + col);
 ;
 	iny
 	lda     (sp),y
@@ -1100,11 +1258,8 @@ L0012:	sta     (sp),y
 	asl     a
 	asl     a
 	asl     a
-	clc
-	ldy     #$00
-	adc     (sp),y
 	sta     ptr1
-	iny
+	dey
 	lda     (sp),y
 	clc
 	adc     ptr1
@@ -1112,27 +1267,27 @@ L0012:	sta     (sp),y
 ;
 ; for (col = 0; col < 16; ++col) {
 ;
-	ldy     #$01
-	clc
-	tya
-	adc     (sp),y
-	jmp     L0012
-;
-; for (row = 0; row < 16; ++row) {
-;
-L0009:	iny
+	ldy     #$00
 	clc
 	lda     #$01
 	adc     (sp),y
-	jmp     L0013
+	jmp     L000F
+;
+; for (row = 0; row < 16; ++row) {
+;
+L0007:	iny
+	clc
+	tya
+	adc     (sp),y
+	jmp     L0010
 ;
 ; ppu_on_all();
 ;
-L0008:	jsr     _ppu_on_all
+L0006:	jsr     _ppu_on_all
 ;
 ; }
 ;
-	jmp     incsp3
+	jmp     incsp2
 
 .endproc
 
@@ -1147,67 +1302,130 @@ L0008:	jsr     _ppu_on_all
 .segment	"CODE"
 
 ;
-; unsigned char pad_prev = 0;
+; ppu_off();
 ;
-	jsr     decsp1
-	lda     #$00
-	jsr     pusha
+	jsr     _ppu_off
 ;
-; mmc1_write(MMC1_CTRL, CTRL_MIRROR_V | CTRL_PRG_32K | CTRL_CHR_4K);
+; mmc1_write(MMC1_CTRL, 0x80);  // Reset
 ;
 	ldx     #$80
+	lda     #$00
+	jsr     pushax
+	txa
+	jsr     _mmc1_write
+;
+; mmc1_write(MMC1_CTRL, 0x12);  // 4KB mode, vertical mirroring
+;
+	ldx     #$80
+	lda     #$00
 	jsr     pushax
 	lda     #$12
 	jsr     _mmc1_write
 ;
-; mmc1_write(MMC1_CHR0, BANK0_TOP);  // Start with font bank
+; mmc1_write(MMC1_CHR0, 0);
 ;
 	ldx     #$A0
 	lda     #$00
 	jsr     pushax
 	jsr     _mmc1_write
 ;
-; mmc1_write(MMC1_CHR1, BANK0_TOP);  // Keep both banks on font
+; mmc1_write(MMC1_CHR1, 0);
 ;
 	ldx     #$C0
 	lda     #$00
 	jsr     pushax
 	jsr     _mmc1_write
 ;
-; mmc1_write(MMC1_PRG, 0);   // PRG bank 0
+; pal_all(palettes);
 ;
-	ldx     #$E0
-	lda     #$00
-	jsr     pushax
-	jsr     _mmc1_write
+	lda     #<(_palettes)
+	ldx     #>(_palettes)
+	jsr     _pal_all
 ;
-; pal_col(0, palettes[0]);
+; draw_tile_grid();
 ;
-	lda     #$00
+	jsr     _draw_tile_grid
+;
+; char input = pad_trigger(0);
+;
+L0002:	lda     #$00
+	jsr     _pad_trigger
 	jsr     pusha
-	lda     _palettes
-	jsr     _pal_col
 ;
-; pal_col(1, palettes[1]);
+; if (input & PAD_A) {
 ;
-	lda     #$01
-	jsr     pusha
-	lda     _palettes+1
-	jsr     _pal_col
+	ldy     #$00
+	lda     (sp),y
+	and     #$80
+	beq     L000D
 ;
-; pal_col(2, palettes[2]);
+; current_block = (current_block + 1) % 4;  // Cycle through all 4 blocks
 ;
-	lda     #$02
-	jsr     pusha
-	lda     _palettes+2
-	jsr     _pal_col
+	ldx     #$00
+	lda     _current_block
+	clc
+	adc     #$01
+	bcc     L0006
+	inx
+L0006:	jsr     pushax
+	ldx     #$00
+	lda     #$04
+	jsr     tosmoda0
+	sta     _current_block
 ;
-; pal_col(3, palettes[3]);
+; draw_tile_grid();
 ;
-	lda     #$03
-	jsr     pusha
-	lda     _palettes+3
-	jsr     _pal_col
+	jsr     _draw_tile_grid
+;
+; if (input & PAD_UP) {
+;
+	ldy     #$00
+L000D:	lda     (sp),y
+	and     #$08
+	beq     L000F
+;
+; current_palette = (current_palette + 1) % NUM_PALETTES;
+;
+	ldx     #$00
+	lda     _current_palette
+	clc
+	adc     #$01
+	bcc     L0008
+	inx
+L0008:	jsr     pushax
+	ldx     #$00
+	lda     #$0A
+	jsr     tosmoda0
+	sta     _current_palette
+;
+; draw_tile_grid();
+;
+	jsr     _draw_tile_grid
+;
+; if (input & PAD_DOWN) {
+;
+	ldy     #$00
+L000F:	lda     (sp),y
+	and     #$04
+	beq     L0009
+;
+; current_palette = (current_palette + NUM_PALETTES - 1) % NUM_PALETTES;
+;
+	ldx     #$00
+	lda     _current_palette
+	clc
+	adc     #$0A
+	bcc     L000A
+	inx
+L000A:	sec
+	sbc     #$01
+	bcs     L000B
+	dex
+L000B:	jsr     pushax
+	ldx     #$00
+	lda     #$0A
+	jsr     tosmoda0
+	sta     _current_palette
 ;
 ; draw_tile_grid();
 ;
@@ -1215,134 +1433,13 @@ L0008:	jsr     _ppu_on_all
 ;
 ; ppu_wait_nmi();
 ;
-L0002:	jsr     _ppu_wait_nmi
+L0009:	jsr     _ppu_wait_nmi
 ;
-; pad_current = pad_poll(0);
+; }
 ;
-	lda     #$00
-	jsr     _pad_poll
-	ldy     #$01
-	sta     (sp),y
+	jsr     incsp1
 ;
-; if (pad_current != pad_prev) {
-;
-	lda     (sp),y
-	jsr     pusha0
-	ldy     #$02
-	lda     (sp),y
-	jsr     tosicmp0
-	jeq     L0014
-;
-; if ((pad_current & PAD_A) && !(pad_prev & PAD_A)) {
-;
-	ldy     #$01
-	lda     (sp),y
-	and     #$80
-	beq     L0025
-	dey
-	lda     (sp),y
-	and     #$80
-	bne     L0006
-;
-; current_bank = (current_bank + 1) & 3;
-;
-	lda     _current_bank
-	clc
-	adc     #$01
-	and     #$03
-	sta     _current_bank
-;
-; draw_tile_grid();
-;
-	jsr     _draw_tile_grid
-;
-; if ((pad_current & PAD_B) && !(pad_prev & PAD_B)) {
-;
-L0006:	ldy     #$01
-L0025:	lda     (sp),y
-	and     #$40
-	beq     L0026
-	dey
-	lda     (sp),y
-	and     #$40
-	bne     L000B
-;
-; show_bottom_half ^= 1;
-;
-	lda     _show_bottom_half
-	eor     #$01
-	sta     _show_bottom_half
-;
-; draw_tile_grid();
-;
-	jsr     _draw_tile_grid
-;
-; if ((pad_current & PAD_UP) && !(pad_prev & PAD_UP)) {
-;
-L000B:	ldy     #$01
-L0026:	lda     (sp),y
-	and     #$08
-	beq     L0027
-	dey
-	lda     (sp),y
-	and     #$08
-	bne     L000F
-;
-; current_palette = (current_palette + 9) % 10;
-;
-	tax
-	lda     _current_palette
-	clc
-	adc     #$09
-	bcc     L0013
-	inx
-L0013:	jsr     pushax
-	ldx     #$00
-	lda     #$0A
-	jsr     tosmoda0
-	sta     _current_palette
-;
-; draw_tile_grid();
-;
-	jsr     _draw_tile_grid
-;
-; if ((pad_current & PAD_DOWN) && !(pad_prev & PAD_DOWN)) {
-;
-L000F:	ldy     #$01
-L0027:	lda     (sp),y
-	and     #$04
-	beq     L0028
-	dey
-	lda     (sp),y
-	and     #$04
-	bne     L0014
-;
-; current_palette = (current_palette + 1) % 10;
-;
-	tax
-	lda     _current_palette
-	clc
-	adc     #$01
-	bcc     L0018
-	inx
-L0018:	jsr     pushax
-	ldx     #$00
-	lda     #$0A
-	jsr     tosmoda0
-	sta     _current_palette
-;
-; draw_tile_grid();
-;
-	jsr     _draw_tile_grid
-;
-; pad_prev = pad_current;
-;
-L0014:	ldy     #$01
-L0028:	lda     (sp),y
-	dey
-	sta     (sp),y
-;
-; while(1) {
+; while(1)
 ;
 	jmp     L0002
 

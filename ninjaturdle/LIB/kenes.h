@@ -31,6 +31,15 @@
 #define CHR_BANK_MAP       2  // Map tiles (top half of ninjaturtle.png)
 #define CHR_BANK_SPRITES   3  // Sprite tiles (bottom half of ninjaturtle.png)
 
+// Bank Definitions
+#define BANK_FONT      0
+#define BANK_SPRITE1   1
+#define BANK_SPRITE2   2
+#define BANK_SPRITE3   3
+
+// Choose a blank tile index for the borders
+#define TILE_BLANK     0xFF  // Make sure this tile is truly blank in every bank
+
 // MMC1 functions
 void mmc1_write(unsigned int address, unsigned char value) {
     char i;
@@ -46,14 +55,14 @@ void mmc1_init(void) {
     *((unsigned char*)MMC1_CONTROL) = 0x80;
     
     // Configure MMC1:
-    // - 4KB CHR bank mode (bit 4 = 0)
+    // - 4KB CHR bank mode (bit 4 = 1)
     // - 32KB PRG ROM mode (bits 2-3 = 0)
-    // - Vertical mirroring (bit 0 = 0)
-    mmc1_write(MMC1_CONTROL, 0x0C);  // Changed from 0x0E to 0x0C for 4KB CHR mode
+    // - Vertical mirroring (bits 0-1 = 2)
+    mmc1_write(MMC1_CONTROL, 0x12);  // 0001 0010
     
     // Set initial CHR banks
-    mmc1_write(MMC1_CHR0, CHR_BANK_FONT * 2);      // Pattern table 0: Font (4KB)
-    mmc1_write(MMC1_CHR1, CHR_BANK_FONT * 2 + 1);  // Pattern table 0: Font (4KB)
+    mmc1_write(MMC1_CHR0, 0);  // First 4KB bank
+    mmc1_write(MMC1_CHR1, 0);  // Second 4KB bank
 }
 
 // Set up both pattern tables for a specific scene
@@ -64,11 +73,7 @@ void setup_pattern_tables(unsigned char bg_bank, unsigned char spr_bank) {
     mmc1_write(MMC1_CHR1, bg_bank * 2 + 1);  // Second 4KB
 }
 
-// NROM-specific utilities
-
 // Fade in a specific palette with a delay
-// palette: pointer to palette data
-// delay_frames: frames to wait between each step
 void fade_in_palette(const unsigned char *palette, unsigned char delay_frames) {
     unsigned char i;
     unsigned char temp_pal[32];
@@ -84,21 +89,19 @@ void fade_in_palette(const unsigned char *palette, unsigned char delay_frames) {
         if (delay_frames > 0) {
             unsigned char j;
             for (j = 0; j < delay_frames; j++) {
-                ppu_wait_nmi(); // Wait for NMI to complete
+                ppu_wait_nmi();
             }
         }
     }
 }
 
 // Fade out the current palette
-// delay_frames: frames to wait between each step
 void fade_out_palette(unsigned char delay_frames) {
     unsigned char i, j;
     unsigned char temp_pal[32];
     
     // Save current palette
     for (i = 0; i < 32; i++) {
-        // We can't actually read palette values in NES, so we'll just fade to black
         temp_pal[i] = 0x0F; // Default to black
     }
     
@@ -110,25 +113,17 @@ void fade_out_palette(unsigned char delay_frames) {
                 pal_col(j, temp_pal[j]);
             }
         }
-        ppu_wait_nmi(); // Wait for NMI to complete
+        ppu_wait_nmi();
         if (delay_frames > 0) {
             unsigned char k;
             for (k = 0; k < delay_frames; k++) {
-                ppu_wait_nmi(); // Wait for NMI to complete
+                ppu_wait_nmi();
             }
         }
     }
 }
 
-// Sprite utilities
-
 // Create a simple sprite with position and attributes
-// x, y: position
-// tile: tile number
-// palette: palette number (0-3)
-// flip_h, flip_v: horizontal/vertical flip
-// behind: place behind background
-// Returns: sprite index
 unsigned char create_sprite(unsigned char x, unsigned char y, unsigned char tile, 
                           unsigned char palette, unsigned char flip_h, 
                           unsigned char flip_v, unsigned char behind) {
@@ -142,13 +137,20 @@ unsigned char create_sprite(unsigned char x, unsigned char y, unsigned char tile
 }
 
 // Update sprite position
-// index: sprite index
-// x, y: new position
 void update_sprite_pos(unsigned char index, unsigned char x, unsigned char y) {
-    // Since we can't read sprite attributes, we'll just recreate the sprite
-    // This is a simplified version that assumes the sprite is visible
     (void)index; // Suppress unused parameter warning
     oam_spr(x, y, 0, 0); // Use default attributes
+}
+
+// Draw a border around the specified area
+void draw_border(unsigned char x, unsigned char y, unsigned char width, unsigned char height) {
+    unsigned char row, col;
+    for(row = 0; row < height; row++) {
+        vram_adr(NTADR_A(x, y + row));
+        for(col = 0; col < width; col++) {
+            vram_put(TILE_BLANK);
+        }
+    }
 }
 
 #endif // KENES_H
