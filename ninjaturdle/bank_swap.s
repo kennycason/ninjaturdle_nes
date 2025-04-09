@@ -1172,32 +1172,6 @@ L0004:	sta     ptr1
 	lda     #$12
 	jsr     _mmc1_write
 ;
-; mmc1_write(MMC1_CHR0, 0);  // Always use bank 0 for font
-;
-	ldx     #$A0
-	lda     #$00
-	jsr     pushax
-	jsr     _mmc1_write
-;
-; mmc1_write(MMC1_CHR1, 0);
-;
-	ldx     #$C0
-	lda     #$00
-	jsr     pushax
-	jsr     _mmc1_write
-;
-; draw_border_and_text();
-;
-	jsr     _draw_border_and_text
-;
-; mmc1_write(MMC1_CTRL, 0x12);  // Ensure 4KB mode is set
-;
-	ldx     #$80
-	lda     #$00
-	jsr     pushax
-	lda     #$12
-	jsr     _mmc1_write
-;
 ; mmc1_write(MMC1_CHR0, current_block);
 ;
 	ldx     #$A0

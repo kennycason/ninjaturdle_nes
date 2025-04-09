@@ -96,12 +96,6 @@ void draw_tile_grid(void) {
     
     ppu_off();
     
-    // First draw text using font bank
-    mmc1_write(MMC1_CTRL, 0x12);  // Ensure 4KB mode is set
-    mmc1_write(MMC1_CHR0, 0);  // Always use bank 0 for font
-    mmc1_write(MMC1_CHR1, 0);
-    draw_border_and_text();
-    
     // Set both pattern tables to the current bank
     // current_block maps to 4KB banks:
     // 0 = first bank top (0-127)
