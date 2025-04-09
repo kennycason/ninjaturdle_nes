@@ -639,3 +639,266 @@ This is the whole concept of the MMC1 mapper. After we successfully implemented 
 
 
 
+
+
+Programming MMC1
+Jump to navigationJump to search
+MMC1 was Nintendo's first ASIC mapper for the NES.
+
+
+Contents
+1	Quick setup for UNROM style
+2	PRG banks
+3	Interrupts
+4	See also
+5	References
+6	External links
+Quick setup for UNROM style
+If you are using the SGROM or SNROM board to provide an environment similar to UNROM, with 8 KB of CHR RAM, a fixed PRG ROM bank at $C000, and a 16 KB switchable PRG ROM bank at $8000, do this in your init code after the mapper has been reset:
+
+  lda #$0E   ; vertical mirroring, fixed $C000, 8 KB CHR pages
+  sta $8000  ; (use $0F instead for horizontal mirroring)
+  lsr a
+  sta $8000
+  lsr a
+  sta $8000
+  lsr a
+  sta $8000
+  lsr a
+  sta $8000
+Games that use CHR RAM switch to another PRG bank before they copy tile data into CHR RAM.
+
+PRG banks
+Some revisions of the MMC1 IC might power up in a mode other than fixed-$C000, requiring that the vectors and the start of the init code be placed in all banks, much as in BxROM or AxROM or GxROM. Other revisions guarantee that the fixed bank is loaded at power on. To make sure your code works on all MMC1 revisions, put the following code in the last 16 bytes of each 16384 byte bank. (Barbie uses almost identical code.)
+
+reset_stub:
+  sei
+  ldx #$FF
+  txs        ; set the stack pointer
+  stx $8000  ; reset the mapper
+  jmp reset  ; must be in $C000-$FFED
+  .addr nmiHandler, reset_stub, irqHandler
+Then to switch PRG ROM banks, load the bank number (0-15) into A and call this subroutine:
+
+mmc1_load_prg_bank:
+  sta $E000
+  lsr a
+  sta $E000
+  lsr a
+  sta $E000
+  lsr a
+  sta $E000
+  lsr a
+  sta $E000
+  rts
+Interrupts
+If an NMI or IRQ can interrupt a series of writes, it is not easy to know what state the serial register was in before the interruption. One technique for coping with this problem involves using a flag variable to indicate that a serial write should be retried[1]:
+
+The normal serial write routine should have an "interrupted" flag:
+Clear the flag before beginning the series of writes.
+When completed, check the flag. If an interrupt is indicated, reset the serial register, clear the interrupted flag and begin the serial writes again.
+If the NMI or IRQ needs to switch banks, it should reset the serial register and set the "interrupted" flag to indicate that it has done this.
+See also
+
+
+
+---- 
+
+logo
+Home Forum Sections Community Submissions Changes Search Help
+Welcome to Romhacking.net. 
+ Log in
+ 
+ Sign up
+April 09, 2025, 12:16:58 PM
+News:
+11 March 2016 - Forum Rules
+
+Home
+Romhacking.net► Romhacking► Newcomer's Board► Adventures in NES Bank Switching: Episode 4 (Hokuto no Ken 3)
+Adventures in NES Bank Switching: Episode 4 (Hokuto no Ken 3)
+Started by BlackPaladin, March 20, 2023, 10:35:18 PM
+
+Previous topic - Next topic
+PrintGo Down Pages1
+BlackPaladin
+
+****
+Sr. Member
+Posts: 377
+Logged
+
+March 20, 2023, 10:35:18 PM
+I may have hit a roadblock in my attempt at translating Hokuto no Ken 3 NES when it comes to implementing DTE.  I'll explain what I've done so far.
+
+First off, using the debugger, I looked for the "sweet spot" when it comes to the game's text. ("B1 A2" in 0x3D8E7).  Where 0x3D8E5-0x3D8E8 is ("A0 00 B1 A2"), added "20 7B FF EA" (JSR $FF76 / NOP) and pasted "A0 00 B1 A2" onto a small area of unused nearby space (0x3FF86) with a "60" (RTS) right after.  I tested it out, and that seems to work fine currently. 
+
+But here's the thing, this space doesn't have enough space for DTE code and/or accompanying DTE table.  However, there is unused space in $2FC5D-$2FFFF.  Because of this, I had to do bank switching.  After looking up some information at nesdev on Mapper 1 (the mapper this game uses) and help from a couple of people on Discord, the register for text may have been discovered.  Here's the code from the debugger...
+
+Spoiler
+
+Well, using this information, I also looked up what code to use when it comes to bank swapping.  Here's the code I came up with (with help from a couple of people on Discord). This was pasted over 0x3FF86. (Where "A0 00 B1 A2 60" is)  Here's how I interpreted how this code is supposed to work...
+
+CodeSelect
+  03FF86: A2 0B     LDX #$0B   <- Loads Bank 0B
+  03FF88: 8A        TXA        <- Moves X Register to A
+  03FF89: 20 E3 FF  JSR $FFE3  <- Jumps to Bank Switching subroutine
+  03FF8C: 4C 5F FC  JMP $FC5F  <- Jumps to $2FC5F in Bank 0B
+  03FF8F: A2 0F     LDX #$0F   <- Loads Bank 0F,
+  03FF91: 8A        TXA        <- Moves X Register to A
+  03FF95: 60        RTS        <- Ends Routine
+
+I also pasted "20 7B FF EA 60" (JSR $FF76 / NOP / RTS) onto 0x2FC5F.  I had figured if I had done this, I can use the free space in $2FC5D-$2FFFF so that I can repurpose the DTE code I had used in Last Armageddon into this game as well as add an accompanying DTE table.  Anyway, when I put this into practice, this is what happened...
+
+
+
+Yeah, not what I had expected.  :(
+
+I don't know what went wrong here.  I thought this worked.  Can someone help me with what's going wrong?  (Thanks to leina and Gyroballer for helping out and getting me to this point so far.)
+
+Cyneprepou4uk
+
+*****
+Hero Member
+Posts: 1,468
+The baldest romhacker
+Logged
+#1
+
+March 21, 2023, 05:27:43 AM
+CodeSelect
+03FF8C: 4C 5F FC  JMP $FC5F  <- Jumps to $2FC5F in Bank 0B
+
+Unless your mapper is in 32k PRG mode (which is unlikely), you're jumping to the last fixed bank, not to bank 0B.
+
+In 16k PRG mode you can swap 8000-BFFF area only.
+ https://github.com/cyneprepou4uk/NES-Games-Disassembly
+BlackPaladin
+
+****
+Sr. Member
+Posts: 377
+Logged
+#2
+
+March 21, 2023, 10:02:17 AM
+Quote from: Cyneprepou4uk on March 21, 2023, 05:27:43 AM
+CodeSelect
+03FF8C: 4C 5F FC  JMP $FC5F  <- Jumps to $2FC5F in Bank 0B
+
+Unless your mapper is in 32k PRG mode (which is unlikely), you're jumping to the last fixed bank, not to bank 0B.
+
+In 16k PRG mode you can swap 8000-BFFF area only.
+
+So this means that this game has the following information in the mapper...
+
+Quote
+PRG ROM: 16 x 16KiB = 256 KiB
+ CHR ROM: 0 x  8KiB = 0 KiB
+ ROM CRC32: 0x4e7cad28
+ ROM MD5:  0x39b549ef5d37dd661c0aeddca2b84c9f
+ Mapper #: 1
+ Mapper name: MMC1
+ Mirroring: Horizontal
+ Battery-backed: Yes
+ Trained: No
+ NES2.0 Extensions
+ Sub Mapper #: 0
+ Total WRAM size: 8 KiB
+ Total VRAM size: 8 KiB
+ WRAM backed by battery: 8 KiB
+ VRAM backed by battery: 0 KiB
+
+There's no way I can bank swap to $2FC5F?  Does it mean if I wanted to bank swap, it has to be in $8000-$BFFF, $18000-1BFFF, $28000-$2BFFF, $38000-3BFFF, etc.?
+
+Cyneprepou4uk
+
+*****
+Hero Member
+Posts: 1,468
+The baldest romhacker
+Logged
+#3
+
+March 21, 2023, 12:32:50 PM
+Last Edit: March 22, 2023, 05:52:32 AM by Cyneprepou4uk
+Seems that you still don't understand what PRG bankswitching is all about.
+
+Basically, CPU can access 0000-FFFF range via memory bus, and not more than that. 8000-FFFF is used for PRG, which is 32k, and CPU can access PRG within that range only (some mappers allow 6000-7FFF as well). However, games can have larger PRG than 32k, and by default CPU cannot access 0x2FC5F or whatever. So by using mappers you can connect different PRG banks to memory bus via their registers.
+
+For example, your game allows you to connect 16k banks to 8000-BFFF range. If you connect bank 00 and execute JMP $8000, you will be jumping to 0x00010. If you connect bank 01 and execute the same JMP $8000, this time you will be jumping to 0x04010.
+
+Here you can see how after the last write to FFFF register, memory at 8000-BFFF is changing to a different one in Hex Editor. I can "Go Here In ROM File" to see which PRG bank is connected at the moment. At the same time it's still 8000-BFFF for CPU, which means that your instructions must operate with 8000-BFFF range in order to do something with connected bank.
+
+
+
+Also, your game's mapper configuration connects last 16k of PRG to C000-FFFF, and you can't swap it to another bank. It's called a fixed bank. So your JMP $FC5F will always jump to 0x3FC6F despite what is loaded into 8000-BFFF.
+
+A fixed bank is used as a transitional place between bankswitching, because bad things will happen if you execute bankswitching code while being inside that bankswitching area (unless you know what you're doing). Also it contains common code for other banks in order for them to have a constant access to (math calculations for example). And of course it has interrupt vectors and their handlers. And sometimes DPCM music data.
+ https://github.com/cyneprepou4uk/NES-Games-Disassembly
+BlackPaladin
+
+****
+Sr. Member
+Posts: 377
+Logged
+#4
+
+March 22, 2023, 12:02:12 AM
+Last Edit: March 22, 2023, 12:44:19 PM by BlackPaladin
+Quote from: Cyneprepou4uk on March 21, 2023, 12:32:50 PM
+Seems that you still don't understand what PRG bankswitching is all about.
+
+Basically, CPU can access 0000-FFFF range via memory bus, and not more than that. 8000-FFFF is used for PRG, which is 32k, and CPU can access PRG within that range only (some mappers allow 6000-7FFF as well). However, games can have larger PRG than 32k, and by default CPU cannot access 0x2FC5F or whatever. So by using mappers you can connect different PRG banks to memory bus via their registers.
+
+For example, your game allows you to connect 16k banks to 8000-BFFF range. If you connect bank 00 and execute JMP $8000, you will be jumping to 0x00010. If you connect bank 01 and execute the same JMP $8000, this time you will be jumping to 0x04010.
+
+Here you can see how after the last write to FFFF register, memory at 8000-BFFF is changing to a different one in Hex Editor. I can "Go Here In ROM File" to see which PRG bank is connected at the moment. At the same time it's still 8000-BFFF for CPU, which means that your instructions must operate with 8000-BFFF range in order to do something with connected bank.
+
+
+
+Also, your game's mapper configuration connects last 16k of PRG to C000-FFFF, and you can't swap it to another bank. It's called a fixed bank. So your JMP $FC5F will always jump to 0x3FC6C despite what is loaded into 8000-BFFF.
+
+A fixed bank is used as a transitional place between bankswitching, because bad things will happen if you execute bank switching code while being in that bankswitching area (unless you know what you're doing). Also it contains common code for other banks in order for them to have a constant access to (math calculations for example). And of course it has interrupt vectors and their handlers. And sometimes DPCM music data.
+
+I guess this means I cannot use the same DTE hack I used in Last Armageddon in this game as the sweet spot is in a fixed bank and cannot be moved and bank-switched out of it.
+
+That's unfortunate.  I thought I could add DTE, but it looks like using KingMike's documentation on the subject (which I used for LA) cannot be used here.  *sigh*  Disappointed... :(
+
+Cyneprepou4uk
+
+*****
+Hero Member
+Posts: 1,468
+The baldest romhacker
+Logged
+#5
+
+March 23, 2023, 06:40:53 AM
+Looks doable to me. I saw your screenshot in Discord
+
+
+
+You read a byte and make a decision on whether DTE needs to be used. If yes, you swap bank and do your stuff, then swap back to read next byte. 900 free bytes in bank 0B should be enough.
+
+Based on the screenshot, code which is reading text is located in a fixed bank, which means that you will have access to it from bank 0B if necessary. I don't know what are you complaining about.
+ https://github.com/cyneprepou4uk/NES-Games-Disassembly
+BlackPaladin
+
+****
+Sr. Member
+Posts: 377
+Logged
+#6
+
+March 23, 2023, 09:14:29 PM
+Now, I'm confused.  Can you contact me on Discord?
+
+PrintGo Up Pages1
+Romhacking.net► Romhacking► Newcomer's Board► Adventures in NES Bank Switching: Episode 4 (Hokuto no Ken 3)
+Jump to
+=> Newcomer's Board
+ 
+Help | Terms and Rules | Go Up ▲
+SMF 2.1.4 © 2023, Simple Machines
+Page created in 0.720 seconds with 20 queries.
