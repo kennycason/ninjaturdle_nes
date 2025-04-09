@@ -27,6 +27,7 @@
 	.import		_music_stop
 	.import		_sfx_play
 	.import		_pad_poll
+	.import		_bank_spr
 	.import		_vram_adr
 	.import		_vram_put
 	.import		_vram_fill
@@ -9894,6 +9895,11 @@ L0003:	jmp     incsp6
 	lda     #$03
 	jsr     _mmc1_write
 ;
+; bank_spr(1);
+;
+	lda     #$01
+	jsr     _bank_spr
+;
 ; offset = Level_offsets[level];
 ;
 	ldy     _level
@@ -15679,6 +15685,11 @@ L0003:	rts
 ; load_title();
 ;
 	jsr     _load_title
+;
+; bank_spr(1);
+;
+	lda     #$01
+	jsr     _bank_spr
 ;
 ; ppu_on_all(); // turn on screen
 ;

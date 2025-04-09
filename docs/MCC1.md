@@ -1,3 +1,51 @@
+# MMC1 Implementation Notes
+
+## What We Successfully Implemented
+
+1. **Basic MMC1 Control**
+   - Implemented MMC1 register writes through `mmc1_write()` function in kenes.h
+   - Properly handles the 5-bit serial write protocol required by MMC1
+   - Each write sends one bit at a time to the shift register
+
+2. **Bank Configuration**
+   - Set up 4KB CHR mode using `MMC1_CONTROL` register (0x12 = %00010010)
+   - Configured separate banks for background and sprites:
+     - Pattern Table 0 (background) uses map tiles via `CHR_BANK_MAP`
+     - Pattern Table 1 (sprites) uses sprite tiles via `CHR_BANK_SPRITES`
+
+3. **Pattern Table Selection**
+   - Successfully implemented sprite pattern table selection using neslib's `bank_spr()`
+   - Fixed sprite display issues by ensuring proper pattern table selection is maintained
+   - Pattern table selection persists across room transitions
+
+4. **Key Components**
+```c
+// MMC1 registers
+#define MMC1_CONTROL    0x8000
+#define MMC1_CHR0       0xA000
+#define MMC1_CHR1       0xC000
+#define MMC1_PRG        0xE000
+
+// MMC1 CHR bank definitions
+#define CHR_BANK_FONT      0  // Font tiles
+#define CHR_BANK_TITLE     1  // Title screen tiles
+#define CHR_BANK_MAP       2  // Map tiles
+#define CHR_BANK_SPRITES   3  // Sprite tiles
+```
+
+## Implementation Details
+
+The key to getting MMC1 working was:
+
+1. Proper initialization of MMC1 control register with 4KB CHR mode
+2. Correct bank assignments for background and sprite pattern tables
+3. Using neslib's `bank_spr()` instead of direct PPU control register manipulation
+4. Maintaining bank settings across room transitions
+
+This implementation allows proper separation of background and sprite tiles while maintaining compatibility with the MMC1 mapper's requirements.
+
+---
+
 MMC1
 Jump to navigationJump to search
 MMC1
@@ -360,7 +408,7 @@ AX5904 is a third-party clone of the MMC1A.
 References
 
 23. Advanced mapper MMC1
-A mapper is some circuitry on the cartridge that allows you to “map” more than 32k of PRG ROM and/or more than 8k of CHR ROM to the NES. By dividing a larger ROM into smaller “banks” and redirecting read/writes to different banks, you can trick the NES into allowing much larger ROMs. MMC1 was the most common mapper.
+A mapper is some circuitry on the cartridge that allows you to "map" more than 32k of PRG ROM and/or more than 8k of CHR ROM to the NES. By dividing a larger ROM into smaller "banks" and redirecting read/writes to different banks, you can trick the NES into allowing much larger ROMs. MMC1 was the most common mapper.
 
 MMC1 – 681 games
 MMC3 – 600 games
@@ -372,13 +420,13 @@ AxROM – 76 games
 
 NES_SLROM
 
-I borrowed this from Kevtris’s website. The smaller chip on the bottom left says “Nintendo MMC1A”.
+I borrowed this from Kevtris's website. The smaller chip on the bottom left says "Nintendo MMC1A".
 
-MMC1 has the ability to change PRG banks and CHR banks. It can have PRG sizes up to 256k and CHR sizes up to 128k. (some rare variants could go up to 512k in PRG, but that won’t be discussed). It can change the mirroring from Horizontal to Vertical to One Screen. Metroid and Kid Icarus were MMC1, and they switch mirroring to scroll in different directions.
+MMC1 has the ability to change PRG banks and CHR banks. It can have PRG sizes up to 256k and CHR sizes up to 128k. (some rare variants could go up to 512k in PRG, but that won't be discussed). It can change the mirroring from Horizontal to Vertical to One Screen. Metroid and Kid Icarus were MMC1, and they switch mirroring to scroll in different directions.
 
-The MMC1 boards frequently had WRAM of 8k ($2000) bytes at $6000-7FFF, which could be battery backed to save a game. When I tried to make an NROM demo with WRAM, several emulators (and my PowerPak) decided that the WRAM didn’t exist because no NROM games ever had WRAM. But you wouldn’t have that problem with MMC1.
+The MMC1 boards frequently had WRAM of 8k ($2000) bytes at $6000-7FFF, which could be battery backed to save a game. When I tried to make an NROM demo with WRAM, several emulators (and my PowerPak) decided that the WRAM didn't exist because no NROM games ever had WRAM. But you wouldn't have that problem with MMC1.
 
-(In the most common arrangement…) The last PRG bank is fixed to $C000-FFFF and the $8000-BFFF can be mapped to any of the other banks. PRG banks are 16k ($4000) in size. Graphics can be swapped too. You can either change the entire pattern tables (PPU $0-1FFF) or change each separately (PPU $0-FFF and $1000-1FFF). CHR banks are 4k ($1000) in size. One thing you can do with swappable CHR banks is animate the background like Kirby’s Adventure does (by changing CHR banks every few frames).
+(In the most common arrangement…) The last PRG bank is fixed to $C000-FFFF and the $8000-BFFF can be mapped to any of the other banks. PRG banks are 16k ($4000) in size. Graphics can be swapped too. You can either change the entire pattern tables (PPU $0-1FFF) or change each separately (PPU $0-FFF and $1000-1FFF). CHR banks are 4k ($1000) in size. One thing you can do with swappable CHR banks is animate the background like Kirby's Adventure does (by changing CHR banks every few frames).
 
 I chose a 128k PRG ROM and 128k CHR ROM, and have it set to change each tileset separately.
 
@@ -388,7 +436,7 @@ This is all tricky to program, in general, and more so for cc65. It is important
 
 Music is special. You would typically reserve an entire bank for music code and data. And all the music functions have to swap the music code/data in place to use it. You will need to explicitly put the music in a certain bank and change the SOUND_BANK definition to match it (in crt0.s).
 
-Most of this new code was written by cppchriscpp with slight modification by me. Here’s the link to Chris’s code…
+Most of this new code was written by cppchriscpp with slight modification by me. Here's the link to Chris's code…
 
 https://github.com/cppchriscpp/nes-starter-kit/tree/master/source
 
@@ -397,25 +445,25 @@ I included all the files in the MMC1 folder. The .c and .h file at the top of th
 
 In the header (crt0.s)…Flag 6 indicates the mapper # = 1 (MMC1). The NES_MAPPER symbol is defined in the .cfg file. Flags 8, indicate 1 PRG RAM (WRAM) bank. At the top of crt0.s the SOUND_BANK bank will need to be correct, and music put in the corresponding segment.
 
-Also in crt0.s, I added the MMC1 reset code, and include the 2 .asm files in the MMC1 folder. I put the music in BANK 6, and now bank 6 is swapped before the music init code is called. All CHR files are put in the CHARS segment, which is 128k in size (it’s not completely filled).
+Also in crt0.s, I added the MMC1 reset code, and include the 2 .asm files in the MMC1 folder. I put the music in BANK 6, and now bank 6 is swapped before the music init code is called. All CHR files are put in the CHARS segment, which is 128k in size (it's not completely filled).
 
 Advertisement
 
 The neslib.s file in the LIB folder has also been changed, specifically the nmi code and the music functions.
 
-Each segment is defined in the .cfg file… MMC1_128_128.cfg. In the asm files, you just have to put a .segment “BANK4” to put everything below that in BANK 4. In the .c and .h files, you have to do this…
+Each segment is defined in the .cfg file… MMC1_128_128.cfg. In the asm files, you just have to put a .segment "BANK4" to put everything below that in BANK 4. In the .c and .h files, you have to do this…
 
-#pragma rodata-name (“BANK4”)
-#pragma code-name (“BANK4”)
+#pragma rodata-name ("BANK4")
+#pragma code-name ("BANK4")
 
 RODATA for Read Only data, like constant arrays.
 CODE for code, of course.
 
-Look at the ROM in a hex editor, and you can see how the linker constructed the ROM. I specifically wrote strings called “BANK0” in bank #0 and “BANK1” in bank #1, etc.
+Look at the ROM in a hex editor, and you can see how the linker constructed the ROM. I specifically wrote strings called "BANK0" in bank #0 and "BANK1" in bank #1, etc.
 
 HexView
 
-What’s new?
+What's new?
 Banked calls are necessary, when calling a function in another bank.
 
 banked_call(unsigned char bankId, void (*method)(void));
@@ -450,7 +498,7 @@ in main(), it uses
 
 banked_call(BANK_0, function_bank0);
 
-This function swaps bank #0 into place, then calls function_bank0(), which prints some text, “BANK0”, on the screen.
+This function swaps bank #0 into place, then calls function_bank0(), which prints some text, "BANK0", on the screen.
 
 banked_call(BANK_1, function_bank1);
 
@@ -460,28 +508,28 @@ banked_call(BANK_2, function_bank2);
 
 to show that you can nest one banked call inside another…up to 10 deep.
 
-And we see that both “BANK1” and “BANK2” printed, so both of those worked.
+And we see that both "BANK1" and "BANK2" printed, so both of those worked.
 
-Next we see that this banked_call() can’t take any extra arguments, so
+Next we see that this banked_call() can't take any extra arguments, so
 you would have to pass arguments with global variables…I called them arg1 and arg2.
 
-arg1 = ‘G’; // must pass arguments with globals
-arg2 = ‘4’;
+arg1 = 'G'; // must pass arguments with globals
+arg2 = '4';
 banked_call(BANK_3, function_bank3);
 
-function_bank3() prints “BANK3” and “G4”, so we know that worked. Passing arguments by global is error prone, so be careful.
+function_bank3() prints "BANK3" and "G4", so we know that worked. Passing arguments by global is error prone, so be careful.
 
 Skipping to banked_call(BANK_5, function_bank5);
 
-function_bank5() also calls function_2_bank5() which is also in the same bank. You would use standard function calls for that, and not banked_call(). It printed “BANK5” and “ALSO THIS” so we know it worked alright. Use regular functions if it’s in the same bank.
+function_bank5() also calls function_2_bank5() which is also in the same bank. You would use standard function calls for that, and not banked_call(). It printed "BANK5" and "ALSO THIS" so we know it worked alright. Use regular functions if it's in the same bank.
 
 Finally, banked_call(BANK_6, function_bank6); reads 2 bytes from the WRAM at $6000-7FFF. Just to have an example of it working. In the .cfg file I stated that there is a BSS segment there called XRAM. At the top of this .c file I declared a large array wram_array[] of 0x2000 bytes. You can read and write to it as needed.
 
-It printed “BANK6” and “AC” (our test values) correctly.
+It printed "BANK6" and "AC" (our test values) correctly.
 
 Once we return to the main() function, we know we are in the fixed bank. Without using banked_call() we could swap a bank in place using set_prg_bank(). We could do that to read data in bank… like, for example, level data. You just read from it normally, as if that bank was always there.
 
-I recommend you never use set_prg_bank() and then jumping to it without using banked_call(). The bank isn’t saved to the internal bank variable. If an NMI is triggered, the nmi code swaps the music code in place and then uses the internal bank variable to reset the swapped bank before returning… and that would be the wrong bank, and it would crash. Actually, this scenario might work without crashing. But I still recommend using the banked_call().
+I recommend you never use set_prg_bank() and then jumping to it without using banked_call(). The bank isn't saved to the internal bank variable. If an NMI is triggered, the nmi code swaps the music code in place and then uses the internal bank variable to reset the swapped bank before returning… and that would be the wrong bank, and it would crash. Actually, this scenario might work without crashing. But I still recommend using the banked_call().
 
 There is an infinite loop next, that reads the controller, and processes each button press.
 
@@ -505,13 +553,13 @@ Advertisement
 
 I just wanted to make sure that the music code is working correctly, because I rewrote the function code. All the music data and code is in bank #6, and the code swaps in bank #6 and then calls the music function. Then swaps banks back again before returning.
 
-I didn’t show any examples of changing the mirroring, but that is possible too.
+I didn't show any examples of changing the mirroring, but that is possible too.
 
 Link to the code…
 
 https://github.com/nesdoug/32_MMC1
 
-I’m glad I got this working. Now on to actual game code. Oh, also… I was using MMC1_128_128.cfg but you could double the PRG ROM to 256k, by using the MMC1_256_128.cfg (edit the compile.bat linker command line arguments).
+I'm glad I got this working. Now on to actual game code. Oh, also… I was using MMC1_128_128.cfg but you could double the PRG ROM to 256k, by using the MMC1_256_128.cfg (edit the compile.bat linker command line arguments).
 
 You could easily turn the WRAM at $6000-7FFF into save RAM by editing the header. Flags 6, indicate contains battery-backed SRAM, set bit 1… so add 2 to flags 6 in the header in crt0.s.
 

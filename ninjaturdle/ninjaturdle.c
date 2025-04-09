@@ -26,6 +26,9 @@ void main(void) {
 	
 	load_title();
 	
+	// Set sprite pattern table to 1
+	bank_spr(1);
+	
 	ppu_on_all(); // turn on screen
 	
 	scroll_x = 0;
@@ -259,6 +262,9 @@ void load_room(void) {
 	mmc1_write(MMC1_CONTROL, 0x12);  // 4KB CHR mode
 	mmc1_write(MMC1_CHR0, CHR_BANK_MAP);     // Pattern Table 0 (background) uses map tiles
 	mmc1_write(MMC1_CHR1, CHR_BANK_SPRITES); // Pattern Table 1 (sprites) uses sprite tiles
+	
+	// Ensure sprite pattern table is set to 1
+	bank_spr(1);
 	
 	offset = Level_offsets[level];
 	
