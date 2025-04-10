@@ -313,5 +313,5 @@ unsigned char damage_cooldown; // Invincibility frames after taking damage
 
 #define ENEMY_BOSS1 2
 #define BOSS_MAX_HEALTH 20
-#define BOSS_DAMAGE_PER_HIT 1
+#define BOSS_DAMAGE_PER_HIT 2
 unsigned char boss_health;

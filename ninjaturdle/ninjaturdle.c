@@ -190,6 +190,14 @@ void main(void) {
 			ppu_wait_nmi();
 			oam_clear();
 			
+			// Switch to CHR bank 0 for fonts/text and set up proper palette
+			mmc1_write(MMC1_CONTROL, 0x12);  // 4KB CHR mode
+			mmc1_write(MMC1_CHR0, CHR_BANK_FONT);   // Font tiles
+			mmc1_write(MMC1_CHR1, CHR_BANK_TITLE);  // Title graphics
+			
+			// Set up palette for text
+			pal_bg(palette_title);
+			
 			multi_vram_buffer_horz(END_TEXT, sizeof(END_TEXT), NTADR_A(6,13));
 			multi_vram_buffer_horz(END_TEXT2, sizeof(END_TEXT2), NTADR_A(8,15));
 			multi_vram_buffer_horz(END_TEXT3, sizeof(END_TEXT3), NTADR_A(11,17));
@@ -208,6 +216,16 @@ void main(void) {
 			ppu_wait_nmi();
 			oam_clear();
 			
+			// Switch to CHR bank 0 for fonts/text and set up proper palette
+			mmc1_write(MMC1_CONTROL, 0x12);  // 4KB CHR mode
+			mmc1_write(MMC1_CHR0, CHR_BANK_FONT);   // Font tiles
+			mmc1_write(MMC1_CHR1, CHR_BANK_TITLE);  // Title graphics
+			
+			// Set up palette for text
+			pal_bg(palette_title);
+			
+			// Ensure correct VRAM addressing
+			vram_adr(NTADR_A(12,14));
 			multi_vram_buffer_horz(DEAD_TEXT, sizeof(DEAD_TEXT), NTADR_A(12,14));
 			
 			set_scroll_x(0);

@@ -14794,9 +14794,9 @@ L0046:	inc     _index
 ;
 	lda     #$00
 	sta     _index
-L003D:	lda     _index
+L003E:	lda     _index
 	cmp     #$04
-	bcc     L004E
+	bcc     L004F
 ;
 ; }
 ;
@@ -14804,9 +14804,9 @@ L003D:	lda     _index
 ;
 ; if (turd_active[index]) {
 ;
-L004E:	ldy     _index
+L004F:	ldy     _index
 	lda     _turd_active,y
-	jeq     L004D
+	jeq     L004E
 ;
 ; turd_x[index] += turd_vel_x[index];
 ;
@@ -14827,9 +14827,9 @@ L0008:	sta     ptr2
 	ldx     #>(_turd_vel_x)
 	clc
 	adc     _index
-	bcc     L003E
+	bcc     L003F
 	inx
-L003E:	jsr     ldaidx
+L003F:	jsr     ldaidx
 	clc
 	adc     sreg
 	sta     (ptr2),y
@@ -14852,9 +14852,9 @@ L000A:	sta     ptr2
 	ldx     #>(_turd_vel_y)
 	clc
 	adc     _index
-	bcc     L003F
+	bcc     L0040
 	inx
-L003F:	jsr     ldaidx
+L0040:	jsr     ldaidx
 	clc
 	adc     sreg
 	sta     (ptr2),y
@@ -14880,9 +14880,9 @@ L000C:	sta     sreg
 	ldx     #>(_turd_vel_y)
 	clc
 	adc     _index
-	bcc     L0040
+	bcc     L0041
 	inx
-L0040:	jsr     ldaidx
+L0041:	jsr     ldaidx
 	sec
 	sbc     #$06
 	bvs     L000F
@@ -14900,15 +14900,15 @@ L000F:	bpl     L000D
 L000D:	ldy     _index
 	lda     _turd_x,y
 	cmp     #$FB
-	bcs     L0041
+	bcs     L0042
 	ldy     _index
 	lda     _turd_y,y
 	cmp     #$F1
-	bcs     L0041
+	bcs     L0042
 	ldy     _index
 	lda     _turd_x,y
 	cmp     #$05
-	bcc     L0041
+	bcc     L0042
 	ldy     _index
 	lda     _turd_y,y
 	cmp     #$05
@@ -14916,13 +14916,13 @@ L000D:	ldy     _index
 ;
 ; turd_active[index] = 0;
 ;
-L0041:	ldy     _index
+L0042:	ldy     _index
 	lda     #$00
 	sta     _turd_active,y
 ;
 ; continue;
 ;
-	jmp     L004D
+	jmp     L004E
 ;
 ; ENTITY1.x = turd_x[index];
 ;
@@ -14949,10 +14949,10 @@ L0011:	ldy     _index
 ;
 	jsr     _bg_coll_L
 	tax
-	bne     L0047
+	bne     L0048
 	jsr     _bg_coll_R
 	tax
-	bne     L0047
+	bne     L0048
 	lda     #<(_turd_vel_y)
 	ldx     #>(_turd_vel_y)
 	clc
@@ -14967,33 +14967,33 @@ L001D:	ldy     #$00
 	eor     #$80
 L001E:	asl     a
 	tya
-	bcc     L0049
+	bcc     L004A
 	jsr     _bg_coll_D
 	tax
-	beq     L0049
+	beq     L004A
 ;
 ; turd_active[index] = 0;
 ;
-L0047:	ldy     _index
+L0048:	ldy     _index
 	lda     #$00
 	sta     _turd_active,y
 ;
 ; continue;
 ;
-	jmp     L004D
+	jmp     L004E
 ;
 ; for (index2 = 0; index2 < MAX_ENEMY; ++index2) {
 ;
-L0049:	sta     _index2
-L004A:	lda     _index2
+L004A:	sta     _index2
+L004B:	lda     _index2
 	cmp     #$10
-	jcs     L004D
+	jcs     L004E
 ;
 ; if (enemy_active[index2]) {
 ;
 	ldy     _index2
 	lda     _enemy_active,y
-	jeq     L004C
+	jeq     L004D
 ;
 ; ENTITY2.x = enemy_x[index2];
 ;
@@ -15012,7 +15012,7 @@ L004A:	lda     _index2
 	ldy     _index2
 	lda     _enemy_type,y
 	cmp     #$02
-	bne     L004B
+	bne     L004C
 ;
 ; ENTITY2.width = 28;  // 32 pixels - 4 pixels for safety
 ;
@@ -15032,7 +15032,7 @@ L004A:	lda     _index2
 	ldx     #>(_ENTITY2)
 	jsr     _check_collision
 	tax
-	beq     L004C
+	jeq     L004D
 ;
 ; if (corn_mode) {
 ;
@@ -15043,20 +15043,22 @@ L004A:	lda     _index2
 ;
 	lda     _boss_health
 	sec
-	sbc     #$03
-	sta     _boss_health
+	sbc     #$06
 ;
 ; } else {
 ;
-	jmp     L0030
+	jmp     L003D
 ;
 ; boss_health -= BOSS_DAMAGE_PER_HIT;
 ;
-L002F:	dec     _boss_health
+L002F:	lda     _boss_health
+	sec
+	sbc     #$02
+L003D:	sta     _boss_health
 ;
 ; turd_active[index] = 0;
 ;
-L0030:	ldy     _index
+	ldy     _index
 	lda     #$00
 	sta     _turd_active,y
 ;
@@ -15070,7 +15072,7 @@ L0030:	ldy     _index
 ; if (boss_health <= 0) {
 ;
 	lda     _boss_health
-	bne     L004D
+	bne     L004E
 ;
 ; enemy_y[index2] = TURN_OFF;
 ;
@@ -15090,11 +15092,11 @@ L0030:	ldy     _index
 ;
 ; break;
 ;
-	jmp     L004D
+	jmp     L004E
 ;
 ; ENTITY2.width = ENEMY_WIDTH;
 ;
-L004B:	lda     #$0D
+L004C:	lda     #$0D
 	sta     _ENTITY2+2
 ;
 ; ENTITY2.height = ENEMY_HEIGHT;
@@ -15110,7 +15112,7 @@ L004B:	lda     #$0D
 	ldx     #>(_ENTITY2)
 	jsr     _check_collision
 	tax
-	beq     L004C
+	beq     L004D
 ;
 ; enemy_y[index2] = TURN_OFF;
 ;
@@ -15138,17 +15140,17 @@ L004B:	lda     #$0D
 ;
 ; break;
 ;
-	jmp     L004D
+	jmp     L004E
 ;
 ; for (index2 = 0; index2 < MAX_ENEMY; ++index2) {
 ;
-L004C:	inc     _index2
-	jmp     L004A
+L004D:	inc     _index2
+	jmp     L004B
 ;
 ; for(index = 0; index < MAX_TURDS; ++index) {
 ;
-L004D:	inc     _index
-	jmp     L003D
+L004E:	inc     _index
+	jmp     L003E
 
 .endproc
 
@@ -16279,6 +16281,35 @@ L0022:	jsr     _ppu_wait_nmi
 ;
 	jsr     _oam_clear
 ;
+; mmc1_write(MMC1_CONTROL, 0x12);  // 4KB CHR mode
+;
+	ldx     #$80
+	lda     #$00
+	jsr     pushax
+	lda     #$12
+	jsr     _mmc1_write
+;
+; mmc1_write(MMC1_CHR0, CHR_BANK_FONT);   // Font tiles
+;
+	ldx     #$A0
+	lda     #$00
+	jsr     pushax
+	jsr     _mmc1_write
+;
+; mmc1_write(MMC1_CHR1, CHR_BANK_TITLE);  // Title graphics
+;
+	ldx     #$C0
+	lda     #$00
+	jsr     pushax
+	lda     #$01
+	jsr     _mmc1_write
+;
+; pal_bg(palette_title);
+;
+	lda     #<(_palette_title)
+	ldx     #>(_palette_title)
+	jsr     _pal_bg
+;
 ; multi_vram_buffer_horz(END_TEXT, sizeof(END_TEXT), NTADR_A(6,13));
 ;
 	jsr     decsp3
@@ -16395,6 +16426,41 @@ L0027:	jsr     _ppu_wait_nmi
 ; oam_clear();
 ;
 	jsr     _oam_clear
+;
+; mmc1_write(MMC1_CONTROL, 0x12);  // 4KB CHR mode
+;
+	ldx     #$80
+	lda     #$00
+	jsr     pushax
+	lda     #$12
+	jsr     _mmc1_write
+;
+; mmc1_write(MMC1_CHR0, CHR_BANK_FONT);   // Font tiles
+;
+	ldx     #$A0
+	lda     #$00
+	jsr     pushax
+	jsr     _mmc1_write
+;
+; mmc1_write(MMC1_CHR1, CHR_BANK_TITLE);  // Title graphics
+;
+	ldx     #$C0
+	lda     #$00
+	jsr     pushax
+	lda     #$01
+	jsr     _mmc1_write
+;
+; pal_bg(palette_title);
+;
+	lda     #<(_palette_title)
+	ldx     #>(_palette_title)
+	jsr     _pal_bg
+;
+; vram_adr(NTADR_A(12,14));
+;
+	ldx     #$21
+	lda     #$CC
+	jsr     _vram_adr
 ;
 ; multi_vram_buffer_horz(DEAD_TEXT, sizeof(DEAD_TEXT), NTADR_A(12,14));
 ;
