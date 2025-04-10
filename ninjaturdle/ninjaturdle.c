@@ -11,6 +11,7 @@
 
 #define LEFT 0
 #define RIGHT 1
+#define CORN_DAMAGE_MULTIPLIER 3
 
 unsigned char bounce[] = {
     0, 0, 0, 1, 2, 2, 2, 1
@@ -582,6 +583,12 @@ void movement(void) {
 	// Toggle corn mode with Select button
 	if (pad1_new & PAD_SELECT) {
 		corn_mode = !corn_mode; // Toggle between 0 and 1
+		sfx_play(SFX_DING, 0); // Play a sound to indicate mode change
+	}
+	
+	// Automatically switch back to turd mode if corn count is 0
+	if (corn_mode && coins == 0) {
+		corn_mode = 0;
 		sfx_play(SFX_DING, 0); // Play a sound to indicate mode change
 	}
 	
@@ -1333,7 +1340,7 @@ void update_turds(void) {
                         if (check_collision(&ENTITY1, &ENTITY2)) {
                             // Hit boss
                             if (corn_mode) {
-                                // Double damage in corn mode
+                                // Increased damage in corn mode
                                 boss_health -= BOSS_DAMAGE_PER_HIT * CORN_DAMAGE_MULTIPLIER;
                             } else {
                                 boss_health -= BOSS_DAMAGE_PER_HIT;
