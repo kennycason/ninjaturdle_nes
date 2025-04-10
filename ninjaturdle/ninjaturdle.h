@@ -246,7 +246,7 @@ char bg_coll_D2(void);
 #define TURD_HEIGHT 7
 #define TURD_SPEED 3  // Horizontal speed
 #define TURD_GRAVITY 1 // How fast turds fall
-#define TURD_COOLDOWN 15 // Frames between shots
+#define TURD_COOLDOWN 20 // Frames between shots
 
 // Turd direction constants
 #define TURD_RIGHT 0

@@ -415,7 +415,10 @@ void movement(void) {
 	old_x = NINJA.x;
 	
 	if (pad1 & PAD_LEFT) {
-		direction = LEFT;
+		// Only change direction if not shooting (B button not held)
+		if (!(pad1 & PAD_B)) {
+			direction = LEFT;
+		}
 		
         if (NINJA.vel_x >= DECEL) {
             NINJA.vel_x -= DECEL;
@@ -429,8 +432,10 @@ void movement(void) {
 		}
 	}
 	else if (pad1 & PAD_RIGHT) {
-		
-		direction = RIGHT;
+		// Only change direction if not shooting (B button not held)
+		if (!(pad1 & PAD_B)) {
+			direction = RIGHT;
+		}
 
 		if (NINJA.vel_x <= DECEL) {
             NINJA.vel_x += DECEL;

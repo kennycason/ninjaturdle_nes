@@ -10627,22 +10627,27 @@ L002B:	jsr     _oam_meta_spr
 ;
 	lda     _pad1
 	and     #$02
-	beq     L0060
+	beq     L0062
+;
+; if (!(pad1 & PAD_B)) {
+;
+	lda     _pad1
+	and     #$40
+	bne     L0003
 ;
 ; direction = LEFT;
 ;
-	lda     #$00
 	sta     _direction
 ;
 ; if (NINJA.vel_x >= DECEL) {
 ;
-	lda     _NINJA+4
+L0003:	lda     _NINJA+4
 	cmp     #$32
 	lda     _NINJA+4+1
 	sbc     #$00
-	bvs     L0004
+	bvs     L0005
 	eor     #$80
-L0004:	bpl     L0003
+L0005:	bpl     L0004
 ;
 ; NINJA.vel_x -= DECEL;
 ;
@@ -10650,19 +10655,19 @@ L0004:	bpl     L0003
 	sec
 	sbc     #$32
 	sta     _NINJA+4
-	jcs     L0020
+	jcs     L0022
 	dec     _NINJA+4+1
 ;
 ; else if (NINJA.vel_x > 0) {
 ;
-	jmp     L0020
-L0003:	lda     _NINJA+4
+	jmp     L0022
+L0004:	lda     _NINJA+4
 	cmp     #$01
 	lda     _NINJA+4+1
 	sbc     #$00
-	bvs     L0008
+	bvs     L0009
 	eor     #$80
-L0008:	bpl     L0007
+L0009:	bpl     L0008
 ;
 ; NINJA.vel_x = 0;
 ;
@@ -10671,35 +10676,41 @@ L0008:	bpl     L0007
 ;
 ; else {
 ;
-	jmp     L0062
+	jmp     L0064
 ;
 ; NINJA.vel_x -= ACCEL;
 ;
-L0007:	lda     _NINJA+4
+L0008:	lda     _NINJA+4
 	sec
 	sbc     #$1E
 	sta     _NINJA+4
-	bcs     L000A
+	bcs     L000B
 	dec     _NINJA+4+1
 ;
 ; if (NINJA.vel_x < -MAX_SPEED) NINJA.vel_x = -MAX_SPEED;
 ;
-L000A:	lda     _NINJA+4
+L000B:	lda     _NINJA+4
 	cmp     #$C0
 	lda     _NINJA+4+1
 	sbc     #$FD
-	bvc     L000C
+	bvc     L000D
 	eor     #$80
-L000C:	jpl     L0020
+L000D:	jpl     L0022
 	ldx     #$FD
 	lda     #$C0
 ;
 ; else if (pad1 & PAD_RIGHT) {
 ;
-	jmp     L0062
-L0060:	lda     _pad1
+	jmp     L0064
+L0062:	lda     _pad1
 	and     #$01
-	beq     L000E
+	beq     L000F
+;
+; if (!(pad1 & PAD_B)) {
+;
+	lda     _pad1
+	and     #$40
+	bne     L0010
 ;
 ; direction = RIGHT;
 ;
@@ -10708,13 +10719,13 @@ L0060:	lda     _pad1
 ;
 ; if (NINJA.vel_x <= DECEL) {
 ;
-	lda     _NINJA+4
+L0010:	lda     _NINJA+4
 	cmp     #$33
 	lda     _NINJA+4+1
 	sbc     #$00
-	bvc     L0010
+	bvc     L0012
 	eor     #$80
-L0010:	bpl     L000F
+L0012:	bpl     L0011
 ;
 ; NINJA.vel_x += DECEL;
 ;
@@ -10722,15 +10733,15 @@ L0010:	bpl     L000F
 	clc
 	adc     _NINJA+4
 	sta     _NINJA+4
-	jcc     L0020
+	jcc     L0022
 	inc     _NINJA+4+1
 ;
 ; else if (NINJA.vel_x < 0) {
 ;
-	jmp     L0020
-L000F:	ldx     _NINJA+4+1
+	jmp     L0022
+L0011:	ldx     _NINJA+4+1
 	cpx     #$80
-	bcc     L0013
+	bcc     L0015
 ;
 ; NINJA.vel_x = 0;
 ;
@@ -10739,78 +10750,78 @@ L000F:	ldx     _NINJA+4+1
 ;
 ; else {
 ;
-	jmp     L0062
+	jmp     L0064
 ;
 ; NINJA.vel_x += ACCEL;
 ;
-L0013:	lda     #$1E
+L0015:	lda     #$1E
 	clc
 	adc     _NINJA+4
 	sta     _NINJA+4
-	bcc     L0015
+	bcc     L0017
 	inc     _NINJA+4+1
 ;
 ; if (NINJA.vel_x >= MAX_SPEED) NINJA.vel_x = MAX_SPEED;
 ;
-L0015:	lda     _NINJA+4
+L0017:	lda     _NINJA+4
 	cmp     #$40
 	lda     _NINJA+4+1
 	sbc     #$02
-	bvs     L0017
+	bvs     L0019
 	eor     #$80
-L0017:	bpl     L0020
+L0019:	bpl     L0022
 	ldx     #$02
 	lda     #$40
 ;
 ; else { // nothing pressed
 ;
-	jmp     L0062
+	jmp     L0064
 ;
 ; if (NINJA.vel_x >= ACCEL) NINJA.vel_x -= ACCEL;
 ;
-L000E:	lda     _NINJA+4
+L000F:	lda     _NINJA+4
 	cmp     #$1E
 	lda     _NINJA+4+1
 	sbc     #$00
-	bvs     L001A
+	bvs     L001C
 	eor     #$80
-L001A:	bpl     L0019
+L001C:	bpl     L001B
 	lda     _NINJA+4
 	sec
 	sbc     #$1E
 	sta     _NINJA+4
-	bcs     L0020
+	bcs     L0022
 	dec     _NINJA+4+1
 ;
 ; else if (NINJA.vel_x < -ACCEL) NINJA.vel_x += ACCEL;
 ;
-	jmp     L0020
-L0019:	lda     _NINJA+4
+	jmp     L0022
+L001B:	lda     _NINJA+4
 	cmp     #$E2
 	lda     _NINJA+4+1
 	sbc     #$FF
-	bvc     L001E
+	bvc     L0020
 	eor     #$80
-L001E:	asl     a
+L0020:	asl     a
 	lda     #$00
 	tax
-	bcc     L0062
+	bcc     L0064
 	lda     #$1E
 	clc
 	adc     _NINJA+4
 	sta     _NINJA+4
-	bcc     L0020
+	bcc     L0022
 	inc     _NINJA+4+1
 ;
 ; else NINJA.vel_x = 0;
 ;
-	jmp     L0020
-L0062:	sta     _NINJA+4
+	jmp     L0022
+L0064:	sta     _NINJA+4
 	stx     _NINJA+4+1
 ;
 ; NINJA.x += NINJA.vel_x;
 ;
-L0020:	lda     _NINJA+4
+L0022:	lda     _NINJA+4
 	clc
 	adc     _NINJA
 	sta     _NINJA
@@ -10824,7 +10835,7 @@ L0020:	lda     _NINJA+4
 	cmp     #$01
 	lda     _NINJA+1
 	sbc     #$F0
-	bcc     L0065
+	bcc     L0067
 ;
 ; if (old_x >= 0x8000) {
 ;
@@ -10834,7 +10845,7 @@ L0020:	lda     _NINJA+4
 	sbc     #$80
 	lda     #$00
 	tax
-	bcc     L0064
+	bcc     L0066
 ;
 ; NINJA.x = 0xf000; // max right
 ;
@@ -10842,7 +10853,7 @@ L0020:	lda     _NINJA+4
 ;
 ; NINJA.x = 0x0000; // max left
 ;
-L0064:	sta     _NINJA
+L0066:	sta     _NINJA
 	stx     _NINJA+1
 ;
 ; NINJA.vel_x = 0;
@@ -10852,7 +10863,7 @@ L0064:	sta     _NINJA
 ;
 ; ENTITY1.x = high_byte(NINJA.x); // this is much faster than passing a pointer to NINJA
 ;
-L0065:	lda     _NINJA+1
+L0067:	lda     _NINJA+1
 	sta     _ENTITY1
 ;
 ; ENTITY1.y = high_byte(NINJA.y);
@@ -10874,13 +10885,13 @@ L0065:	lda     _NINJA+1
 ;
 	ldx     _NINJA+4+1
 	cpx     #$80
-	bcc     L0024
+	bcc     L0026
 ;
 ; if (bg_coll_L() ) { // check collision left
 ;
 	jsr     _bg_coll_L
 	tax
-	beq     L002B
+	beq     L002D
 ;
 ; high_byte(NINJA.x) = high_byte(NINJA.x) - eject_L;
 ;
@@ -10901,7 +10912,7 @@ L0065:	lda     _NINJA+1
 	cmp     #$01
 	lda     _NINJA+1
 	sbc     #$F0
-	bcc     L002B
+	bcc     L002D
 ;
 ; NINJA.x = 0xf000;
 ;
@@ -10909,20 +10920,20 @@ L0065:	lda     _NINJA+1
 ;
 ; else if (NINJA.vel_x > 0) {
 ;
-	jmp     L0078
-L0024:	lda     _NINJA+4
+	jmp     L007A
+L0026:	lda     _NINJA+4
 	cmp     #$01
 	lda     _NINJA+4+1
 	sbc     #$00
-	bvs     L0029
+	bvs     L002B
 	eor     #$80
-L0029:	bpl     L002B
+L002B:	bpl     L002D
 ;
 ; if (bg_coll_R() ) { // check collision right
 ;
 	jsr     _bg_coll_R
 	tax
-	beq     L002B
+	beq     L002D
 ;
 ; high_byte(NINJA.x) = high_byte(NINJA.x) - eject_R;
 ;
@@ -10943,24 +10954,24 @@ L0029:	bpl     L002B
 	cmp     #$01
 	lda     _NINJA+1
 	sbc     #$F0
-	bcc     L002B
+	bcc     L002D
 ;
 ; NINJA.x = 0x0000;
 ;
 	ldx     #$00
-L0078:	lda     #$00
+L007A:	lda     #$00
 	sta     _NINJA
 	stx     _NINJA+1
 ;
 ; if (NINJA.vel_y < 0x300) {
 ;
-L002B:	lda     _NINJA+6
+L002D:	lda     _NINJA+6
 	cmp     #$00
 	lda     _NINJA+6+1
 	sbc     #$03
-	bvc     L002D
+	bvc     L002F
 	eor     #$80
-L002D:	bpl     L002C
+L002F:	bpl     L002E
 ;
 ; NINJA.vel_y += GRAVITY;
 ;
@@ -10968,23 +10979,23 @@ L002D:	bpl     L002C
 	clc
 	adc     _NINJA+6
 	sta     _NINJA+6
-	bcc     L002F
+	bcc     L0031
 	inc     _NINJA+6+1
 ;
 ; else {
 ;
-	jmp     L002F
+	jmp     L0031
 ;
 ; NINJA.vel_y = 0x300; // consistent
 ;
-L002C:	ldx     #$03
+L002E:	ldx     #$03
 	lda     #$00
 	sta     _NINJA+6
 	stx     _NINJA+6+1
 ;
 ; NINJA.y += NINJA.vel_y;
 ;
-L002F:	lda     _NINJA+6
+L0031:	lda     _NINJA+6
 	clc
 	adc     _NINJA+2
 	sta     _NINJA+2
@@ -11008,15 +11019,15 @@ L002F:	lda     _NINJA+6
 	cmp     #$01
 	lda     _NINJA+6+1
 	sbc     #$00
-	bvs     L0031
+	bvs     L0033
 	eor     #$80
-L0031:	bpl     L0030
+L0033:	bpl     L0032
 ;
 ; if (bg_coll_D() ) { // check collision below
 ;
 	jsr     _bg_coll_D
 	tax
-	beq     L0066
+	beq     L0068
 ;
 ; high_byte(NINJA.y) = high_byte(NINJA.y) - eject_D;
 ;
@@ -11038,22 +11049,22 @@ L0031:	bpl     L0030
 	cmp     #$01
 	lda     _NINJA+6+1
 	sbc     #$00
-	bvs     L0034
+	bvs     L0036
 	eor     #$80
-L0034:	bpl     L0066
+L0036:	bpl     L0068
 ;
 ; else if (NINJA.vel_y < 0) {
 ;
-	jmp     L0079
-L0030:	ldx     _NINJA+6+1
+	jmp     L007B
+L0032:	ldx     _NINJA+6+1
 	cpx     #$80
-	bcc     L0066
+	bcc     L0068
 ;
 ; if (bg_coll_U() ) { // check collision above
 ;
 	jsr     _bg_coll_U
 	tax
-	beq     L0066
+	beq     L0068
 ;
 ; high_byte(NINJA.y) = high_byte(NINJA.y) - eject_U;
 ;
@@ -11064,26 +11075,26 @@ L0030:	ldx     _NINJA+6+1
 ;
 ; NINJA.vel_y = 0;
 ;
-L0079:	lda     #$00
+L007B:	lda     #$00
 	sta     _NINJA+6
 	sta     _NINJA+6+1
 ;
 ; ENTITY1.y = high_byte(NINJA.y); // the rest should be the same
 ;
-L0066:	lda     _NINJA+3
+L0068:	lda     _NINJA+3
 	sta     _ENTITY1+1
 ;
 ; if (pad1_new & PAD_A) {
 ;
 	lda     _pad1_new
 	and     #$80
-	beq     L0039
+	beq     L003B
 ;
 ; if (bg_coll_D2() ) {
 ;
 	jsr     _bg_coll_D2
 	tax
-	beq     L0039
+	beq     L003B
 ;
 ; NINJA.vel_y = JUMP_VEL; // JUMP
 ;
@@ -11104,8 +11115,8 @@ L0066:	lda     _NINJA+3
 ;
 ; if (short_jump_count) {
 ;
-L0039:	lda     _short_jump_count
-	beq     L003B
+L003B:	lda     _short_jump_count
+	beq     L003D
 ;
 ; ++short_jump_count;
 ;
@@ -11115,24 +11126,24 @@ L0039:	lda     _short_jump_count
 ;
 	lda     _short_jump_count
 	cmp     #$1F
-	bcc     L003B
+	bcc     L003D
 	lda     #$00
 	sta     _short_jump_count
 ;
 ; if ((short_jump_count) && ((pad1 & PAD_A) == 0) && (NINJA.vel_y < -0x200)) {
 ;
-L003B:	lda     _short_jump_count
-	beq     L003C
+L003D:	lda     _short_jump_count
+	beq     L003E
 	lda     _pad1
 	and     #$80
-	bne     L003C
+	bne     L003E
 	lda     _NINJA+6
 	cmp     #$00
 	lda     _NINJA+6+1
 	sbc     #$FE
-	bvc     L003F
+	bvc     L0041
 	eor     #$80
-L003F:	bpl     L003C
+L0041:	bpl     L003E
 ;
 ; NINJA.vel_y = -0x200;
 ;
@@ -11147,14 +11158,14 @@ L003F:	bpl     L003C
 ;
 ; if ((scroll_x & 0xff) < 4) {
 ;
-L003C:	lda     _scroll_x
+L003E:	lda     _scroll_x
 	cmp     #$04
-	bcs     L006A
+	bcs     L006C
 ;
 ; if (!map_loaded) {
 ;
 	lda     _map_loaded
-	bne     L0045
+	bne     L0047
 ;
 ; new_cmap();
 ;
@@ -11166,16 +11177,16 @@ L003C:	lda     _scroll_x
 ;
 ; else {
 ;
-	jmp     L005E
+	jmp     L0060
 ;
 ; map_loaded = 0;
 ;
-L006A:	lda     #$00
-L005E:	sta     _map_loaded
+L006C:	lda     #$00
+L0060:	sta     _map_loaded
 ;
 ; temp5 = NINJA.x;
 ;
-L0045:	lda     _NINJA+1
+L0047:	lda     _NINJA+1
 	sta     _temp5+1
 	lda     _NINJA
 	sta     _temp5
@@ -11185,7 +11196,7 @@ L0045:	lda     _NINJA+1
 	cmp     #$01
 	lda     _NINJA+1
 	sbc     #$90
-	bcc     L0046
+	bcc     L0048
 ;
 ; temp1 = (NINJA.x - MAX_RIGHT) >> 8;
 ;
@@ -11197,13 +11208,13 @@ L0045:	lda     _NINJA+1
 ; if (temp1 > 3) temp1 = 3; // max scroll change
 ;
 	cmp     #$04
-	bcc     L006B
+	bcc     L006D
 	lda     #$03
 	sta     _temp1
 ;
 ; scroll_x += temp1;
 ;
-L006B:	lda     _temp1
+L006D:	lda     _temp1
 	clc
 	adc     _scroll_x
 	sta     _scroll_x
@@ -11220,11 +11231,11 @@ L006B:	lda     _temp1
 ;
 ; if (scroll_x >= MAX_SCROLL) {
 ;
-L0046:	lda     _scroll_x
+L0048:	lda     _scroll_x
 	cmp     #$FF
 	lda     _scroll_x+1
 	sbc     #$06
-	bcc     L006C
+	bcc     L006E
 ;
 ; scroll_x = MAX_SCROLL; // stop scrolling right, end of level
 ;
@@ -11244,7 +11255,7 @@ L0046:	lda     _scroll_x
 ;
 	lda     _NINJA+1
 	cmp     #$F1
-	bcc     L006C
+	bcc     L006E
 ;
 ; NINJA.x = 0xf100;
 ;
@@ -11255,8 +11266,8 @@ L0046:	lda     _scroll_x
 ;
 ; if (turd_cooldown > 0) {
 ;
-L006C:	lda     _turd_cooldown
-	beq     L006D
+L006E:	lda     _turd_cooldown
+	beq     L006F
 ;
 ; --turd_cooldown;
 ;
@@ -11264,9 +11275,9 @@ L006C:	lda     _turd_cooldown
 ;
 ; if (pad1_new & PAD_SELECT) {
 ;
-L006D:	lda     _pad1_new
+L006F:	lda     _pad1_new
 	and     #$20
-	beq     L004B
+	beq     L004D
 ;
 ; corn_mode = !corn_mode; // Toggle between 0 and 1
 ;
@@ -11283,10 +11294,10 @@ L006D:	lda     _pad1_new
 ;
 ; if (corn_mode && coins == 0) {
 ;
-L004B:	lda     _corn_mode
-	beq     L004C
+L004D:	lda     _corn_mode
+	beq     L004E
 	lda     _coins
-	bne     L004C
+	bne     L004E
 ;
 ; corn_mode = 0;
 ;
@@ -11301,20 +11312,20 @@ L004B:	lda     _corn_mode
 ;
 ; if (has_turd_power && (pad1 & PAD_B) && turd_cooldown == 0) {
 ;
-L004C:	lda     _has_turd_power
-	beq     L0059
+L004E:	lda     _has_turd_power
+	beq     L005B
 	lda     _pad1
 	and     #$40
-	beq     L0059
+	beq     L005B
 	lda     _turd_cooldown
-	bne     L0059
+	bne     L005B
 ;
 ; if (corn_mode && coins > 0) {
 ;
 	lda     _corn_mode
-	beq     L0054
+	beq     L0056
 	lda     _coins
-	beq     L0054
+	beq     L0056
 ;
 ; fire_turd();
 ;
@@ -11326,9 +11337,9 @@ L004C:	lda     _has_turd_power
 ;
 ; } else if (!corn_mode) {
 ;
-	jmp     L0077
-L0054:	lda     _corn_mode
-	bne     L0059
+	jmp     L0079
+L0056:	lda     _corn_mode
+	bne     L005B
 ;
 ; fire_turd();
 ;
@@ -11336,12 +11347,12 @@ L0054:	lda     _corn_mode
 ;
 ; turd_cooldown = TURD_COOLDOWN;
 ;
-L0077:	lda     #$0F
+L0079:	lda     #$14
 	sta     _turd_cooldown
 ;
 ; update_turds();
 ;
-L0059:	jmp     _update_turds
+L005B:	jmp     _update_turds
 
 .endproc
 
