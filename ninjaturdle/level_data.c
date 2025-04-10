@@ -22,7 +22,7 @@ const unsigned char level_1_coins[]={
 	0x30, 6, 0xc0, COIN_REG, 
 	0x30, 6, 0xe0, COIN_REG, 
 	0x30, 7, 0x80, COIN_REG, 
-	0xb0, 7, 0xc0, COIN_END, 	
+	// 0xb0, 7, 0xc0, COIN_END, 	// End of level coin - commented out
 	TURN_OFF
 };
 
@@ -86,7 +86,7 @@ const unsigned char level_1_enemies[]={
 	0xc0, 3, 0xb0, ENEMY_WASP, 
 	0x80, 5, 0x00, ENEMY_BOUNCE, 
 	0xc0, 5, 0x90, ENEMY_WASP, 
-	0xb0, 7, 0x70, ENEMY_BOSS1, 
+	0xb0, 7, 0xc0, ENEMY_BOSS1, // Moved boss to where the big coin was
 	TURN_OFF
 };
 
