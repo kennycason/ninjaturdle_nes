@@ -11,7 +11,6 @@
 
 #define LEFT 0
 #define RIGHT 1
-#define CORN_DAMAGE_MULTIPLIER 3
 
 unsigned char bounce[] = {
     0, 0, 0, 1, 2, 2, 2, 1
@@ -592,7 +591,8 @@ void movement(void) {
 		sfx_play(SFX_DING, 0); // Play a sound to indicate mode change
 	}
 	
-	if (has_turd_power && pad1_new & PAD_B && turd_cooldown == 0) {
+	// Continuous turd firing when B is held down
+	if (has_turd_power && (pad1 & PAD_B) && turd_cooldown == 0) {
 		// Check if we have enough corn in corn mode
 		if (corn_mode && coins > 0) {
 			fire_turd();

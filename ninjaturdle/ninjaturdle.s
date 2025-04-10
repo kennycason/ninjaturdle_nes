@@ -11299,11 +11299,11 @@ L004B:	lda     _corn_mode
 	lda     #$00
 	jsr     _sfx_play
 ;
-; if (has_turd_power && pad1_new & PAD_B && turd_cooldown == 0) {
+; if (has_turd_power && (pad1 & PAD_B) && turd_cooldown == 0) {
 ;
 L004C:	lda     _has_turd_power
 	beq     L0059
-	lda     _pad1_new
+	lda     _pad1
 	and     #$40
 	beq     L0059
 	lda     _turd_cooldown
