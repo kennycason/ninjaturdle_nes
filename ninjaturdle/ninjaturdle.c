@@ -1312,7 +1312,9 @@ void update_turds(void) {
             ENTITY1.width = TURD_WIDTH;
             ENTITY1.height = TURD_HEIGHT;
             
-            if (bg_coll_L() || bg_coll_R() || bg_coll_U() || bg_coll_D()) {
+            // Only check horizontal collisions and ground collisions
+            // Allow passing through platforms from below
+            if (bg_coll_L() || bg_coll_R() || (turd_vel_y[index] > 0 && bg_coll_D())) {
                 turd_active[index] = 0;
                 continue;
             }
@@ -1445,7 +1447,9 @@ void update_enemy_bullets(void) {
             ENTITY1.width = ENEMY_BULLET_WIDTH;
             ENTITY1.height = ENEMY_BULLET_HEIGHT;
             
-            if (bg_coll_L() || bg_coll_R() || bg_coll_U() || bg_coll_D()) {
+            // Only check horizontal collisions and ground collisions
+            // Allow passing through platforms from below
+            if (bg_coll_L() || bg_coll_R() || (enemy_bullet_vel_y[index] > 0 && bg_coll_D())) {
                 enemy_bullet_active[index] = 0;
                 continue;
             }
