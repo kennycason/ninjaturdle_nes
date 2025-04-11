@@ -80,7 +80,8 @@ enum {
 enum { 
 	SFX_JUMP, 
 	SFX_DING, 
-	SFX_NOISE
+	SFX_NOISE,
+	SFX_HIT
 };
 
 unsigned char game_mode;
@@ -131,6 +132,8 @@ struct Ninja {
 	unsigned int y;
 	signed int vel_x; // speed, signed, low byte is sub-pixel
 	signed int vel_y;
+	unsigned char health;    // Player health
+	unsigned char invincible; // Invincibility timer
 };
 
 struct Ninja NINJA;
@@ -272,6 +275,7 @@ unsigned char corn_mode; // 0 = turd mode, 1 = corn mode
 #define ENEMY_BULLET_HEIGHT 11 // Make bullets bigger (same as HERO_HEIGHT)
 #define ENEMY_BULLET_DAMAGE 2  // Damage per hit
 #define ENEMY_BULLET_COOLDOWN 90  // Frames between shots (slower than player)
+#define INVINCIBLE_TIME 60  // Frames of invincibility after being hit
 
 // Enemy bullet types
 #define BULLET_LINEAR 0  // Moves in a straight line
@@ -290,6 +294,7 @@ signed char enemy_bullet_vel_x[MAX_ENEMY_BULLETS];
 signed char enemy_bullet_vel_y[MAX_ENEMY_BULLETS];
 unsigned char enemy_bullet_type[MAX_ENEMY_BULLETS];
 unsigned char enemy_bullet_cooldown[MAX_ENEMY_BULLETS];  // Cooldown for each enemy
+unsigned char enemy_bullet_room[MAX_ENEMY_BULLETS];      // Room for each enemy bullet
 
 // Turd power flag (default to true for now)
 unsigned char has_turd_power;
@@ -315,3 +320,17 @@ unsigned char damage_cooldown; // Invincibility frames after taking damage
 #define BOSS_MAX_HEALTH 20
 #define BOSS_DAMAGE_PER_HIT 2
 unsigned char boss_health;
+
+// Collision types for metatiles based on column position in 16x16 grid
+// Columns 0-3: Background (no collision)
+// Columns 4-5: Platform (can pass through from below)
+// Columns 6-7: Solid (collision from all sides)
+
+#define IS_BACKGROUND(tile) ((tile & 0x07) < 0x04)  // Columns 0-3
+#define IS_PLATFORM(tile)   ((tile & 0x07) >= 0x04 && (tile & 0x07) <= 0x05)  // Columns 4-5
+#define IS_SOLID(tile)      ((tile & 0x07) >= 0x06)  // Columns 6-7
+
+// Collision types for metatiles
+#define COLLISION_NONE 0x00      // No collision (background)
+#define COLLISION_PLATFORM 0x80  // Can pass through from below (platforms)
+#define COLLISION_SOLID 0x40     // Solid from all directions (walls)

@@ -10,53 +10,53 @@
 //y, room, x, type
 //y = TURN_OFF end of list
 const unsigned char level_1_coins[]={
-	0x90, 0, 0x70, COIN_REG, 
-	0x90, 0, 0x90, COIN_REG, 
-	0x50, 1, 0x40, COIN_REG,  
-	0x70, 2, 0x00, COIN_REG, 
-	0x50, 2, 0x70, COIN_REG, 
-	0x50, 3, 0xa0, COIN_REG, 
-	0x50, 3, 0xd0, COIN_REG, 
-	0x60, 4, 0xf0, COIN_REG, 
-	0x60, 5, 0x20, COIN_REG,  
-	0x30, 6, 0xc0, COIN_REG, 
-	0x30, 6, 0xe0, COIN_REG, 
-	0x30, 7, 0x80, COIN_REG, 
-	// 0xb0, 7, 0xc0, COIN_END, 	// End of level coin - commented out
-	TURN_OFF
+    0x90, 0, 0x70, COIN_REG, 
+    0x90, 0, 0x90, COIN_REG, 
+    0x50, 1, 0x40, COIN_REG,  
+    0x70, 2, 0x00, COIN_REG, 
+    0x50, 2, 0x70, COIN_REG, 
+    0x50, 3, 0xa0, COIN_REG, 
+    0x50, 3, 0xd0, COIN_REG, 
+    0x60, 4, 0xf0, COIN_REG, 
+    0x60, 5, 0x20, COIN_REG,  
+    0x30, 6, 0xc0, COIN_REG, 
+    0x30, 6, 0xe0, COIN_REG, 
+    0x30, 7, 0x80, COIN_REG, 
+    // 0xb0, 7, 0xc0, COIN_END,     // End of level coin - commented out
+    TURN_OFF
 };
 
 const unsigned char level_2_coins[]={
-	0xa0, 1, 0x20, COIN_REG, 
-	0xa0, 1, 0x40, COIN_REG,
-	0x60, 2, 0x70, COIN_REG, 
-	0x30, 3, 0x20, COIN_REG, 
-	0x30, 3, 0x70, COIN_REG, 
-	0xc0, 5, 0x00, COIN_REG, 
-	0xc0, 5, 0x50, COIN_REG,
-	0x40, 6, 0x90, COIN_REG, 
-	0x40, 6, 0xd0, COIN_REG, 
-	0x40, 7, 0x40, COIN_REG, 
-	0xa0, 7, 0xc0, COIN_END, 
-	TURN_OFF
+    0xa0, 1, 0x20, COIN_REG, 
+    0xa0, 1, 0x40, COIN_REG,
+    0x60, 2, 0x70, COIN_REG, 
+    0x30, 3, 0x20, COIN_REG, 
+    0x30, 3, 0x70, COIN_REG, 
+    0xc0, 5, 0x00, COIN_REG, 
+    0xc0, 5, 0x50, COIN_REG,
+    0x40, 6, 0x90, COIN_REG, 
+    0x40, 6, 0xd0, COIN_REG, 
+    0x40, 7, 0x40, COIN_REG, 
+    0xa0, 7, 0xc0, COIN_END, 
+    TURN_OFF
 };
 
 const unsigned char level_3_coins[]={
-	0x80, 0, 0x80, COIN_REG, 
-	0x70, 1, 0x50, COIN_REG,
-	0x80, 1, 0xd0, COIN_REG,
-	0x80, 2, 0x40, COIN_REG, 
-	0x80, 2, 0x80, COIN_REG,
-	0x80, 2, 0xc0, COIN_REG, 
-	0x80, 3, 0x30, COIN_REG, 
-	0x50, 7, 0x25, COIN_REG, 
-	0x50, 7, 0x80, COIN_END, 
-	0xb0, 7, 0xd0, COIN_REG, 
-	TURN_OFF
+    0x80, 0, 0x80, COIN_REG, 
+    0x70, 1, 0x50, COIN_REG,
+    0x80, 1, 0xd0, COIN_REG,
+    0x80, 2, 0x40, COIN_REG, 
+    0x80, 2, 0x80, COIN_REG,
+    0x80, 2, 0xc0, COIN_REG, 
+    0x80, 3, 0x30, COIN_REG, 
+    0x50, 7, 0x25, COIN_REG, 
+    0x50, 7, 0x80, COIN_END, 
+    0xb0, 7, 0xd0, COIN_REG, 
+    TURN_OFF
 };
 
 const unsigned char * const Coins_list[]={
-	level_1_coins, level_2_coins, level_3_coins
+    level_1_coins, level_2_coins, level_3_coins
 };
 
 
@@ -68,106 +68,103 @@ const unsigned char * const Coins_list[]={
 //y = TURN_OFF end of list
 const unsigned char level_1_enemies[]={
 
-/* stress test	
-	0x11,0,0xe2,ENEMY_WASP,
-	0x21,0,0xe4,ENEMY_WASP,
-	0x31,0,0xe6,ENEMY_WASP,
-	0x41,0,0xe8,ENEMY_WASP,
-	0x51,0,0xe8,ENEMY_WASP,
-	0x61,0,0xe8,ENEMY_WASP,
-	0x71,0,0xe8,ENEMY_WASP,
+/* stress test    
+    0x11,0,0xe2,ENEMY_WASP,
+    0x21,0,0xe4,ENEMY_WASP,
+    0x31,0,0xe6,ENEMY_WASP,
+    0x41,0,0xe8,ENEMY_WASP,
+    0x51,0,0xe8,ENEMY_WASP,
+    0x61,0,0xe8,ENEMY_WASP,
+    0x71,0,0xe8,ENEMY_WASP,
 */
-	
-	0x90, 0, 0xc0, ENEMY_WASP, 
-	0xc0, 1, 0xe0, ENEMY_BOUNCE, 
-	0xc0, 2, 0x30, ENEMY_BOUNCE,  
-	0x80, 2, 0x90, ENEMY_WASP, 
-	0xb0, 3, 0x20, ENEMY_BOUNCE,  
-	0xc0, 3, 0xb0, ENEMY_WASP, 
-	0x80, 5, 0x00, ENEMY_BOUNCE, 
-	0xc0, 5, 0x90, ENEMY_WASP, 
-	0xb0, 7, 0xc0, ENEMY_BOSS1, // Moved boss to where the big coin was
-	TURN_OFF
+    
+    0x90, 0, 0xc0, ENEMY_WASP, 
+    0xc0, 1, 0xe0, ENEMY_BOUNCE, 
+    0xc0, 2, 0x30, ENEMY_BOUNCE,  
+    0x80, 2, 0x90, ENEMY_WASP, 
+    0xb0, 3, 0x20, ENEMY_BOUNCE,  
+    0xc0, 3, 0xb0, ENEMY_WASP, 
+    0x80, 5, 0x00, ENEMY_BOUNCE, 
+    0xc0, 5, 0x90, ENEMY_WASP, 
+    0xb0, 7, 0xc0, ENEMY_BOSS1, // Moved boss to where the big coin was
+    TURN_OFF
 };
 
 
 const unsigned char level_2_enemies[]={
-	0xc0, 0, 0x90, ENEMY_WASP, 
-	0xc0, 1, 0xd0, ENEMY_WASP, 
-	0x40, 3, 0x40, ENEMY_BOUNCE, 
-	0xc0, 4, 0x30, ENEMY_BOUNCE, 
-	0xc0, 4, 0x80, ENEMY_BOUNCE, 
-	0xc0, 6, 0x20, ENEMY_WASP, 
-	0xc0, 7, 0x20, ENEMY_BOUNCE, 
-	0xc0, 7, 0x60, ENEMY_BOUNCE, 
-	TURN_OFF
+    0xc0, 0, 0x90, ENEMY_WASP, 
+    0xc0, 1, 0xd0, ENEMY_WASP, 
+    0x40, 3, 0x40, ENEMY_BOUNCE, 
+    0xc0, 4, 0x30, ENEMY_BOUNCE, 
+    0xc0, 4, 0x80, ENEMY_BOUNCE, 
+    0xc0, 6, 0x20, ENEMY_WASP, 
+    0xc0, 7, 0x20, ENEMY_BOUNCE, 
+    0xc0, 7, 0x60, ENEMY_BOUNCE, 
+    TURN_OFF
 };
 
-	
+    
 const unsigned char level_3_enemies[]={
-	0xc0, 0, 0xc0, ENEMY_BOUNCE, 
-	0xc0, 0, 0xf0, ENEMY_BOUNCE, 
-	0xc0, 1, 0x80, ENEMY_WASP, 
-	0xc0, 1, 0xd0, ENEMY_WASP, 
-	0xc0, 2, 0x40, ENEMY_BOUNCE, 
-	0xc0, 2, 0x80, ENEMY_BOUNCE, 
-	0xc0, 2, 0xc0, ENEMY_BOUNCE, 
-	0xb0, 3, 0x10, ENEMY_BOUNCE, 
-	0xb0, 4, 0x60, ENEMY_WASP, 
-	0x90, 5, 0x40, ENEMY_BOUNCE, 
-	0x90, 6, 0x50, ENEMY_BOUNCE, 
-	0xa0, 6, 0xc0, ENEMY_BOUNCE,
-	0xc0, 7, 0xe0, ENEMY_WASP, 
-	TURN_OFF
+    0xc0, 0, 0xc0, ENEMY_BOUNCE, 
+    0xc0, 0, 0xf0, ENEMY_BOUNCE, 
+    0xc0, 1, 0x80, ENEMY_WASP, 
+    0xc0, 1, 0xd0, ENEMY_WASP, 
+    0xc0, 2, 0x40, ENEMY_BOUNCE, 
+    0xc0, 2, 0x80, ENEMY_BOUNCE, 
+    0xc0, 2, 0xc0, ENEMY_BOUNCE, 
+    0xb0, 3, 0x10, ENEMY_BOUNCE, 
+    0xb0, 4, 0x60, ENEMY_WASP, 
+    0x90, 5, 0x40, ENEMY_BOUNCE, 
+    0x90, 6, 0x50, ENEMY_BOUNCE, 
+    0xa0, 6, 0xc0, ENEMY_BOUNCE,
+    0xc0, 7, 0xe0, ENEMY_WASP, 
+    TURN_OFF
 };
 
 const unsigned char * const Enemy_list[]={
-	level_1_enemies, level_2_enemies, level_3_enemies
+    level_1_enemies, level_2_enemies, level_3_enemies
 };
 
 
 
 // 5 bytes per metatile definition, tile TL, TR, BL, BR, palette 0-3
-// T means top, B means bottom, L left,R right
-// 51 maximum # of metatiles = 255 bytes
-// 5th byte, 	1000 0000 = floor collision
-//				0100 0000 = all collision, solid
-//				0000 0011 = palette
+// T means top, B means bottom, L left, R right
+// Column-based collision system:
+// Columns 0-3: Background (no collision)
+// Columns 4-5: Platform (can pass through from below)
+// Columns 6-7: Solid (collision from all sides)
 
 const unsigned char metatiles1[]={
-	0, 0, 0, 0,  0,
-	11, 11, 11, 11,  3,
-	13, 14, 29, 30,  0,
-	5, 6, 21, 22,  1,
-	6, 6, 22, 22,  1,
-	6, 7, 22, 23,  1,
-	27, 1, 27, 1,  2,
-	1, 1, 1, 1,  2,
-	1, 28, 1, 28,  2,
-	8, 1, 24, 25,  2,
-	1, 1, 25, 25,  2,
-	1, 10, 25, 26,  2
+    // Background tiles (columns 0-3)
+    0x00, 0x01, 
+    0x10, 0x11, COLLISION_NONE,      // Empty background (ID 0)
+
+    0x02, 0x03, 
+    0x12, 0x13, COLLISION_NONE,      // Basic background (ID 1)
+
+    0x04, 0x05, 
+    0x14, 0x15, COLLISION_NONE,      // Alt background (ID 2)
+
+    0x06, 0x07, 
+    0x16, 0x17, COLLISION_NONE,      // Decorative 1 (ID 3)
+    
+    // Platform tiles (columns 4-5)
+    0x08, 0x09, 
+    0x18, 0x19, COLLISION_PLATFORM,  // Platform style 1 (ID 4)
+
+    0x0A, 0x0B, 
+    0x1A, 0x1B, COLLISION_PLATFORM,  // Platform style 2 (ID 5)
+    
+    // Solid tiles (columns 6-7)
+    0x0C, 0x0D, 
+    0x1C, 0x1D, COLLISION_SOLID,     // Solid block 1 (ID 6)
+
+    0x0E, 0x0F, 
+    0x1E, 0x1F, COLLISION_SOLID,     // Solid block 2 (ID 7)
 };
 
 #define COL_DOWN 0x80
 #define COL_ALL 0x40
-
-const unsigned char is_solid[]={
-	0,
-	COL_DOWN,
-	COL_ALL+COL_DOWN,
-	COL_DOWN,
-	COL_DOWN,
-	COL_DOWN,
-	0,
-	0,
-	0,
-	0,
-	0,
-	0
-};
-
-
 
 #include "BG/Level1.c"
 #include "BG/w1l1_main.c"
@@ -182,7 +179,7 @@ Level3_0,Level3_1,Level3_2,Level3_3,Level3_4,Level3_5,Level3_6,Level3_7
 };
 
 const unsigned char Level_offsets[]={
-	0,8,16
+    0,8,16
 };
 
 #define MAX_ROOMS (8-1)

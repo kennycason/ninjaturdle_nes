@@ -49,6 +49,10 @@ void main(void) {
 		turd_active[index] = 0;
 	}
 	
+	// Initialize player health and invincibility
+	NINJA.health = MAX_HEALTH;
+	NINJA.invincible = 0;
+	
 	while (1) {
 		while (game_mode == MODE_TITLE) {
 			ppu_wait_nmi();
@@ -291,7 +295,9 @@ void load_room(void) {
 	for(y=0; ;y+=0x20) { 
 		for(x=0; ;x+=0x20) {
 			address = get_ppu_addr(0, x, y);
-			index = (y & 0xf0) + (x >> 4);
+			// index = (y & 0xf0) + (x >> 4);
+			index = ((y >> 4) * 16) + (x >> 4);
+			// index = (y >> 5) * 16 + (x >> 4);
 			buffer_4_mt(address, index); // ppu_address, index to the data
 			flush_vram_update2();
 			if (x == 0xe0) break;
@@ -992,18 +998,30 @@ char bg_coll_D2(void) {
 char bg_collision_sub(void) {
     if (temp_y >= 0xf0) return 0;
     
-	coordinates = (temp_x >> 4) + (temp_y & 0xf0);
+    coordinates = (temp_x >> 4) + (temp_y & 0xf0);
     // we just need 4 bits each from x and y
-	
-	map = temp_room&1; // high byte
-	if (!map) {
-		collision = c_map[coordinates];
-	}
-	else {
-		collision = c_map2[coordinates];
-	}
-	
-    return is_solid[collision];
+    
+    map = temp_room&1; // high byte
+    if (!map) {
+        temp1 = c_map[coordinates];
+    }
+    else {
+        temp1 = c_map2[coordinates];
+    }
+    
+    // Check collision type based on column position
+    if (IS_SOLID(temp1)) {
+        return COLLISION_SOLID;  // Solid collision from all sides
+    }
+    else if (IS_PLATFORM(temp1)) {
+        // Only return platform collision if approaching from above
+        if (NINJA.vel_y > 0) {
+            return COLLISION_PLATFORM;
+        }
+        return 0;  // Pass through from below
+    }
+    
+    return 0;  // No collision with background tiles
 }
 
 
@@ -1438,6 +1456,9 @@ void fire_enemy_bullet(unsigned char enemy_index, unsigned char bullet_type) {
             // Always throw with an upward arc like ninja's turds
             enemy_bullet_vel_y[index] = ENEMY_BULLET_JUMP;
             
+            // Set the room for the bullet
+            enemy_bullet_room[index] = enemy_room[enemy_index];
+            
             // Set cooldown for this enemy
             enemy_bullet_cooldown[enemy_index] = ENEMY_BULLET_COOLDOWN;
             
@@ -1450,57 +1471,56 @@ void fire_enemy_bullet(unsigned char enemy_index, unsigned char bullet_type) {
 
 // Function to update enemy bullets
 void update_enemy_bullets(void) {
-    for(index = 0; index < MAX_ENEMY_BULLETS; ++index) {
-        if (enemy_bullet_active[index]) {
-            // Move bullet
-            enemy_bullet_x[index] += enemy_bullet_vel_x[index];
-            enemy_bullet_y[index] += enemy_bullet_vel_y[index];
+    char i;
+    char collision;
+    
+    for (i = 0; i < MAX_ENEMY_BULLETS; i++) {
+        if (enemy_bullet_active[i]) {
+            // Update position
+            enemy_bullet_x[i] += enemy_bullet_vel_x[i];
+            enemy_bullet_y[i] += enemy_bullet_vel_y[i];
             
-            // Apply gravity to all bullets
-            enemy_bullet_vel_y[index] += ENEMY_BULLET_GRAVITY;
+            // Apply gravity
+            enemy_bullet_vel_y[i] += GRAVITY;
             
-            // Cap falling speed
-            if (enemy_bullet_vel_y[index] > 5) {
-                enemy_bullet_vel_y[index] = 5;
-            }
+            // Check for collisions
+            temp_x = enemy_bullet_x[i];
+            temp_y = enemy_bullet_y[i];
+            temp_room = enemy_bullet_room[i];
             
-            // Check if bullet is off screen
-            if (enemy_bullet_x[index] > 250 || enemy_bullet_y[index] > 240 || 
-                enemy_bullet_x[index] < 5 || enemy_bullet_y[index] < 5) {
-                enemy_bullet_active[index] = 0;
+            collision = bg_collision_sub();
+            
+            // Handle collisions - deactivate on solid collision or platform from above
+            if (collision == COLLISION_SOLID || 
+                (collision == COLLISION_PLATFORM && enemy_bullet_vel_y[i] > 0)) {
+                enemy_bullet_active[i] = 0;
                 continue;
             }
             
-            // Check collision with background
-            ENTITY1.x = enemy_bullet_x[index];
-            ENTITY1.y = enemy_bullet_y[index];
-            ENTITY1.width = ENEMY_BULLET_WIDTH;
-            ENTITY1.height = ENEMY_BULLET_HEIGHT;
-            
-            // Only check horizontal collisions and ground collisions
-            // Allow passing through platforms from below
-            if (bg_coll_L() || bg_coll_R() || (enemy_bullet_vel_y[index] > 0 && bg_coll_D())) {
-                enemy_bullet_active[index] = 0;
+            // Check if bullet is off screen
+            if (enemy_bullet_y[i] >= 0xf0) {
+                enemy_bullet_active[i] = 0;
                 continue;
             }
             
             // Check collision with player
+            ENTITY1.x = enemy_bullet_x[i];
+            ENTITY1.y = enemy_bullet_y[i];
+            ENTITY1.width = ENEMY_BULLET_WIDTH;
+            ENTITY1.height = ENEMY_BULLET_HEIGHT;
+            
             ENTITY2.x = high_byte(NINJA.x);
             ENTITY2.y = high_byte(NINJA.y);
             ENTITY2.width = HERO_WIDTH;
             ENTITY2.height = HERO_HEIGHT;
             
             if (check_collision(&ENTITY1, &ENTITY2)) {
-                if (damage_cooldown == 0) {
-                    player_health -= ENEMY_BULLET_DAMAGE;
-                    damage_cooldown = DAMAGE_COOLDOWN_TIME;
-                    sfx_play(SFX_NOISE, 0);
-                    
-                    if (player_health <= 0) {
-                        death = 1;
-                    }
+                if (!NINJA.invincible) {
+                    NINJA.health--;
+                    NINJA.invincible = INVINCIBLE_TIME;
+                    sfx_play(SFX_HIT, 0);
                 }
-                enemy_bullet_active[index] = 0;
+                enemy_bullet_active[i] = 0;
             }
         }
     }

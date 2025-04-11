@@ -1,3 +1,6 @@
+Row 0: [00][01][02][03][04][05][06][07][08][09][0A][0B][0C][0D][0E][0F]
+Row 1: [10][11][12][13][14][15][16][17][18][19][1A][1B][1C][1D][1E][1F]
+
 Ah, let me clarify the NES CHR ROM structure:
 Each NES pattern table is 128×128 pixels (16×16 tiles of 8×8 pixels each)
 Pattern Table 0: $0000-$0FFF (4KB)
