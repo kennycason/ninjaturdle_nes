@@ -295,9 +295,7 @@ void load_room(void) {
 	for(y=0; ;y+=0x20) { 
 		for(x=0; ;x+=0x20) {
 			address = get_ppu_addr(0, x, y);
-			// index = (y & 0xf0) + (x >> 4);
 			index = (y & 0xf0) + (x >> 4);
-			// index = (y >> 5) * 16 + (x >> 4);
 			buffer_4_mt(address, index); // ppu_address, index to the data
 			flush_vram_update2();
 			if (x == 0xe0) break;

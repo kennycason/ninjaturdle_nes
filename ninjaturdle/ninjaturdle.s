@@ -205,6 +205,7 @@
 	.export		_level_3_enemies
 	.export		_Enemy_list
 	.export		_metatiles1
+	.export		_metatiles_pal1
 	.export		_Level1_0
 	.export		_Level1_1
 	.export		_Level1_2
@@ -1112,42 +1113,42 @@ _metatiles1:
 	.byte	$01
 	.byte	$10
 	.byte	$11
-	.byte	$00
+	.byte	$03
 	.byte	$02
 	.byte	$03
 	.byte	$12
 	.byte	$13
-	.byte	$00
+	.byte	$02
 	.byte	$04
 	.byte	$05
 	.byte	$14
 	.byte	$15
-	.byte	$00
+	.byte	$01
 	.byte	$06
 	.byte	$07
 	.byte	$16
 	.byte	$17
-	.byte	$00
+	.byte	$01
 	.byte	$08
 	.byte	$09
 	.byte	$18
 	.byte	$19
-	.byte	$80
+	.byte	$81
 	.byte	$0A
 	.byte	$0B
 	.byte	$1A
 	.byte	$1B
-	.byte	$80
+	.byte	$81
 	.byte	$0C
 	.byte	$0D
 	.byte	$1C
 	.byte	$1D
-	.byte	$40
+	.byte	$42
 	.byte	$0E
 	.byte	$0F
 	.byte	$1E
 	.byte	$1F
-	.byte	$40
+	.byte	$42
 	.byte	$20
 	.byte	$21
 	.byte	$30
@@ -1157,37 +1158,37 @@ _metatiles1:
 	.byte	$23
 	.byte	$32
 	.byte	$33
-	.byte	$00
+	.byte	$01
 	.byte	$24
 	.byte	$25
 	.byte	$34
 	.byte	$35
-	.byte	$00
+	.byte	$01
 	.byte	$26
 	.byte	$27
 	.byte	$36
 	.byte	$37
-	.byte	$00
+	.byte	$01
 	.byte	$28
 	.byte	$29
 	.byte	$38
 	.byte	$39
-	.byte	$80
+	.byte	$81
 	.byte	$2A
 	.byte	$2B
 	.byte	$3A
 	.byte	$3B
-	.byte	$80
+	.byte	$81
 	.byte	$2C
 	.byte	$2D
 	.byte	$3C
 	.byte	$3D
-	.byte	$40
+	.byte	$42
 	.byte	$2E
 	.byte	$2F
 	.byte	$3E
 	.byte	$3F
-	.byte	$40
+	.byte	$42
 	.byte	$40
 	.byte	$41
 	.byte	$50
@@ -1197,37 +1198,54 @@ _metatiles1:
 	.byte	$43
 	.byte	$52
 	.byte	$53
-	.byte	$00
+	.byte	$01
 	.byte	$44
 	.byte	$45
 	.byte	$54
 	.byte	$55
-	.byte	$00
+	.byte	$01
 	.byte	$46
 	.byte	$47
 	.byte	$56
 	.byte	$57
-	.byte	$00
+	.byte	$01
 	.byte	$48
 	.byte	$49
 	.byte	$58
 	.byte	$59
-	.byte	$80
+	.byte	$81
 	.byte	$4A
 	.byte	$4B
 	.byte	$5A
 	.byte	$5B
-	.byte	$80
+	.byte	$81
 	.byte	$4C
 	.byte	$4D
 	.byte	$5C
 	.byte	$5D
-	.byte	$40
+	.byte	$42
 	.byte	$4E
 	.byte	$4F
 	.byte	$5E
 	.byte	$5F
-	.byte	$40
+	.byte	$42
+_metatiles_pal1:
+	.byte	$03
+	.byte	$02
+	.byte	$01
+	.byte	$00
+	.byte	$01
+	.byte	$01
+	.byte	$02
+	.byte	$02
+	.byte	$00
+	.byte	$01
+	.byte	$02
+	.byte	$03
+	.byte	$01
+	.byte	$01
+	.byte	$02
+	.byte	$02
 _Level1_0:
 	.byte	$00
 	.byte	$00
