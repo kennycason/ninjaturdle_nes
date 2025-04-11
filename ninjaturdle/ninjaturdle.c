@@ -525,63 +525,48 @@ void movement(void) {
     // skip collision if vel = 0
 
 	
-	// handle y
-
-	// gravity
-
-	// NINJA.vel_y is signed
-	if (NINJA.vel_y < 0x300) {
-		NINJA.vel_y += GRAVITY;
-	}
-	else {
-		NINJA.vel_y = 0x300; // consistent
-	}
-	NINJA.y += NINJA.vel_y;
-	
-	ENTITY1.x = high_byte(NINJA.x);
-	ENTITY1.y = high_byte(NINJA.y);
-	
+	// handle y (gravity and jumping)
+    if (NINJA.vel_y < 0x300) {
+        NINJA.vel_y += GRAVITY;
+    }
+    else {
+        NINJA.vel_y = 0x300; // terminal velocity
+    }
+    
+    // Update y position
+    NINJA.y += NINJA.vel_y;
+    
+    // Update collision box position
+    ENTITY1.x = high_byte(NINJA.x);
+    ENTITY1.y = high_byte(NINJA.y);
+    
+    // Check for collisions
     if (NINJA.vel_y > 0) {
-        if (bg_coll_D() ) { // check collision below
+        if (bg_coll_D()) { // check collision below
             high_byte(NINJA.y) = high_byte(NINJA.y) - eject_D;
             NINJA.y &= 0xff00;
-            if (NINJA.vel_y > 0) {
-                NINJA.vel_y = 0;
-            }
+            NINJA.vel_y = 0;
         }
     }
     else if (NINJA.vel_y < 0) {
-        if (bg_coll_U() ) { // check collision above
+        if (bg_coll_U()) { // check collision above
             high_byte(NINJA.y) = high_byte(NINJA.y) - eject_U;
             NINJA.vel_y = 0;
         }
     }
     
-	// check collision down a little lower than hero
-	ENTITY1.y = high_byte(NINJA.y); // the rest should be the same
-	
-	// Check if we can jump (on ground)
-	can_jump = bg_coll_D2();
-	
-	if (pad1_new & PAD_A) {
+    // Check if we can jump (on ground)
+    can_jump = bg_coll_D2();
+    
+    // Handle jumping
+    if (pad1_new & PAD_A) {
         if (can_jump) {
-			NINJA.vel_y = JUMP_VEL; // JUMP
-			sfx_play(SFX_JUMP, 0);
-			short_jump_count = 1;
-		}
-	}
-	
-	// Variable jump height (separate from ground check)
-	if (short_jump_count) {
-		++short_jump_count;
-		if (short_jump_count > 15) short_jump_count = 0;
-	}
-	if ((short_jump_count) && ((pad1 & PAD_A) == 0) && (NINJA.vel_y < -0x200)) {
-		NINJA.vel_y = -0x200;
-		short_jump_count = 0;
-	}
-	
-	// do we need to load a new collision map? (scrolled into a new room)
+            NINJA.vel_y = JUMP_VEL;
+            sfx_play(SFX_JUMP, 0);
+        }
+    }
+    
+    // do we need to load a new collision map? (scrolled into a new room)
 	if ((scroll_x & 0xff) < 4) {
 		if (!map_loaded) {
 			new_cmap();
