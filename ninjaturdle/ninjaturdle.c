@@ -434,10 +434,16 @@ void draw_sprites(void) {
 
 	
 void movement(void) {
+    // Declare all variables at the top
+    char can_jump;
+    unsigned int old_x;
+    unsigned int temp5;
+    unsigned char temp1;
+    
     // handle x
-	old_x = NINJA.x;
-	
-	if (pad1 & PAD_LEFT) {
+    old_x = NINJA.x;
+    
+    if (pad1 & PAD_LEFT) {
 		// Only change direction if not shooting (B button not held)
 		if (!(pad1 & PAD_B)) {
 			direction = LEFT;
@@ -554,19 +560,21 @@ void movement(void) {
 	// check collision down a little lower than hero
 	ENTITY1.y = high_byte(NINJA.y); // the rest should be the same
 	
+	// Check if we can jump (on ground)
+	can_jump = bg_coll_D2();
+	
 	if (pad1_new & PAD_A) {
-        if (bg_coll_D2() ) {
+        if (can_jump) {
 			NINJA.vel_y = JUMP_VEL; // JUMP
 			sfx_play(SFX_JUMP, 0);
 			short_jump_count = 1;
 		}
-		
 	}
 	
-	// allow shorter jumps
+	// Variable jump height (separate from ground check)
 	if (short_jump_count) {
 		++short_jump_count;
-		if (short_jump_count > 30) short_jump_count = 0;
+		if (short_jump_count > 15) short_jump_count = 0;
 	}
 	if ((short_jump_count) && ((pad1 & PAD_A) == 0) && (NINJA.vel_y < -0x200)) {
 		NINJA.vel_y = -0x200;
