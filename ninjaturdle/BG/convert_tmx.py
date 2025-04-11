@@ -74,13 +74,21 @@ def convert_object_layer(tmx_file, output_file):
     if object_layer is None:
         print("Error: Object layer not found!")
         return
+    else:
+        print("Object layer found.")
     
-    # Get the firstgid for the sprites tileset
-    sprites_tileset = root.find(".//tileset[@name='sprites']")
+    # Get the firstgid for the sprites tileset - look for tileset with source="sprites.tsx"
+    sprites_tileset = root.find(".//tileset[@source='sprites.tsx']")
     if sprites_tileset is None:
         print("Error: Sprites tileset not found!")
+        print("Available tilesets:")
+        for tileset in root.findall(".//tileset"):
+            print(f"  source={tileset.get('source')} firstgid={tileset.get('firstgid')}")
         return
+    else:
+        print("Sprites tileset found.")
     sprites_firstgid = int(sprites_tileset.get('firstgid'))
+    print(f"Sprites firstgid: {sprites_firstgid}")
     
     # Parse CSV data
     layer_data = parse_csv_data(object_layer.text)
@@ -88,9 +96,12 @@ def convert_object_layer(tmx_file, output_file):
     width = len(layer_data[0])
     rooms = width // 16
 
+    print(f"Writing header to {output_file.name}")
     output_file.write("// Y, room, X, object #\n\n")
+    output_file.flush()  # Force write to disk
     
     # Process objects room by room
+    objects_found = 0
     for room in range(rooms):
         room_start = room * 16
         room_end = room_start + 16
@@ -103,9 +114,18 @@ def convert_object_layer(tmx_file, output_file):
                     # Get local tile ID by subtracting the sprites firstgid
                     obj_id = value - sprites_firstgid
                     x_in_room = x % 16
-                    output_file.write(f"0x{y:02x}0, {room}, 0x{x_in_room:02x}0, obj{obj_id}, \n")
+                    print(f"Object found at (x={x_in_room}, y={y}) with ID: {obj_id}")
+                    output_line = f"0x{y:02x}0, {room}, 0x{x_in_room:02x}0, obj{obj_id}, \n"
+                    print(f"Writing: {output_line.strip()}")
+                    output_file.write(output_line)
+                    output_file.flush()  # Force write to disk
+                    objects_found += 1
 
+    print(f"Writing footer to {output_file.name}")
     output_file.write("TURN_OFF\n\n")
+    output_file.flush()  # Force write to disk
+    print(f"Total objects written: {objects_found}")
+    print(f"File size after writing: {os.path.getsize(output_file.name)} bytes")
 
 def main():
     parser = argparse.ArgumentParser(description='Convert Tiled TMX files to C code')

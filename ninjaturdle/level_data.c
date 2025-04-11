@@ -236,16 +236,14 @@ const unsigned char metatiles_pal1[]={
 #define COL_DOWN 0x80
 #define COL_ALL 0x40
 
-#include "BG/Level1.c"
 #include "BG/w1l1_main.c"
-#include "BG/Level2.c"
-#include "BG/Level3.c"
+#include "BG/w1l2_main.c"
+#include "BG/w1l3_main.c"
 
 const unsigned char * const Levels_list[]={
-// Level1_0,Level1_1,Level1_2,Level1_3,Level1_4,Level1_5,Level1_6,Level1_7,
 w1l1_main_0,w1l1_main_1,w1l1_main_2,w1l1_main_3,w1l1_main_4,w1l1_main_5,w1l1_main_6,w1l1_main_7,
-Level2_0,Level2_1,Level2_2,Level2_3,Level2_4,Level2_5,Level2_6,Level2_7,
-Level3_0,Level3_1,Level3_2,Level3_3,Level3_4,Level3_5,Level3_6,Level3_7
+w1l2_main_0,w1l2_main_1,w1l2_main_2,w1l2_main_3,w1l2_main_4,w1l2_main_5,w1l2_main_6,w1l2_main_7,
+w1l3_main_0,w1l3_main_1,w1l3_main_2,w1l3_main_3,w1l3_main_4,w1l3_main_5,w1l3_main_6,w1l3_main_7
 };
 
 const unsigned char Level_offsets[]={
