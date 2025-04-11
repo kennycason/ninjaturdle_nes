@@ -1,5 +1,6 @@
 // kenes.h - Custom NES utilities for Ninjaturdle
 // A collection of helper functions and definitions for NROM games
+// Kenny Cason
 
 #ifndef KENES_H
 #define KENES_H
@@ -152,5 +153,14 @@ void draw_border(unsigned char x, unsigned char y, unsigned char width, unsigned
         }
     }
 }
+
+// will push 5 metatiles (2x2 box) and 1 attribute byte(palette) to the vram_buffer
+// this affects a 32x32 px area of the screen, and pushes 17 bytes to the vram_buffer.
+// make sure to set_vram_buffer(), and clear_vram_buffer(), 
+// set_data_pointer(), and set_mt_pointer() 
+// "index" is which starting byte in the room data, to convert to tiles.
+// use index = (y & 0xf0) + (x >> 4); where x 0-255 and y 0-239;
+void __fastcall__ buffer_5_mt(int ppu_address, char index);
+
 
 #endif // KENES_H

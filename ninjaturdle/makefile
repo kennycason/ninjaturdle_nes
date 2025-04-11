@@ -1,6 +1,4 @@
-# makefile for nesdoug example code, for Linux
-# this version won't move the final files to BUILD folder
-# also won't rebuild on changes to neslib/nesdoug/famitone files
+# makefile for nes game + char bank browser
 
 CC65 = ../tools/cc65/bin/cc65
 CA65 = ../tools/cc65/bin/ca65

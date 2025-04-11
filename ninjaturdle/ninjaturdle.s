@@ -1148,6 +1148,86 @@ _metatiles1:
 	.byte	$1E
 	.byte	$1F
 	.byte	$40
+	.byte	$20
+	.byte	$21
+	.byte	$30
+	.byte	$31
+	.byte	$00
+	.byte	$22
+	.byte	$23
+	.byte	$32
+	.byte	$33
+	.byte	$00
+	.byte	$24
+	.byte	$25
+	.byte	$34
+	.byte	$35
+	.byte	$00
+	.byte	$26
+	.byte	$27
+	.byte	$36
+	.byte	$37
+	.byte	$00
+	.byte	$28
+	.byte	$29
+	.byte	$38
+	.byte	$39
+	.byte	$80
+	.byte	$2A
+	.byte	$2B
+	.byte	$3A
+	.byte	$3B
+	.byte	$80
+	.byte	$2C
+	.byte	$2D
+	.byte	$3C
+	.byte	$3D
+	.byte	$40
+	.byte	$2E
+	.byte	$2F
+	.byte	$3E
+	.byte	$3F
+	.byte	$40
+	.byte	$40
+	.byte	$41
+	.byte	$50
+	.byte	$51
+	.byte	$00
+	.byte	$42
+	.byte	$43
+	.byte	$52
+	.byte	$53
+	.byte	$00
+	.byte	$44
+	.byte	$45
+	.byte	$54
+	.byte	$55
+	.byte	$00
+	.byte	$46
+	.byte	$47
+	.byte	$56
+	.byte	$57
+	.byte	$00
+	.byte	$48
+	.byte	$49
+	.byte	$58
+	.byte	$59
+	.byte	$80
+	.byte	$4A
+	.byte	$4B
+	.byte	$5A
+	.byte	$5B
+	.byte	$80
+	.byte	$4C
+	.byte	$4D
+	.byte	$5C
+	.byte	$5D
+	.byte	$40
+	.byte	$4E
+	.byte	$4F
+	.byte	$5E
+	.byte	$5F
+	.byte	$40
 _Level1_0:
 	.byte	$00
 	.byte	$00
@@ -9876,10 +9956,10 @@ L0003:	jmp     incsp6
 	ldx     #$00
 	lda     _offset
 	asl     a
-	bcc     L0019
+	bcc     L001A
 	inx
 	clc
-L0019:	adc     #<(_Levels_list)
+L001A:	adc     #<(_Levels_list)
 	sta     ptr1
 	txa
 	adc     #>(_Levels_list)
@@ -9900,12 +9980,12 @@ L0019:	adc     #<(_Levels_list)
 ; for(y=0; ;y+=0x20) { 
 ;
 	lda     #$00
-L0017:	sta     _y
+L0018:	sta     _y
 ;
 ; for(x=0; ;x+=0x20) {
 ;
 	lda     #$00
-L0016:	sta     _x
+L0017:	sta     _x
 ;
 ; address = get_ppu_addr(0, x, y);
 ;
@@ -9921,17 +10001,10 @@ L0016:	sta     _x
 	sta     _address
 	stx     _address+1
 ;
-; index = ((y >> 4) * 16) + (x >> 4);
+; index = (y & 0xf0) + (x >> 4);
 ;
 	lda     _y
-	lsr     a
-	lsr     a
-	lsr     a
-	lsr     a
-	asl     a
-	asl     a
-	asl     a
-	asl     a
+	and     #$F0
 	sta     ptr1
 	lda     _x
 	lsr     a
@@ -9958,41 +10031,41 @@ L0016:	sta     _x
 ;
 	lda     _x
 	cmp     #$E0
-	beq     L001C
+	beq     L001D
 ;
 ; for(x=0; ;x+=0x20) {
 ;
 	lda     #$20
 	clc
 	adc     _x
-	jmp     L0016
+	jmp     L0017
 ;
 ; if (y == 0xe0) break;
 ;
-L001C:	lda     _y
+L001D:	lda     _y
 	cmp     #$E0
-	beq     L001D
+	beq     L001E
 ;
 ; for(y=0; ;y+=0x20) { 
 ;
 	lda     #$20
 	clc
 	adc     _y
-	jmp     L0017
+	jmp     L0018
 ;
 ; ++offset;
 ;
-L001D:	inc     _offset
+L001E:	inc     _offset
 ;
 ; set_data_pointer(Levels_list[offset]);
 ;
 	ldx     #$00
 	lda     _offset
 	asl     a
-	bcc     L001A
+	bcc     L001B
 	inx
 	clc
-L001A:	adc     #<(_Levels_list)
+L001B:	adc     #<(_Levels_list)
 	sta     ptr1
 	txa
 	adc     #>(_Levels_list)
@@ -10007,7 +10080,7 @@ L001A:	adc     #<(_Levels_list)
 ; for(y=0; ;y+=0x20) { 
 ;
 	lda     #$00
-L0018:	sta     _y
+L0019:	sta     _y
 ;
 ; x = 0;
 ;
@@ -10028,10 +10101,18 @@ L0018:	sta     _y
 	sta     _address
 	stx     _address+1
 ;
-; index = (y & 0xf0);
+; index = (y & 0xf0) + (x >> 4);
 ;
 	lda     _y
 	and     #$F0
+	sta     ptr1
+	lda     _x
+	lsr     a
+	lsr     a
+	lsr     a
+	lsr     a
+	clc
+	adc     ptr1
 	sta     _index
 ;
 ; buffer_4_mt(address, index); // ppu_address, index to the data
@@ -10050,18 +10131,18 @@ L0018:	sta     _y
 ;
 	lda     _y
 	cmp     #$E0
-	beq     L001E
+	beq     L001F
 ;
 ; for(y=0; ;y+=0x20) { 
 ;
 	lda     #$20
 	clc
 	adc     _y
-	jmp     L0018
+	jmp     L0019
 ;
 ; --offset;
 ;
-L001E:	dec     _offset
+L001F:	dec     _offset
 ;
 ; memcpy (c_map, Levels_list[offset], 240);
 ;
@@ -10071,10 +10152,10 @@ L001E:	dec     _offset
 	ldx     #$00
 	lda     _offset
 	asl     a
-	bcc     L001B
+	bcc     L001C
 	inx
 	clc
-L001B:	adc     #<(_Levels_list)
+L001C:	adc     #<(_Levels_list)
 	sta     ptr1
 	txa
 	adc     #>(_Levels_list)
