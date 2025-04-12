@@ -125,7 +125,8 @@ const unsigned char * const Enemy_list[]={
     level_1_enemies, level_2_enemies, level_3_enemies
 };
 
-const unsigned char metatiles1[]={
+// tile tids 0x00-0x3F (0-63) (64 16x16 tiles, 256 8x8 tiles)
+const unsigned char metatiles1[] = {
     // row 0
 
     // Background tiles (columns 0-3)
@@ -189,176 +190,176 @@ const unsigned char metatiles1[]={
 
     // Background tiles (columns 0-3)
     0x40, 0x41, 
-    0x50, 0x51, COLLISION_NONE | 0,    // Empty background (ID 8)
+    0x50, 0x51, COLLISION_NONE | 0,    // Empty background (ID 10)
 
     0x42, 0x43, 
-    0x52, 0x53, COLLISION_NONE | 1,    // Basic background (ID 9)
+    0x52, 0x53, COLLISION_NONE | 1,    // Basic background (ID 11)
 
     0x44, 0x45, 
-    0x54, 0x55, COLLISION_NONE | 1,    // Alt background (ID A)
+    0x54, 0x55, COLLISION_NONE | 1,    // Alt background (ID 12)
 
     0x46, 0x47, 
-    0x56, 0x57, COLLISION_NONE | 1,    // Decorative 1 (ID B)
+    0x56, 0x57, COLLISION_NONE | 1,    // Decorative 1 (ID 13)
     
     // Platform tiles (columns 4-5)
     0x48, 0x49, 
-    0x58, 0x59, COLLISION_PLATFORM | 1,    // Platform style 1 (ID C)
+    0x58, 0x59, COLLISION_PLATFORM | 1,    // Platform style 1 (ID 14)
 
     0x4A, 0x4B, 
-    0x5A, 0x5B, COLLISION_PLATFORM | 1,    // Platform style 2 (ID D)
+    0x5A, 0x5B, COLLISION_PLATFORM | 1,    // Platform style 2 (ID 15)
     
     // Solid tiles (columns 6-7)
     0x4C, 0x4D, 
-    0x5C, 0x5D, COLLISION_SOLID | 2,      // Solid block 1 (ID E)
+    0x5C, 0x5D, COLLISION_SOLID | 2,      // Solid block 1 (ID 16)
 
     0x4E, 0x4F, 
-    0x5E, 0x5F, COLLISION_SOLID | 2,     // Solid block 2 (ID F)
+    0x5E, 0x5F, COLLISION_SOLID | 2,     // Solid block 2 (ID 17)
 
     // row 4
 
     // Background tiles (columns 0-3)
     0x60, 0x61, 
-    0x70, 0x71, COLLISION_NONE | 0,    // Empty background (ID 8)
+    0x70, 0x71, COLLISION_NONE | 0,    // Empty background (ID 18)
 
     0x62, 0x63, 
-    0x72, 0x73, COLLISION_NONE | 1,    // Basic background (ID 9)
+    0x72, 0x73, COLLISION_NONE | 1,    // Basic background (ID 19)
 
     0x64, 0x65, 
-    0x74, 0x75, COLLISION_NONE | 1,    // Alt background (ID A)
+    0x74, 0x75, COLLISION_NONE | 1,    // Alt background (ID 1A))
 
     0x66, 0x67, 
-    0x76, 0x77, COLLISION_NONE | 1,    // Decorative 1 (ID B)
+    0x76, 0x77, COLLISION_NONE | 1,    // Decorative 1 (ID 1B)
     
     // Platform tiles (columns 4-5)
     0x68, 0x69, 
-    0x78, 0x79, COLLISION_PLATFORM | 1,    // Platform style 1 (ID C)
+    0x78, 0x79, COLLISION_PLATFORM | 1,    // Platform style 1 (ID 1C)
 
     0x6A, 0x6B, 
-    0x7A, 0x7B, COLLISION_PLATFORM | 1,    // Platform style 2 (ID D)
+    0x7A, 0x7B, COLLISION_PLATFORM | 1,    // Platform style 2 (ID 1D)
     
     // Solid tiles (columns 6-7)
     0x6C, 0x6D, 
-    0x7C, 0x7D, COLLISION_SOLID | 2,      // Solid block 1 (ID E)
+    0x7C, 0x7D, COLLISION_SOLID | 2,      // Solid block 1 (ID 1E)
 
     0x6E, 0x6F, 
-    0x7E, 0x7F, COLLISION_SOLID | 2,     // Solid block 2 (ID F)
+    0x7E, 0x7F, COLLISION_SOLID | 2,     // Solid block 2 (ID 1F)
 
     // row 5
 
     // Background tiles (columns 0-3)
     0x80, 0x81, 
-    0x90, 0x91, COLLISION_NONE | 0,    // Empty background (ID 8)
+    0x90, 0x91, COLLISION_NONE | 0,    // Empty background (ID 20)
 
     0x82, 0x83, 
-    0x92, 0x93, COLLISION_NONE | 1,    // Basic background (ID 9)
+    0x92, 0x93, COLLISION_NONE | 1,    // Basic background (ID 21)
 
     0x84, 0x85, 
-    0x94, 0x95, COLLISION_NONE | 1,    // Alt background (ID A)
+    0x94, 0x95, COLLISION_NONE | 1,    // Alt background (ID 22)
 
     0x86, 0x87, 
-    0x96, 0x97, COLLISION_NONE | 1,    // Decorative 1 (ID B)
+    0x96, 0x97, COLLISION_NONE | 1,    // Decorative 1 (ID 23)
     
     // Platform tiles (columns 4-5)
     0x88, 0x89, 
-    0x98, 0x99, COLLISION_PLATFORM | 1,    // Platform style 1 (ID C)
+    0x98, 0x99, COLLISION_PLATFORM | 1,    // Platform style 1 (ID 24)
 
     0x8A, 0x8B, 
-    0x9A, 0x9B, COLLISION_PLATFORM | 1,    // Platform style 2 (ID D)
+    0x9A, 0x9B, COLLISION_PLATFORM | 1,    // Platform style 2 (ID 25)
     
     // Solid tiles (columns 6-7)
     0x8C, 0x8D, 
-    0x9C, 0x9D, COLLISION_SOLID | 2,      // Solid block 1 (ID E)
+    0x9C, 0x9D, COLLISION_SOLID | 2,      // Solid block 1 (ID 26)
 
     0x8E, 0x8F, 
-    0x9E, 0x9F, COLLISION_SOLID | 2,     // Solid block 2 (ID F)
+    0x9E, 0x9F, COLLISION_SOLID | 2,     // Solid block 2 (ID 27)
 
     // row 6
 
     // Background tiles (columns 0-3)
     0xA0, 0xA1, 
-    0xB0, 0xB1, COLLISION_NONE | 0,    // Empty background (ID 8)
+    0xB0, 0xB1, COLLISION_NONE | 0,    // Empty background (ID 28)
 
     0xA2, 0xA3, 
-    0xB2, 0xB3, COLLISION_NONE | 1,    // Basic background (ID 9)
+    0xB2, 0xB3, COLLISION_NONE | 1,    // Basic background (ID 29)
 
     0xA4, 0xA5, 
-    0xB4, 0xB5, COLLISION_NONE | 1,    // Alt background (ID A)
+    0xB4, 0xB5, COLLISION_NONE | 1,    // Alt background (ID 2A)
 
     0xA6, 0xA7, 
-    0xB6, 0xB7, COLLISION_NONE | 1,    // Decorative 1 (ID B)
+    0xB6, 0xB7, COLLISION_NONE | 1,    // Decorative 1 (ID 2B)
     
     // Platform tiles (columns 4-5)
     0xA8, 0xA9, 
-    0xB8, 0xB9, COLLISION_PLATFORM | 1,    // Platform style 1 (ID C)
+    0xB8, 0xB9, COLLISION_PLATFORM | 1,    // Platform style 1 (ID 2C)
 
     0xAA, 0xAB, 
-    0xBA, 0xBB, COLLISION_PLATFORM | 1,    // Platform style 2 (ID D)
+    0xBA, 0xBB, COLLISION_PLATFORM | 1,    // Platform style 2 (ID 2D)
     
     // Solid tiles (columns 6-7)
     0xAC, 0xAD, 
-    0xBC, 0xBD, COLLISION_SOLID | 2,      // Solid block 1 (ID E)
+    0xBC, 0xBD, COLLISION_SOLID | 2,      // Solid block 1 (ID 2E)
 
     0xAE, 0xAF, 
-    0xBE, 0xBF, COLLISION_SOLID | 2,     // Solid block 2 (ID F)
+    0xBE, 0xBF, COLLISION_SOLID | 2,     // Solid block 2 (ID 2F)
 
     // row 7
 
     // Background tiles (columns 0-3)
     0xC0, 0xC1, 
-    0xD0, 0xD1, COLLISION_NONE | 0,    // Empty background (ID 8)
+    0xD0, 0xD1, COLLISION_NONE | 0,    // Empty background (ID 30)
 
     0xC2, 0xC3, 
-    0xD2, 0xD3, COLLISION_NONE | 1,    // Basic background (ID 9)
+    0xD2, 0xD3, COLLISION_NONE | 1,    // Basic background (ID 31)
 
     0xC4, 0xC5, 
-    0xD4, 0xD5, COLLISION_NONE | 1,    // Alt background (ID A)
+    0xD4, 0xD5, COLLISION_NONE | 1,    // Alt background (ID 32)
 
     0xC6, 0xC7, 
-    0xD6, 0xD7, COLLISION_NONE | 1,    // Decorative 1 (ID B)
+    0xD6, 0xD7, COLLISION_NONE | 1,    // Decorative 1 (ID 33)
     
     // Platform tiles (columns 4-5)
     0xC8, 0xC9, 
-    0xD8, 0xD9, COLLISION_PLATFORM | 1,    // Platform style 1 (ID C)
+    0xD8, 0xD9, COLLISION_PLATFORM | 1,    // Platform style 1 (ID 34)
 
     0xCA, 0xCB, 
-    0xDA, 0xDB, COLLISION_PLATFORM | 1,    // Platform style 2 (ID D)
+    0xDA, 0xDB, COLLISION_PLATFORM | 1,    // Platform style 2 (ID 35)
     
     // Solid tiles (columns 6-7)
     0xCC, 0xCD, 
-    0xDC, 0xDD, COLLISION_SOLID | 2,      // Solid block 1 (ID E)
+    0xDC, 0xDD, COLLISION_SOLID | 2,      // Solid block 1 (ID 36)
 
     0xCE, 0xCF, 
-    0xDE, 0xDF, COLLISION_SOLID | 2,     // Solid block 2 (ID F)
+    0xDE, 0xDF, COLLISION_SOLID | 2,     // Solid block 2 (ID 37)
 
 
     // row 8
 
     // Background tiles (columns 0-3)
     0xE0, 0xE1, 
-    0xF0, 0xF1, COLLISION_NONE | 0,    // Empty background (ID 8)
+    0xF0, 0xF1, COLLISION_NONE | 0,    // Empty background (ID 38)
 
     0xE2, 0xE3, 
-    0xF2, 0xF3, COLLISION_NONE | 1,    // Basic background (ID 9)
+    0xF2, 0xF3, COLLISION_NONE | 1,    // Basic background (ID 39)
 
     0xE4, 0xE5, 
-    0xF4, 0xF5, COLLISION_NONE | 1,    // Alt background (ID A)
+    0xF4, 0xF5, COLLISION_NONE | 1,    // Alt background (ID 3A)
 
     0xE6, 0xE7, 
-    0xF6, 0xF7, COLLISION_NONE | 1,    // Decorative 1 (ID B)
+    0xF6, 0xF7, COLLISION_NONE | 1,    // Decorative 1 (ID 3B)
     
     // Platform tiles (columns 4-5)
     0xE8, 0xE9, 
-    0xF8, 0xF9, COLLISION_PLATFORM | 1,    // Platform style 1 (ID C)
+    0xF8, 0xF9, COLLISION_PLATFORM | 1,    // Platform style 1 (ID 3C)
 
     0xEA, 0xEB, 
-    0xFA, 0xFB, COLLISION_PLATFORM | 1,    // Platform style 2 (ID D)
+    0xFA, 0xFB, COLLISION_PLATFORM | 1,    // Platform style 2 (ID 3D)
     
     // Solid tiles (columns 6-7)
     0xEC, 0xED, 
-    0xFC, 0xFD, COLLISION_SOLID | 2,      // Solid block 1 (ID E)
+    0xFC, 0xFD, COLLISION_SOLID | 2,      // Solid block 1 (ID 3E)
 
     0xEE, 0xEF, 
-    0xFE, 0xFF, COLLISION_SOLID | 2,     // Solid block 2 (ID F)
+    0xFE, 0xFF, COLLISION_SOLID | 2,     // Solid block 2 (ID 3F)
 };
 
 // Palette mapping array - maps tile IDs to palette numbers (0-3)
