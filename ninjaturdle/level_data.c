@@ -126,6 +126,8 @@ const unsigned char * const Enemy_list[]={
 };
 
 const unsigned char metatiles1[]={
+    // row 0
+
     // Background tiles (columns 0-3)
     0x00, 0x01, 
     0x10, 0x11, COLLISION_NONE | 3,     // Empty background (ID 0)
@@ -211,6 +213,64 @@ const unsigned char metatiles1[]={
 
     0x4E, 0x4F, 
     0x5E, 0x5F, COLLISION_SOLID | 2,     // Solid block 2 (ID F)
+
+    // row 4
+
+    // Background tiles (columns 0-3)
+    0x60, 0x61, 
+    0x70, 0x71, COLLISION_NONE | 0,    // Empty background (ID 8)
+
+    0x62, 0x63, 
+    0x72, 0x73, COLLISION_NONE | 1,    // Basic background (ID 9)
+
+    0x64, 0x65, 
+    0x74, 0x75, COLLISION_NONE | 1,    // Alt background (ID A)
+
+    0x66, 0x67, 
+    0x76, 0x77, COLLISION_NONE | 1,    // Decorative 1 (ID B)
+    
+    // Platform tiles (columns 4-5)
+    0x68, 0x69, 
+    0x78, 0x79, COLLISION_PLATFORM | 1,    // Platform style 1 (ID C)
+
+    0x6A, 0x6B, 
+    0x7A, 0x7B, COLLISION_PLATFORM | 1,    // Platform style 2 (ID D)
+    
+    // Solid tiles (columns 6-7)
+    0x6C, 0x6D, 
+    0x7C, 0x7D, COLLISION_SOLID | 2,      // Solid block 1 (ID E)
+
+    0x6E, 0x6F, 
+    0x7E, 0x7F, COLLISION_SOLID | 2,     // Solid block 2 (ID F)
+
+    // row 5
+
+    // Background tiles (columns 0-3)
+    0x80, 0x81, 
+    0x90, 0x91, COLLISION_NONE | 0,    // Empty background (ID 8)
+
+    0x82, 0x83, 
+    0x92, 0x93, COLLISION_NONE | 1,    // Basic background (ID 9)
+
+    0x84, 0x85, 
+    0x94, 0x95, COLLISION_NONE | 1,    // Alt background (ID A)
+
+    0x86, 0x87, 
+    0x96, 0x97, COLLISION_NONE | 1,    // Decorative 1 (ID B)
+    
+    // Platform tiles (columns 4-5)
+    0x88, 0x89, 
+    0x98, 0x99, COLLISION_PLATFORM | 1,    // Platform style 1 (ID C)
+
+    0x8A, 0x8B, 
+    0x9A, 0x9B, COLLISION_PLATFORM | 1,    // Platform style 2 (ID D)
+    
+    // Solid tiles (columns 6-7)
+    0x8C, 0x8D, 
+    0x9C, 0x9D, COLLISION_SOLID | 2,      // Solid block 1 (ID E)
+
+    0x8E, 0x8F, 
+    0x9E, 0x9F, COLLISION_SOLID | 2,     // Solid block 2 (ID F)
 };
 
 // Palette mapping array - maps tile IDs to palette numbers (0-3)

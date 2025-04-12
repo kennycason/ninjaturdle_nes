@@ -293,10 +293,6 @@ _CoinSpr:
 	.byte	$FF
 	.byte	$20
 	.byte	$01
-	.byte	$FF
-	.byte	$07
-	.byte	$30
-	.byte	$01
 	.byte	$80
 _CornSelectedSpr:
 	.byte	$FF
@@ -329,7 +325,7 @@ _BigCoinSpr:
 _CoinHud:
 	.byte	$00
 	.byte	$00
-	.byte	$23
+	.byte	$20
 	.byte	$01
 	.byte	$80
 _EnemyWaspSprL:
@@ -545,7 +541,7 @@ _TurdSpr:
 _TurdLifeSpr:
 	.byte	$00
 	.byte	$00
-	.byte	$40
+	.byte	$30
 	.byte	$01
 	.byte	$80
 _shuffle_array:
@@ -1220,6 +1216,86 @@ _metatiles1:
 	.byte	$5E
 	.byte	$5F
 	.byte	$42
+	.byte	$60
+	.byte	$61
+	.byte	$70
+	.byte	$71
+	.byte	$00
+	.byte	$62
+	.byte	$63
+	.byte	$72
+	.byte	$73
+	.byte	$01
+	.byte	$64
+	.byte	$65
+	.byte	$74
+	.byte	$75
+	.byte	$01
+	.byte	$66
+	.byte	$67
+	.byte	$76
+	.byte	$77
+	.byte	$01
+	.byte	$68
+	.byte	$69
+	.byte	$78
+	.byte	$79
+	.byte	$81
+	.byte	$6A
+	.byte	$6B
+	.byte	$7A
+	.byte	$7B
+	.byte	$81
+	.byte	$6C
+	.byte	$6D
+	.byte	$7C
+	.byte	$7D
+	.byte	$42
+	.byte	$6E
+	.byte	$6F
+	.byte	$7E
+	.byte	$7F
+	.byte	$42
+	.byte	$80
+	.byte	$81
+	.byte	$90
+	.byte	$91
+	.byte	$00
+	.byte	$82
+	.byte	$83
+	.byte	$92
+	.byte	$93
+	.byte	$01
+	.byte	$84
+	.byte	$85
+	.byte	$94
+	.byte	$95
+	.byte	$01
+	.byte	$86
+	.byte	$87
+	.byte	$96
+	.byte	$97
+	.byte	$01
+	.byte	$88
+	.byte	$89
+	.byte	$98
+	.byte	$99
+	.byte	$81
+	.byte	$8A
+	.byte	$8B
+	.byte	$9A
+	.byte	$9B
+	.byte	$81
+	.byte	$8C
+	.byte	$8D
+	.byte	$9C
+	.byte	$9D
+	.byte	$42
+	.byte	$8E
+	.byte	$8F
+	.byte	$9E
+	.byte	$9F
+	.byte	$42
 _metatiles_pal1:
 	.byte	$03
 	.byte	$02
@@ -1238,26 +1314,26 @@ _metatiles_pal1:
 	.byte	$02
 	.byte	$02
 _w1l1_main_0:
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -1270,9 +1346,9 @@ _w1l1_main_0:
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$07
-	.byte	$07
-	.byte	$07
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -1286,8 +1362,8 @@ _w1l1_main_0:
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$07
-	.byte	$07
+	.byte	$1E
+	.byte	$1E
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -1302,24 +1378,26 @@ _w1l1_main_0:
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$07
-	.byte	$07
+	.byte	$1E
+	.byte	$1E
 	.byte	$00
 	.byte	$00
 	.byte	$00
 	.byte	$00
+	.byte	$10
 	.byte	$00
 	.byte	$00
 	.byte	$00
+	.byte	$18
 	.byte	$00
 	.byte	$00
 	.byte	$00
 	.byte	$00
 	.byte	$00
+	.byte	$1E
+	.byte	$1E
 	.byte	$00
 	.byte	$00
-	.byte	$07
-	.byte	$07
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -1332,9 +1410,9 @@ _w1l1_main_0:
 	.byte	$00
 	.byte	$00
 	.byte	$00
+	.byte	$1E
 	.byte	$00
 	.byte	$00
-	.byte	$07
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -1348,9 +1426,7 @@ _w1l1_main_0:
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$07
+	.byte	$1E
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -1366,7 +1442,23 @@ _w1l1_main_0:
 	.byte	$0D
 	.byte	$04
 	.byte	$04
-	.byte	$07
+	.byte	$1E
+	.byte	$00
+	.byte	$00
+	.byte	$10
+	.byte	$00
+	.byte	$00
+	.byte	$00
+	.byte	$00
+	.byte	$00
+	.byte	$00
+	.byte	$00
+	.byte	$00
+	.byte	$00
+	.byte	$02
+	.byte	$09
+	.byte	$09
+	.byte	$1E
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -1382,7 +1474,7 @@ _w1l1_main_0:
 	.byte	$02
 	.byte	$09
 	.byte	$09
-	.byte	$07
+	.byte	$1E
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -1392,29 +1484,13 @@ _w1l1_main_0:
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$09
-	.byte	$09
-	.byte	$07
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
+	.byte	$11
+	.byte	$1B
 	.byte	$00
 	.byte	$0A
 	.byte	$09
 	.byte	$09
-	.byte	$07
+	.byte	$1E
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -1430,13 +1506,13 @@ _w1l1_main_0:
 	.byte	$05
 	.byte	$09
 	.byte	$09
-	.byte	$07
+	.byte	$1E
+	.byte	$21
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
+	.byte	$1A
+	.byte	$1B
 	.byte	$0A
 	.byte	$13
 	.byte	$13
@@ -1446,67 +1522,67 @@ _w1l1_main_0:
 	.byte	$13
 	.byte	$13
 	.byte	$13
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
 _w1l1_main_1:
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
 	.byte	$00
 	.byte	$00
 	.byte	$00
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -1518,9 +1594,9 @@ _w1l1_main_1:
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$07
-	.byte	$07
-	.byte	$07
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -1529,15 +1605,17 @@ _w1l1_main_1:
 	.byte	$00
 	.byte	$00
 	.byte	$00
+	.byte	$18
 	.byte	$00
 	.byte	$00
 	.byte	$00
 	.byte	$00
+	.byte	$1E
+	.byte	$1E
 	.byte	$00
-	.byte	$07
-	.byte	$07
 	.byte	$00
 	.byte	$00
+	.byte	$10
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -1561,6 +1639,7 @@ _w1l1_main_1:
 	.byte	$00
 	.byte	$00
 	.byte	$00
+	.byte	$10
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -1572,10 +1651,7 @@ _w1l1_main_1:
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
+	.byte	$1B
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -1606,7 +1682,7 @@ _w1l1_main_1:
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$00
+	.byte	$18
 	.byte	$09
 	.byte	$03
 	.byte	$00
@@ -1626,24 +1702,24 @@ _w1l1_main_1:
 	.byte	$09
 	.byte	$03
 	.byte	$00
+	.byte	$21
 	.byte	$00
 	.byte	$00
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
+	.byte	$1A
+	.byte	$12
+	.byte	$1B
 	.byte	$00
 	.byte	$00
 	.byte	$00
 	.byte	$00
 	.byte	$09
 	.byte	$03
-	.byte	$00
+	.byte	$21
 	.byte	$07
-	.byte	$00
+	.byte	$21
 	.byte	$00
 	.byte	$00
 	.byte	$0D
@@ -1660,7 +1736,7 @@ _w1l1_main_1:
 	.byte	$07
 	.byte	$07
 	.byte	$07
-	.byte	$00
+	.byte	$21
 	.byte	$00
 	.byte	$02
 	.byte	$09
@@ -1685,89 +1761,90 @@ _w1l1_main_1:
 	.byte	$13
 	.byte	$0B
 	.byte	$00
-	.byte	$00
+	.byte	$11
 	.byte	$0A
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
 _w1l1_main_2:
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
 	.byte	$00
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
 	.byte	$00
 	.byte	$00
+	.byte	$18
 	.byte	$00
 	.byte	$00
 	.byte	$00
 	.byte	$00
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
 	.byte	$00
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -1777,15 +1854,16 @@ _w1l1_main_2:
 	.byte	$00
 	.byte	$00
 	.byte	$00
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
 	.byte	$00
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
 	.byte	$00
 	.byte	$00
+	.byte	$10
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -1827,6 +1905,7 @@ _w1l1_main_2:
 	.byte	$00
 	.byte	$00
 	.byte	$00
+	.byte	$10
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -1845,19 +1924,16 @@ _w1l1_main_2:
 	.byte	$00
 	.byte	$00
 	.byte	$00
+	.byte	$10
 	.byte	$00
 	.byte	$00
 	.byte	$00
 	.byte	$00
 	.byte	$00
 	.byte	$00
+	.byte	$1A
 	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
+	.byte	$1B
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -1877,7 +1953,7 @@ _w1l1_main_2:
 	.byte	$04
 	.byte	$04
 	.byte	$05
-	.byte	$00
+	.byte	$1A
 	.byte	$00
 	.byte	$00
 	.byte	$04
@@ -1916,7 +1992,7 @@ _w1l1_main_2:
 	.byte	$13
 	.byte	$0B
 	.byte	$00
-	.byte	$00
+	.byte	$20
 	.byte	$0A
 	.byte	$13
 	.byte	$13
@@ -1928,63 +2004,63 @@ _w1l1_main_2:
 	.byte	$13
 	.byte	$0B
 	.byte	$00
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
 _w1l1_main_3:
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -1993,9 +2069,9 @@ _w1l1_main_3:
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$07
-	.byte	$07
-	.byte	$07
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -2009,8 +2085,8 @@ _w1l1_main_3:
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$07
-	.byte	$07
+	.byte	$1E
+	.byte	$1E
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -2030,6 +2106,7 @@ _w1l1_main_3:
 	.byte	$00
 	.byte	$00
 	.byte	$00
+	.byte	$18
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -2055,6 +2132,7 @@ _w1l1_main_3:
 	.byte	$00
 	.byte	$00
 	.byte	$00
+	.byte	$18
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -2078,15 +2156,13 @@ _w1l1_main_3:
 	.byte	$00
 	.byte	$00
 	.byte	$00
+	.byte	$10
 	.byte	$00
 	.byte	$00
+	.byte	$12
 	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
+	.byte	$20
+	.byte	$11
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -2111,7 +2187,7 @@ _w1l1_main_3:
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$00
+	.byte	$1A
 	.byte	$00
 	.byte	$00
 	.byte	$02
@@ -2153,9 +2229,9 @@ _w1l1_main_3:
 	.byte	$09
 	.byte	$09
 	.byte	$09
+	.byte	$1B
 	.byte	$00
-	.byte	$00
-	.byte	$00
+	.byte	$1A
 	.byte	$0A
 	.byte	$13
 	.byte	$13
@@ -2169,55 +2245,55 @@ _w1l1_main_3:
 	.byte	$13
 	.byte	$13
 	.byte	$13
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
 _w1l1_main_4:
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -2251,6 +2327,7 @@ _w1l1_main_4:
 	.byte	$00
 	.byte	$00
 	.byte	$00
+	.byte	$10
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -2289,6 +2366,7 @@ _w1l1_main_4:
 	.byte	$00
 	.byte	$00
 	.byte	$00
+	.byte	$10
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -2312,9 +2390,7 @@ _w1l1_main_4:
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
+	.byte	$1A
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -2338,20 +2414,20 @@ _w1l1_main_4:
 	.byte	$00
 	.byte	$00
 	.byte	$00
+	.byte	$18
 	.byte	$00
 	.byte	$00
 	.byte	$00
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$00
-	.byte	$00
+	.byte	$11
 	.byte	$09
 	.byte	$09
 	.byte	$03
 	.byte	$00
 	.byte	$00
-	.byte	$00
+	.byte	$10
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -2398,7 +2474,7 @@ _w1l1_main_4:
 	.byte	$13
 	.byte	$0B
 	.byte	$00
-	.byte	$00
+	.byte	$11
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -2410,55 +2486,55 @@ _w1l1_main_4:
 	.byte	$13
 	.byte	$13
 	.byte	$13
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
 _w1l1_main_5:
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -2467,12 +2543,12 @@ _w1l1_main_5:
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -2483,13 +2559,15 @@ _w1l1_main_5:
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
 	.byte	$00
+	.byte	$10
 	.byte	$00
+	.byte	$10
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -2498,11 +2576,11 @@ _w1l1_main_5:
 	.byte	$00
 	.byte	$00
 	.byte	$00
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
 	.byte	$00
 	.byte	$00
-	.byte	$07
-	.byte	$07
-	.byte	$07
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -2511,14 +2589,15 @@ _w1l1_main_5:
 	.byte	$00
 	.byte	$00
 	.byte	$00
+	.byte	$18
 	.byte	$00
 	.byte	$00
 	.byte	$00
+	.byte	$1E
+	.byte	$1E
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$07
-	.byte	$07
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -2530,11 +2609,11 @@ _w1l1_main_5:
 	.byte	$00
 	.byte	$00
 	.byte	$00
+	.byte	$1E
+	.byte	$1E
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$07
-	.byte	$07
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -2569,17 +2648,14 @@ _w1l1_main_5:
 	.byte	$00
 	.byte	$00
 	.byte	$00
+	.byte	$20
 	.byte	$00
 	.byte	$00
 	.byte	$00
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
+	.byte	$10
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -2608,14 +2684,14 @@ _w1l1_main_5:
 	.byte	$13
 	.byte	$0B
 	.byte	$00
+	.byte	$12
 	.byte	$00
 	.byte	$00
 	.byte	$00
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$00
-	.byte	$00
+	.byte	$10
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -2650,56 +2726,56 @@ _w1l1_main_5:
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$00
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
+	.byte	$20
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
 _w1l1_main_6:
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -2714,8 +2790,8 @@ _w1l1_main_6:
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$07
-	.byte	$07
+	.byte	$1E
+	.byte	$1E
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -2731,7 +2807,7 @@ _w1l1_main_6:
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$07
+	.byte	$1E
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -2747,7 +2823,7 @@ _w1l1_main_6:
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$07
+	.byte	$1E
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -2760,6 +2836,7 @@ _w1l1_main_6:
 	.byte	$00
 	.byte	$00
 	.byte	$00
+	.byte	$10
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -2768,8 +2845,7 @@ _w1l1_main_6:
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$00
-	.byte	$00
+	.byte	$20
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -2798,7 +2874,7 @@ _w1l1_main_6:
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$00
+	.byte	$11
 	.byte	$00
 	.byte	$0A
 	.byte	$13
@@ -2842,7 +2918,7 @@ _w1l1_main_6:
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$00
+	.byte	$18
 	.byte	$00
 	.byte	$0D
 	.byte	$04
@@ -2890,61 +2966,61 @@ _w1l1_main_6:
 	.byte	$00
 	.byte	$00
 	.byte	$00
+	.byte	$11
 	.byte	$00
-	.byte	$00
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
 _w1l1_main_7:
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -2953,27 +3029,12 @@ _w1l1_main_7:
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$07
-	.byte	$07
-	.byte	$07
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -2986,10 +3047,9 @@ _w1l1_main_7:
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$07
-	.byte	$07
+	.byte	$1E
+	.byte	$1E
+	.byte	$1E
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -3004,8 +3064,8 @@ _w1l1_main_7:
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$07
-	.byte	$07
+	.byte	$1E
+	.byte	$1E
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -3020,8 +3080,24 @@ _w1l1_main_7:
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$07
-	.byte	$07
+	.byte	$1E
+	.byte	$1E
+	.byte	$00
+	.byte	$21
+	.byte	$00
+	.byte	$21
+	.byte	$00
+	.byte	$00
+	.byte	$00
+	.byte	$00
+	.byte	$00
+	.byte	$00
+	.byte	$00
+	.byte	$00
+	.byte	$00
+	.byte	$00
+	.byte	$1E
+	.byte	$1E
 	.byte	$0D
 	.byte	$04
 	.byte	$04
@@ -3036,8 +3112,8 @@ _w1l1_main_7:
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$07
-	.byte	$07
+	.byte	$1E
+	.byte	$1E
 	.byte	$02
 	.byte	$09
 	.byte	$09
@@ -3048,12 +3124,12 @@ _w1l1_main_7:
 	.byte	$00
 	.byte	$00
 	.byte	$00
+	.byte	$12
 	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$07
-	.byte	$07
+	.byte	$21
+	.byte	$21
+	.byte	$1E
+	.byte	$1E
 	.byte	$0A
 	.byte	$13
 	.byte	$13
@@ -3068,8 +3144,8 @@ _w1l1_main_7:
 	.byte	$04
 	.byte	$04
 	.byte	$05
-	.byte	$07
-	.byte	$07
+	.byte	$1E
+	.byte	$1E
 	.byte	$0D
 	.byte	$04
 	.byte	$05
@@ -3078,20 +3154,20 @@ _w1l1_main_7:
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$00
+	.byte	$21
 	.byte	$0A
 	.byte	$09
 	.byte	$09
 	.byte	$09
 	.byte	$03
-	.byte	$07
-	.byte	$07
+	.byte	$1E
+	.byte	$1E
 	.byte	$02
 	.byte	$09
 	.byte	$09
 	.byte	$13
 	.byte	$0B
-	.byte	$00
+	.byte	$21
 	.byte	$00
 	.byte	$00
 	.byte	$0D
@@ -3100,7 +3176,7 @@ _w1l1_main_7:
 	.byte	$09
 	.byte	$09
 	.byte	$03
-	.byte	$07
+	.byte	$1E
 	.byte	$00
 	.byte	$02
 	.byte	$09
@@ -3116,15 +3192,7 @@ _w1l1_main_7:
 	.byte	$09
 	.byte	$09
 	.byte	$03
-	.byte	$07
-	.byte	$00
-	.byte	$0A
-	.byte	$13
-	.byte	$13
-	.byte	$13
-	.byte	$13
-	.byte	$0B
-	.byte	$00
+	.byte	$1E
 	.byte	$00
 	.byte	$0A
 	.byte	$13
@@ -3132,39 +3200,47 @@ _w1l1_main_7:
 	.byte	$13
 	.byte	$13
 	.byte	$0B
-	.byte	$07
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
-	.byte	$0E
+	.byte	$00
+	.byte	$21
+	.byte	$0A
+	.byte	$13
+	.byte	$13
+	.byte	$13
+	.byte	$13
+	.byte	$0B
+	.byte	$1E
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
+	.byte	$17
 _w1l1_main_list:
 	.addr	_w1l1_main_0
 	.addr	_w1l1_main_1
