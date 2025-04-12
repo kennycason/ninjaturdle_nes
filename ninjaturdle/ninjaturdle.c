@@ -16,6 +16,10 @@ unsigned char bounce[] = {
     0, 0, 0, 1, 2, 2, 2, 1
 };
 	
+unsigned char boss_health;
+unsigned char coyote_time;  // Frames of coyote time remaining
+unsigned char was_jumping;  // Whether we were jumping last frame
+	
 void main(void) {
 	ppu_off(); // screen off
 	
@@ -338,6 +342,8 @@ void load_room(void) {
 	
 	// Reset boss health when starting a new level
 	boss_health = BOSS_MAX_HEALTH;
+	coyote_time = 0;
+	was_jumping = 0;
 }
 
 
@@ -558,12 +564,23 @@ void movement(void) {
     // Check if we can jump (on ground)
     can_jump = bg_coll_D2();
     
-    // Handle jumping
-    if (pad1_new & PAD_A) {
-        if (can_jump) {
+    // Add coyote time - allow jumping for a few frames after leaving the ground
+    if (can_jump) {
+        coyote_time = 5; // Reset coyote time when on ground
+    } else if (coyote_time > 0) {
+        --coyote_time;
+        can_jump = 1; // Allow jumping during coyote time
+    }
+    
+    // Handle jumping - use pad1 instead of pad1_new for more responsiveness
+    if (pad1 & PAD_A) {
+        if (can_jump && !was_jumping) {
             NINJA.vel_y = JUMP_VEL;
             sfx_play(SFX_JUMP, 0);
+            was_jumping = 1;
         }
+    } else {
+        was_jumping = 0;
     }
     
     // do we need to load a new collision map? (scrolled into a new room)
