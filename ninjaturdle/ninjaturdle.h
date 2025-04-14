@@ -1,3 +1,6 @@
+#ifndef NINJATURDLE_H
+#define NINJATURDLE_H
+
 #define ACCEL 30
 #define DECEL 50
 #define GRAVITY 0x4c
@@ -334,3 +337,20 @@ unsigned char boss_health;
 #define COLLISION_NONE 0x00      // No collision (background)
 #define COLLISION_PLATFORM 0x80  // Can pass through from below (platforms)
 #define COLLISION_SOLID 0x40     // Solid from all directions (walls)
+#define COL_ALL (COLLISION_PLATFORM | COLLISION_SOLID)  // Mask for any collision type
+
+#define COIN_REG 0
+#define COIN_END 1
+
+#define ENEMY_WASP 0
+#define ENEMY_BOUNCE 1
+#define ENEMY_BOSS1 2
+
+// Tile type constants for level objects
+#define TILE_HP_UP 0x01
+#define TILE_CORN_UP 0x02
+#define TILE_ENEMY_WASP 0x10
+#define TILE_ENEMY_BOUNCE 0x11
+#define TILE_ENEMY_BOSS1 0x1F
+
+#endif // NINJATURDLE_H

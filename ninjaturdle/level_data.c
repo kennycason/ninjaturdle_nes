@@ -1,134 +1,59 @@
-#define COIN_REG 0
-#define COIN_END 1
+#include "level_data.h"
+#include "ninjaturdle.h"
+#include "collision.h"
 
-#define ENEMY_WASP 0
-#define ENEMY_BOUNCE 1
-#define ENEMY_BOSS1 2
+// Enemy types
+#define ENEMY_WASP TILE_ENEMY_WASP
+#define ENEMY_BOUNCE TILE_ENEMY_BOUNCE
+#define ENEMY_BOSS1 TILE_ENEMY_BOSS1
 
-//NOTE MAX_COINS = 12
+// Coin types
+#define COIN_REG TILE_CORN_UP
+#define COIN_END TILE_COIN_END
 
-//y, room, x, type
-//y = TURN_OFF end of list
-const unsigned char level_1_coins[]={
-    0x90, 0, 0x70, COIN_REG, 
-    0x90, 0, 0x90, COIN_REG, 
-    0x50, 1, 0x40, COIN_REG,  
-    0x70, 2, 0x00, COIN_REG, 
-    0x50, 2, 0x70, COIN_REG, 
-    0x50, 3, 0xa0, COIN_REG, 
-    0x50, 3, 0xd0, COIN_REG, 
-    0x60, 4, 0xf0, COIN_REG, 
-    0x60, 5, 0x20, COIN_REG,  
-    0x30, 6, 0xc0, COIN_REG, 
-    0x30, 6, 0xe0, COIN_REG, 
-    0x30, 7, 0x80, COIN_REG, 
-    // 0xb0, 7, 0xc0, COIN_END,     // End of level coin - commented out
-    TURN_OFF
+// Collision types for metatiles
+#define COLLISION_NONE 0x00      // No collision (background)
+#define COLLISION_PLATFORM 0x80  // Can pass through from below (platforms)
+#define COLLISION_SOLID 0x40     // Solid from all directions (walls)
+#define COL_DOWN 0x80           // Special flag for downward collision
+#define COL_ALL (COLLISION_PLATFORM | COLLISION_SOLID)  // Mask for any collision type
+
+// Include generated level data
+#include "BG/w1l1.c"
+#include "BG/w1l2.c"
+#include "BG/w1l3.c"
+
+// Main level data arrays
+const unsigned char * const * const level_main_data[] = {
+    w1l1_main_list,
+    w1l2_main_list,
+    w1l3_main_list
 };
 
-const unsigned char level_2_coins[]={
-    0xa0, 1, 0x20, COIN_REG, 
-    0xa0, 1, 0x40, COIN_REG,
-    0x60, 2, 0x70, COIN_REG, 
-    0x30, 3, 0x20, COIN_REG, 
-    0x30, 3, 0x70, COIN_REG, 
-    0xc0, 5, 0x00, COIN_REG, 
-    0xc0, 5, 0x50, COIN_REG,
-    0x40, 6, 0x90, COIN_REG, 
-    0x40, 6, 0xd0, COIN_REG, 
-    0x40, 7, 0x40, COIN_REG, 
-    0xa0, 7, 0xc0, COIN_END, 
-    TURN_OFF
+// Object data arrays (includes both enemies and items)
+const unsigned char * const level_objects[] = {
+    w1l1_object,
+    w1l2_object,
+    w1l3_object
 };
 
-const unsigned char level_3_coins[]={
-    0x80, 0, 0x80, COIN_REG, 
-    0x70, 1, 0x50, COIN_REG,
-    0x80, 1, 0xd0, COIN_REG,
-    0x80, 2, 0x40, COIN_REG, 
-    0x80, 2, 0x80, COIN_REG,
-    0x80, 2, 0xc0, COIN_REG, 
-    0x80, 3, 0x30, COIN_REG, 
-    0x50, 7, 0x25, COIN_REG, 
-    0x50, 7, 0x80, COIN_END, 
-    0xb0, 7, 0xd0, COIN_REG, 
-    TURN_OFF
+// Coin/item data arrays
+const unsigned char * const Coins_list[] = {
+    w1l1_coins,
+    w1l2_coins,
+    w1l3_coins
 };
 
-const unsigned char * const Coins_list[]={
-    level_1_coins, level_2_coins, level_3_coins
+// Enemy data arrays
+const unsigned char * const Enemy_list[] = {
+    w1l1_enemies,
+    w1l2_enemies,
+    w1l3_enemies
 };
 
-
-//NOTE MAX_ENEMY = 10
-
-//NOTE, after testing, we can only handle 4 enemies on the same screen
-
-//y, room, x
-//y = TURN_OFF end of list
-const unsigned char level_1_enemies[]={
-
-/* stress test    
-    0x11,0,0xe2,ENEMY_WASP,
-    0x21,0,0xe4,ENEMY_WASP,
-    0x31,0,0xe6,ENEMY_WASP,
-    0x41,0,0xe8,ENEMY_WASP,
-    0x51,0,0xe8,ENEMY_WASP,
-    0x61,0,0xe8,ENEMY_WASP,
-    0x71,0,0xe8,ENEMY_WASP,
-*/
-    
-    0x90, 0, 0xc0, ENEMY_WASP, 
-    0xc0, 1, 0xe0, ENEMY_BOUNCE, 
-    0xc0, 2, 0x30, ENEMY_BOUNCE,  
-    0x80, 2, 0x90, ENEMY_WASP, 
-    0xb0, 3, 0x20, ENEMY_BOUNCE,  
-    0xc0, 3, 0xb0, ENEMY_WASP, 
-    0x80, 5, 0x00, ENEMY_BOUNCE, 
-    0xc0, 5, 0x90, ENEMY_WASP, 
-    0xb0, 7, 0xc0, ENEMY_BOSS1, // Moved boss to where the big coin was
-    TURN_OFF
-};
-
-
-const unsigned char level_2_enemies[]={
-    0xc0, 0, 0x90, ENEMY_WASP, 
-    0xc0, 1, 0xd0, ENEMY_WASP, 
-    0x40, 3, 0x40, ENEMY_BOUNCE, 
-    0xc0, 4, 0x30, ENEMY_BOUNCE, 
-    0xc0, 4, 0x80, ENEMY_BOUNCE, 
-    0xc0, 6, 0x20, ENEMY_WASP, 
-    0xc0, 7, 0x20, ENEMY_BOUNCE, 
-    0xc0, 7, 0x60, ENEMY_BOUNCE, 
-    TURN_OFF
-};
-
-    
-const unsigned char level_3_enemies[]={
-    0xc0, 0, 0xc0, ENEMY_BOUNCE, 
-    0xc0, 0, 0xf0, ENEMY_BOUNCE, 
-    0xc0, 1, 0x80, ENEMY_WASP, 
-    0xc0, 1, 0xd0, ENEMY_WASP, 
-    0xc0, 2, 0x40, ENEMY_BOUNCE, 
-    0xc0, 2, 0x80, ENEMY_BOUNCE, 
-    0xc0, 2, 0xc0, ENEMY_BOUNCE, 
-    0xb0, 3, 0x10, ENEMY_BOUNCE, 
-    0xb0, 4, 0x60, ENEMY_WASP, 
-    0x90, 5, 0x40, ENEMY_BOUNCE, 
-    0x90, 6, 0x50, ENEMY_BOUNCE, 
-    0xa0, 6, 0xc0, ENEMY_BOUNCE,
-    0xc0, 7, 0xe0, ENEMY_WASP, 
-    TURN_OFF
-};
-
-const unsigned char * const Enemy_list[]={
-    level_1_enemies, level_2_enemies, level_3_enemies
-};
-
-// tile tids 0x00-0x3F (0-63) (64 16x16 tiles, 256 8x8 tiles)
+// Metatile definitions (64 metatiles, 0x00-0x3F)
 const unsigned char metatiles1[] = {
     // row 0
-
     // Background tiles (columns 0-3)
     0x00, 0x01, 
     0x10, 0x11, COLLISION_NONE | 3,     // Empty background (ID 0)
@@ -157,7 +82,6 @@ const unsigned char metatiles1[] = {
     0x1E, 0x1F, COLLISION_SOLID | 2,      // Solid block 2 (ID 7)
 
     // row 1
-
     // Background tiles (columns 0-3)
     0x20, 0x21, 
     0x30, 0x31, COLLISION_NONE | 0,    // Empty background (ID 8)
@@ -185,9 +109,7 @@ const unsigned char metatiles1[] = {
     0x2E, 0x2F, 
     0x3E, 0x3F, COLLISION_SOLID | 2,     // Solid block 2 (ID F)
 
-
-    // row 3
-
+    // row 2
     // Background tiles (columns 0-3)
     0x40, 0x41, 
     0x50, 0x51, COLLISION_NONE | 0,    // Empty background (ID 10)
@@ -215,8 +137,7 @@ const unsigned char metatiles1[] = {
     0x4E, 0x4F, 
     0x5E, 0x5F, COLLISION_SOLID | 2,     // Solid block 2 (ID 17)
 
-    // row 4
-
+    // row 3
     // Background tiles (columns 0-3)
     0x60, 0x61, 
     0x70, 0x71, COLLISION_NONE | 0,    // Empty background (ID 18)
@@ -225,7 +146,7 @@ const unsigned char metatiles1[] = {
     0x72, 0x73, COLLISION_NONE | 1,    // Basic background (ID 19)
 
     0x64, 0x65, 
-    0x74, 0x75, COLLISION_NONE | 1,    // Alt background (ID 1A))
+    0x74, 0x75, COLLISION_NONE | 1,    // Alt background (ID 1A)
 
     0x66, 0x67, 
     0x76, 0x77, COLLISION_NONE | 1,    // Decorative 1 (ID 1B)
@@ -244,8 +165,7 @@ const unsigned char metatiles1[] = {
     0x6E, 0x6F, 
     0x7E, 0x7F, COLLISION_SOLID | 2,     // Solid block 2 (ID 1F)
 
-    // row 5
-
+    // row 4
     // Background tiles (columns 0-3)
     0x80, 0x81, 
     0x90, 0x91, COLLISION_NONE | 0,    // Empty background (ID 20)
@@ -273,8 +193,7 @@ const unsigned char metatiles1[] = {
     0x8E, 0x8F, 
     0x9E, 0x9F, COLLISION_SOLID | 2,     // Solid block 2 (ID 27)
 
-    // row 6
-
+    // row 5
     // Background tiles (columns 0-3)
     0xA0, 0xA1, 
     0xB0, 0xB1, COLLISION_NONE | 0,    // Empty background (ID 28)
@@ -302,8 +221,7 @@ const unsigned char metatiles1[] = {
     0xAE, 0xAF, 
     0xBE, 0xBF, COLLISION_SOLID | 2,     // Solid block 2 (ID 2F)
 
-    // row 7
-
+    // row 6
     // Background tiles (columns 0-3)
     0xC0, 0xC1, 
     0xD0, 0xD1, COLLISION_NONE | 0,    // Empty background (ID 30)
@@ -331,9 +249,7 @@ const unsigned char metatiles1[] = {
     0xCE, 0xCF, 
     0xDE, 0xDF, COLLISION_SOLID | 2,     // Solid block 2 (ID 37)
 
-
-    // row 8
-
+    // row 7
     // Background tiles (columns 0-3)
     0xE0, 0xE1, 
     0xF0, 0xF1, COLLISION_NONE | 0,    // Empty background (ID 38)
@@ -379,24 +295,66 @@ const unsigned char metatiles_pal1[]={
     1,  // ID C - Platform style 1
     1,  // ID D - Platform style 2
     2,  // ID E - Solid block 1
-    2   // ID F - Solid block 2
+    2,  // ID F - Solid block 2
+    0,  // ID 10 - Empty background
+    1,  // ID 11 - Basic background
+    2,  // ID 12 - Alt background
+    3,  // ID 13 - Decorative 1
+    1,  // ID 14 - Platform style 1
+    1,  // ID 15 - Platform style 2
+    2,  // ID 16 - Solid block 1
+    2,  // ID 17 - Solid block 2
+    0,  // ID 18 - Empty background
+    1,  // ID 19 - Basic background
+    2,  // ID 1A - Alt background
+    3,  // ID 1B - Decorative 1
+    1,  // ID 1C - Platform style 1
+    1,  // ID 1D - Platform style 2
+    2,  // ID 1E - Solid block 1
+    2,  // ID 1F - Solid block 2
+    0,  // ID 20 - Empty background
+    1,  // ID 21 - Basic background
+    2,  // ID 22 - Alt background
+    3,  // ID 23 - Decorative 1
+    1,  // ID 24 - Platform style 1
+    1,  // ID 25 - Platform style 2
+    2,  // ID 26 - Solid block 1
+    2,  // ID 27 - Solid block 2
+    0,  // ID 28 - Empty background
+    1,  // ID 29 - Basic background
+    2,  // ID 2A - Alt background
+    3,  // ID 2B - Decorative 1
+    1,  // ID 2C - Platform style 1
+    1,  // ID 2D - Platform style 2
+    2,  // ID 2E - Solid block 1
+    2,  // ID 2F - Solid block 2
+    0,  // ID 30 - Empty background
+    1,  // ID 31 - Basic background
+    2,  // ID 32 - Alt background
+    3,  // ID 33 - Decorative 1
+    1,  // ID 34 - Platform style 1
+    1,  // ID 35 - Platform style 2
+    2,  // ID 36 - Solid block 1
+    2,  // ID 37 - Solid block 2
+    0,  // ID 38 - Empty background
+    1,  // ID 39 - Basic background
+    2,  // ID 3A - Alt background
+    3,  // ID 3B - Decorative 1
+    1,  // ID 3C - Platform style 1
+    1,  // ID 3D - Platform style 2
+    2,  // ID 3E - Solid block 1
+    2,  // ID 3F - Solid block 2
 };
 
-#define COL_DOWN 0x80
-#define COL_ALL 0x40
-
-#include "BG/w1l1_main.c"
-#include "BG/w1l2_main.c"
-#include "BG/w1l3_main.c"
-
-const unsigned char * const Levels_list[]={
-w1l1_main_0,w1l1_main_1,w1l1_main_2,w1l1_main_3,w1l1_main_4,w1l1_main_5,w1l1_main_6,w1l1_main_7,
-w1l2_main_0,w1l2_main_1,w1l2_main_2,w1l2_main_3,w1l2_main_4,w1l2_main_5,w1l2_main_6,w1l2_main_7,
-w1l3_main_0,w1l3_main_1,w1l3_main_2,w1l3_main_3,w1l3_main_4,w1l3_main_5,w1l3_main_6,w1l3_main_7
+// Room data list
+const unsigned char * const Levels_list[] = {
+    w1l1_main_0, w1l1_main_1, w1l1_main_2, w1l1_main_3, w1l1_main_4, w1l1_main_5, w1l1_main_6, w1l1_main_7,
+    w1l2_main_0, w1l2_main_1, w1l2_main_2, w1l2_main_3, w1l2_main_4, w1l2_main_5, w1l2_main_6, w1l2_main_7,
+    w1l3_main_0, w1l3_main_1, w1l3_main_2, w1l3_main_3, w1l3_main_4, w1l3_main_5, w1l3_main_6, w1l3_main_7
 };
 
-const unsigned char Level_offsets[]={
-    0,8,16
+const unsigned char Level_offsets[] = {
+    0, 8, 16
 };
 
 #define MAX_ROOMS (8-1)
