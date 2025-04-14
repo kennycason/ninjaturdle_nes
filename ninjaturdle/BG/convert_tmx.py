@@ -32,115 +32,93 @@ def parse_csv_data(csv_text):
     rows = [row.strip() for row in csv_text.strip().split('\n')]
     return [[int(cell) for cell in row.split(',') if cell.strip()] for row in rows]
 
-def process_tile_layer(layer, map_width, map_height):
-    """Process tile layer data and convert to game format"""
+def process_layer(layer, room_num):
+    """Process a single layer for a specific room"""
+    # Get layer data
     data = layer.find('data')
     if data is None or data.get('encoding') != 'csv':
         print("Error: Only CSV encoding is supported for tile layers")
-        return []
+        return None
         
     # Parse CSV data into 2D array
     tile_data = parse_csv_data(data.text)
+    height = len(tile_data)
+    width = len(tile_data[0]) if height > 0 else 0
     
-    # Organize into 8 rooms of 16x15 tiles
-    rooms = []
-    for room in range(8):
-        room_data = []
-        start_x = room * 16
-        for y in range(15):  # 15 rows per room
-            row = tile_data[y][start_x:start_x + 16]
-            room_data.extend([(x - 1) for x in row])  # Subtract 1 from tile IDs
-        rooms.append(room_data)
+    # Extract room data
+    room_data = []
+    start_x = room_num * 16
+    end_x = start_x + 16
     
-    return rooms
+    if start_x >= width:
+        return None
+        
+    # Extract the 16x15 room section
+    for y in range(min(15, height)):
+        row = tile_data[y][start_x:end_x]
+        if len(row) == 16:  # Only add complete rows
+            # Don't subtract 1 from tile IDs - keep raw values from Tiled
+            room_data.extend(row)
+            
+    return room_data
 
-def process_object_layer(layer, map_width, map_height):
-    """Process object layer data and convert to game format"""
-    object_data = []
+def process_object_layer(root):
+    """Process object layer and extract coin/enemy data"""
     coin_data = []
     enemy_data = []
-    enemies_per_room = [0] * 8  # Track number of enemies in each room
-    total_enemies = 0
     
-    # Get the layer data
-    data = layer.find('data')
+    # Find the object layer
+    object_layer = root.find(".//layer[@name='object']")
+    if object_layer is None:
+        print("No object layer found")
+        return coin_data, enemy_data
+        
+    # Get layer data
+    data = object_layer.find('data')
     if data is None or data.get('encoding') != 'csv':
-        print("Error: Only CSV encoding is supported for object layers")
-        return [], [], []
+        print("Error: Object layer data not found or not in CSV format")
+        return coin_data, enemy_data
         
     # Parse CSV data into 2D array
-    rows = [row.strip() for row in data.text.strip().split('\n')]
-    tile_data = [[int(cell) for cell in row.split(',') if cell.strip()] for row in rows]
+    tile_data = parse_csv_data(data.text)
+    height = len(tile_data)
+    width = len(tile_data[0]) if height > 0 else 0
     
-    # Process each tile in the layer
-    for y in range(map_height):
-        for x in range(map_width):
-            tile_id = tile_data[y][x]
-            if tile_id == 0:  # Skip empty tiles
+    # Process each tile in the object layer
+    for y in range(height):
+        for x in range(width):
+            gid = tile_data[y][x]
+            if gid == 0:  # Skip empty tiles
                 continue
                 
-            # Calculate room and position
-            room = x // 16  # Each room is 16 tiles wide
-            room_x = (x % 16) * 16  # X position within room in pixels
-            y_pos = y * 16  # Y position in pixels
+            print(f"Found object with GID {gid} at ({x}, {y})")
             
-            # Map GIDs to game object types
-            if tile_id == SPRITE_GID_HP_UP:  # HP Up
-                object_data.extend([y_pos, room, room_x, TILE_HP_UP])
-                coin_data.extend([y_pos, room, room_x, TILE_HP_UP])
-                print(f"Added HP Up: Y=0x{y_pos:02x}, room={room}, X=0x{room_x:02x}, type=0x{TILE_HP_UP:02x}")
-                
-            elif tile_id == SPRITE_GID_CORN_UP:  # Corn Up
-                object_data.extend([y_pos, room, room_x, TILE_CORN_UP])
-                coin_data.extend([y_pos, room, room_x, TILE_CORN_UP])
-                print(f"Added Corn Up: Y=0x{y_pos:02x}, room={room}, X=0x{room_x:02x}, type=0x{TILE_CORN_UP:02x}")
-                
-            elif tile_id in [SPRITE_GID_WASP, SPRITE_GID_BOUNCE, SPRITE_GID_BOSS] and total_enemies < 10:
-                # Check enemy limit per room
-                if enemies_per_room[room] >= 4:
-                    print(f"Warning: Skipping enemy in room {room} - maximum 4 enemies per room")
-                    continue
-                    
-                if tile_id == SPRITE_GID_WASP:  # Wasp enemy
-                    obj_type = TILE_ENEMY_WASP
-                elif tile_id == SPRITE_GID_BOUNCE:  # Bounce enemy
-                    obj_type = TILE_ENEMY_BOUNCE
-                elif tile_id == SPRITE_GID_BOSS:  # Boss enemy
-                    obj_type = TILE_ENEMY_BOSS1
-                else:
-                    continue
-                
-                object_data.extend([y_pos, room, room_x, obj_type])
-                enemy_data.extend([y_pos, room, room_x, obj_type])
-                enemies_per_room[room] += 1
-                total_enemies += 1
-                print(f"Added enemy: Y=0x{y_pos:02x}, room={room}, X=0x{room_x:02x}, type=0x{obj_type:02x}")
-    
-    # Sort objects by room number for each array
-    def sort_and_terminate(data):
-        sorted_objects = []
-        for i in range(0, len(data), 4):
-            if i + 4 <= len(data):
-                sorted_objects.append(data[i:i+4])
-        sorted_objects.sort(key=lambda x: x[1])  # Sort by room number
-        data = [x for obj in sorted_objects for x in obj]
-        if not data:
-            data = [0xff]  # Just add TURN_OFF marker if no objects
-        elif data[-1] != 0xff:
-            data.append(0xff)  # Add TURN_OFF marker
-        return data
-    
-    object_data = sort_and_terminate(object_data)
-    coin_data = sort_and_terminate(coin_data)
-    enemy_data = sort_and_terminate(enemy_data)
-    
-    return object_data, coin_data, enemy_data
+            # Map GIDs to internal tile types
+            if gid == SPRITE_GID_CORN_UP:
+                print(f"Adding coin at ({x}, {y})")
+                coin_data.append((x, y))
+            elif gid == SPRITE_GID_WASP:
+                print(f"Adding wasp at ({x}, {y})")
+                enemy_data.append((x, y, TILE_ENEMY_WASP))  # Use constant directly
+            elif gid == SPRITE_GID_BOUNCE:
+                print(f"Adding bounce enemy at ({x}, {y})")
+                enemy_data.append((x, y, TILE_ENEMY_BOUNCE))  # Use constant directly
+            elif gid == SPRITE_GID_BOSS:
+                print(f"Adding boss at ({x}, {y})")
+                enemy_data.append((x, y, TILE_ENEMY_BOSS1))  # Use constant directly
+            
+    return coin_data, enemy_data
 
-def convert_tmx(world, level):
-    """Convert TMX file to C source code"""
-    tmx_file = f'w{world}l{level}.tmx'
-    output_file = f'w{world}l{level}.c'
-    
+class TMXData:
+    """Class to hold TMX file data"""
+    def __init__(self, layers, width, height, root):
+        self.layers = layers
+        self.width = width
+        self.height = height
+        self.root = root
+
+def load_tmx(tmx_file):
+    """Load and parse a TMX file"""
     try:
         tree = ET.parse(tmx_file)
         root = tree.getroot()
@@ -149,83 +127,18 @@ def convert_tmx(world, level):
         map_width = int(root.get('width'))
         map_height = int(root.get('height'))
         
-        # Find the main tile layer and object layer
-        main_layer = None
-        object_layer = None
-        
+        # Find layers
+        layers = []
         for layer in root.findall('layer'):
             layer_name = layer.get('name', '').lower()
             print(f"Found layer: {layer_name}")
-            if layer_name == 'main':
-                main_layer = layer
-            elif layer_name == 'object':
-                object_layer = layer
-                
-        if main_layer is None:
-            print(f"Error: Could not find 'main' layer in {tmx_file}")
-            return
+            layers.append(layer)
             
-        # Process main layer data
-        rooms = process_tile_layer(main_layer, map_width, map_height)
-        
-        # Process object layer data
-        object_data = []
-        coin_data = []
-        enemy_data = []
-        if object_layer is not None:
-            print("Processing object layer...")
-            object_data, coin_data, enemy_data = process_object_layer(object_layer, map_width, map_height)
-        else:
-            print(f"Warning: No object layer found in {tmx_file}")
-            object_data = [0xff]  # Just add TURN_OFF marker if no objects
-            coin_data = [0xff]
-            enemy_data = [0xff]
+        if not layers:
+            print(f"Error: No layers found in {tmx_file}")
+            return None
             
-        # Write output file
-        with open(output_file, 'w') as f:
-            f.write('// Generated by convert_tmx.py\n')
-            f.write('#include "../ninjaturdle.h"\n\n')
-            
-            # Write main tile data
-            for i in range(8):  # 8 rooms
-                f.write(f'// Room {i} data\n')
-                f.write(f'const unsigned char w{world}l{level}_main_{i}[] = {{\n')
-                room_data = rooms[i]
-                for j in range(0, len(room_data), 16):
-                    f.write('    ' + ', '.join(f'0x{x:02x}' for x in room_data[j:j+16]) + ',\n')
-                f.write('};\n\n')
-            
-            # Write main data list
-            f.write(f'const unsigned char * const w{world}l{level}_main_list[] = {{\n')
-            for i in range(8):
-                f.write(f'    w{world}l{level}_main_{i},\n')
-            f.write('};\n\n')
-            
-            # Write object data (Y, room, X, type)
-            f.write('// Object data (Y, room, X, type)\n')
-            f.write(f'const unsigned char w{world}l{level}_object[] = {{\n')
-            for i in range(0, len(object_data), 4):
-                if i + 4 <= len(object_data):
-                    f.write(f'    0x{object_data[i]:02x}, 0x{object_data[i+1]:02x}, 0x{object_data[i+2]:02x}, 0x{object_data[i+3]:02x},\n')
-            f.write('};\n\n')
-
-            # Write coin/item data
-            f.write('// Coin/Item data (Y, room, X, type)\n')
-            f.write(f'const unsigned char w{world}l{level}_coins[] = {{\n')
-            for i in range(0, len(coin_data), 4):
-                if i + 4 <= len(coin_data):
-                    f.write(f'    0x{coin_data[i]:02x}, 0x{coin_data[i+1]:02x}, 0x{coin_data[i+2]:02x}, 0x{coin_data[i+3]:02x},\n')
-            f.write('};\n\n')
-
-            # Write enemy data
-            f.write('// Enemy data (Y, room, X, type)\n')
-            f.write(f'const unsigned char w{world}l{level}_enemies[] = {{\n')
-            for i in range(0, len(enemy_data), 4):
-                if i + 4 <= len(enemy_data):
-                    f.write(f'    0x{enemy_data[i]:02x}, 0x{enemy_data[i+1]:02x}, 0x{enemy_data[i+2]:02x}, 0x{enemy_data[i+3]:02x},\n')
-            f.write('};\n')
-            
-        print(f"Successfully converted {tmx_file} to {output_file}")
+        return TMXData(layers, map_width, map_height, root)
         
     except FileNotFoundError:
         print(f"Error: Could not find {tmx_file}")
@@ -233,6 +146,74 @@ def convert_tmx(world, level):
         print(f"Error: Could not parse {tmx_file}")
     except Exception as e:
         print(f"Error: {str(e)}")
+    return None
+
+def convert_tmx(tmx_file, output_file):
+    """Convert TMX file to game format"""
+    try:
+        # Load and parse TMX file
+        tmx_data = load_tmx(tmx_file)
+        if not tmx_data:
+            return False
+            
+        # Process background layer
+        rooms = []
+        main_layer = tmx_data.layers[0]  # First layer should be the main/background layer
+        
+        # Process each room (16x15 tile sections)
+        for i in range(tmx_data.width // 16):
+            room = process_layer(main_layer, i)
+            if room:
+                rooms.append(room)
+                
+        # Process object layer for coins and enemies
+        coin_data, enemy_data = process_object_layer(tmx_data.root)
+        
+        # Get world and level from filename
+        world, level = extract_world_level(tmx_file)
+        if not world or not level:
+            print("Error: Could not extract world and level from filename")
+            return False
+            
+        # Generate output file
+        with open(output_file, 'w') as f:
+            # Write headers
+            f.write('#include <stdint.h>\n\n')
+            
+            # Write room data
+            for i, room in enumerate(rooms):
+                f.write(f'const uint8_t w{world}l{level}_room{i}[] = {{\n')
+                # Write room data in rows of 16
+                for row in range(15):
+                    start = row * 16
+                    row_data = room[start:start + 16]
+                    f.write('    ' + ', '.join(f'0x{x:02x}' for x in row_data) + ',\n')
+                f.write('};\n\n')
+                
+            # Write coin data
+            f.write(f'const uint8_t w{world}l{level}_coins[] = {{\n')
+            for x, y in coin_data:
+                f.write(f'    0x{y:02x}, {x//16}, 0x{(x%16)*16:02x}, 0x02,\n')  # 0x02 = COIN_REG
+            f.write('    0xff  // End marker\n};\n\n')
+            
+            # Write enemy data  
+            f.write(f'const uint8_t w{world}l{level}_enemies[] = {{\n')
+            for x, y, enemy_type in enemy_data:
+                f.write(f'    0x{y:02x}, {x//16}, 0x{(x%16)*16:02x}, 0x{enemy_type:02x},\n')
+            f.write('    0xff  // End marker\n};\n\n')
+            
+            # Write room pointers array
+            f.write(f'const uint8_t* const w{world}l{level}_rooms[] = {{\n')
+            for i in range(len(rooms)):
+                f.write(f'    w{world}l{level}_room{i},\n')
+            f.write('};\n')
+            
+        print(f"Successfully converted {tmx_file} to {output_file}")
+        return True
+        
+    except Exception as e:
+        print(f"Error converting TMX file: {e}")
+        return False
 
 def main():
     if len(sys.argv) != 3:
@@ -241,7 +222,7 @@ def main():
     
     world = int(sys.argv[1])
     level = int(sys.argv[2])
-    convert_tmx(world, level)
+    convert_tmx(f"w{world}l{level}.tmx", f"w{world}l{level}.c")
 
 if __name__ == "__main__":
     main() 
