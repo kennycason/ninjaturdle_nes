@@ -93,19 +93,22 @@ def process_object_layer(root):
                 
             print(f"Found object with GID {gid} at ({x}, {y})")
             
-            # Map GIDs to internal tile types
+            # Map GIDs to internal tile types - use exact matches
             if gid == SPRITE_GID_CORN_UP:
                 print(f"Adding coin at ({x}, {y})")
                 coin_data.append((x, y))
+            # Enemy GIDs are completely different values
             elif gid == SPRITE_GID_WASP:
                 print(f"Adding wasp at ({x}, {y})")
-                enemy_data.append((x, y, TILE_ENEMY_WASP))  # Use constant directly
+                enemy_data.append((x, y, TILE_ENEMY_WASP))
             elif gid == SPRITE_GID_BOUNCE:
                 print(f"Adding bounce enemy at ({x}, {y})")
-                enemy_data.append((x, y, TILE_ENEMY_BOUNCE))  # Use constant directly
+                enemy_data.append((x, y, TILE_ENEMY_BOUNCE))
             elif gid == SPRITE_GID_BOSS:
                 print(f"Adding boss at ({x}, {y})")
-                enemy_data.append((x, y, TILE_ENEMY_BOSS1))  # Use constant directly
+                enemy_data.append((x, y, TILE_ENEMY_BOSS1))
+            else:
+                print(f"Unknown GID {gid} at ({x}, {y})")
             
     return coin_data, enemy_data
 
