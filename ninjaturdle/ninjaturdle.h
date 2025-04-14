@@ -1,6 +1,9 @@
 #ifndef NINJATURDLE_H
 #define NINJATURDLE_H
 
+#include "tile_types.h"
+#include "collision.h"
+
 #define ACCEL 30
 #define DECEL 50
 #define GRAVITY 0x4c
@@ -319,38 +322,13 @@ unsigned char player_health;
 unsigned char damage_cooldown; // Invincibility frames after taking damage
 #define DAMAGE_COOLDOWN_TIME 60 // 1 second of invincibility
 
-#define ENEMY_BOSS1 2
 #define BOSS_MAX_HEALTH 20
 #define BOSS_DAMAGE_PER_HIT 2
 unsigned char boss_health;
 
-// Collision types for metatiles based on column position in 16x16 grid
-// Columns 0-3: Background (no collision)
-// Columns 4-5: Platform (can pass through from below)
-// Columns 6-7: Solid (collision from all sides)
-
+// Collision type checks
 #define IS_BACKGROUND(tile) ((tile & 0x07) < 0x04)  // Columns 0-3
 #define IS_PLATFORM(tile)   ((tile & 0x07) >= 0x04 && (tile & 0x07) <= 0x05)  // Columns 4-5
 #define IS_SOLID(tile)      ((tile & 0x07) >= 0x06)  // Columns 6-7
-
-// Collision types for metatiles
-#define COLLISION_NONE 0x00      // No collision (background)
-#define COLLISION_PLATFORM 0x80  // Can pass through from below (platforms)
-#define COLLISION_SOLID 0x40     // Solid from all directions (walls)
-#define COL_ALL (COLLISION_PLATFORM | COLLISION_SOLID)  // Mask for any collision type
-
-#define COIN_REG 0
-#define COIN_END 1
-
-#define ENEMY_WASP 0
-#define ENEMY_BOUNCE 1
-#define ENEMY_BOSS1 2
-
-// Tile type constants for level objects
-#define TILE_HP_UP 0x01
-#define TILE_CORN_UP 0x02
-#define TILE_ENEMY_WASP 0x10
-#define TILE_ENEMY_BOUNCE 0x11
-#define TILE_ENEMY_BOSS1 0x1F
 
 #endif // NINJATURDLE_H

@@ -1,22 +1,7 @@
 #include "level_data.h"
+#include "tile_types.h"
 #include "ninjaturdle.h"
 #include "collision.h"
-
-// Enemy types
-#define ENEMY_WASP TILE_ENEMY_WASP
-#define ENEMY_BOUNCE TILE_ENEMY_BOUNCE
-#define ENEMY_BOSS1 TILE_ENEMY_BOSS1
-
-// Coin types
-#define COIN_REG TILE_CORN_UP
-#define COIN_END TILE_COIN_END
-
-// Collision types for metatiles
-#define COLLISION_NONE 0x00      // No collision (background)
-#define COLLISION_PLATFORM 0x80  // Can pass through from below (platforms)
-#define COLLISION_SOLID 0x40     // Solid from all directions (walls)
-#define COL_DOWN 0x80           // Special flag for downward collision
-#define COL_ALL (COLLISION_PLATFORM | COLLISION_SOLID)  // Mask for any collision type
 
 // Include generated level data
 #include "BG/w1l1.c"
