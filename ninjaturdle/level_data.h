@@ -2,11 +2,11 @@
 #define LEVEL_DATA_H
 
 #include "tile_types.h"
+#include <stdint.h>
 
 // External declarations for level data
-extern const unsigned char * const Coins_list[];
-extern const unsigned char * const Enemy_list[];
-extern const unsigned char * const Levels_list[];
-extern const unsigned char Level_offsets[];
+extern const uint8_t* const Coins_list[];
+extern const uint8_t* const Enemy_list[];
+extern const uint8_t* const* const level_main_data[];
 
 #endif 

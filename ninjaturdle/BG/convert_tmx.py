@@ -185,7 +185,7 @@ def convert_tmx(tmx_file, output_file):
             
             # Write room data
             for i, room in enumerate(rooms):
-                f.write(f'const uint8_t w{world}l{level}_room{i}[] = {{\n')
+                f.write(f'const uint8_t w{world}l{level}_main_{i}[] = {{\n')
                 # Write room data in rows of 16
                 for row in range(15):
                     start = row * 16
@@ -206,9 +206,9 @@ def convert_tmx(tmx_file, output_file):
             f.write('    0xff  // End marker\n};\n\n')
             
             # Write room pointers array
-            f.write(f'const uint8_t* const w{world}l{level}_rooms[] = {{\n')
+            f.write(f'const uint8_t* const w{world}l{level}_main[] = {{\n')
             for i in range(len(rooms)):
-                f.write(f'    w{world}l{level}_room{i},\n')
+                f.write(f'    w{world}l{level}_main_{i},\n')
             f.write('};\n')
             
         print(f"Successfully converted {tmx_file} to {output_file}")

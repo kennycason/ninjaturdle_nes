@@ -10,7 +10,6 @@
 	.importzp	sp, sreg, regsave, regbank
 	.importzp	tmp1, tmp2, tmp3, tmp4, ptr1, ptr2, ptr3, ptr4
 	.macpack	longbranch
-	.forceimport	__STARTUP__
 	.import		_pal_all
 	.import		_pal_col
 	.import		_pal_clear
@@ -38,7 +37,7 @@
 	.export		_draw_number_at
 	.export		_draw_border_and_text
 	.export		_draw_tile_grid
-	.export		_main
+	.export		_bank_swap_main
 
 .segment	"DATA"
 
@@ -1266,12 +1265,12 @@ L0006:	jsr     _ppu_on_all
 .endproc
 
 ; ---------------------------------------------------------------
-; void __near__ main (void)
+; void __near__ bank_swap_main (void)
 ; ---------------------------------------------------------------
 
 .segment	"CODE"
 
-.proc	_main: near
+.proc	_bank_swap_main: near
 
 .segment	"CODE"
 

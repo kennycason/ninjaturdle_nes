@@ -118,7 +118,7 @@ void draw_tile_grid(void) {
     ppu_on_all();
 }
 
-void main(void)
+void bank_swap_main(void)
 {
     // Initial setup routines (PPU, etc.)
     ppu_off();

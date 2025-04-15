@@ -2,35 +2,63 @@
 #include "tile_types.h"
 #include "ninjaturdle.h"
 #include "collision.h"
+#include <stdint.h>
 
-// Include generated level data
-#include "BG/w1l1.c"
-#include "BG/w1l2.c"
-#include "BG/w1l3.c"
+// External declarations for level data arrays
+extern const uint8_t* const w1l1_main[];
+extern const uint8_t* const w1l2_main[];
+extern const uint8_t* const w1l3_main[];
+extern const uint8_t w1l1_coins[];
+extern const uint8_t w1l2_coins[];
+extern const uint8_t w1l3_coins[];
+extern const uint8_t w1l1_enemies[];
+extern const uint8_t w1l2_enemies[];
+extern const uint8_t w1l3_enemies[];
 
-// Main level data arrays
-const unsigned char * const * const level_main_data[] = {
-    w1l1_main_list,
-    w1l2_main_list,
-    w1l3_main_list
-};
+// External declarations for individual room arrays
+extern const uint8_t w1l1_main_0[];
+extern const uint8_t w1l1_main_1[];
+extern const uint8_t w1l1_main_2[];
+extern const uint8_t w1l1_main_3[];
+extern const uint8_t w1l1_main_4[];
+extern const uint8_t w1l1_main_5[];
+extern const uint8_t w1l1_main_6[];
+extern const uint8_t w1l1_main_7[];
 
-// Object data arrays (includes both enemies and items)
-const unsigned char * const level_objects[] = {
-    w1l1_object,
-    w1l2_object,
-    w1l3_object
+extern const uint8_t w1l2_main_0[];
+extern const uint8_t w1l2_main_1[];
+extern const uint8_t w1l2_main_2[];
+extern const uint8_t w1l2_main_3[];
+extern const uint8_t w1l2_main_4[];
+extern const uint8_t w1l2_main_5[];
+extern const uint8_t w1l2_main_6[];
+extern const uint8_t w1l2_main_7[];
+
+extern const uint8_t w1l3_main_0[];
+extern const uint8_t w1l3_main_1[];
+extern const uint8_t w1l3_main_2[];
+extern const uint8_t w1l3_main_3[];
+extern const uint8_t w1l3_main_4[];
+extern const uint8_t w1l3_main_5[];
+extern const uint8_t w1l3_main_6[];
+extern const uint8_t w1l3_main_7[];
+
+// Main level data arrays - each level has an array of room pointers
+const uint8_t* const* const level_main_data[] = {
+    w1l1_main,  // This is an array of room pointers
+    w1l2_main,
+    w1l3_main
 };
 
 // Coin/item data arrays
-const unsigned char * const Coins_list[] = {
+const uint8_t* const Coins_list[] = {
     w1l1_coins,
     w1l2_coins,
     w1l3_coins
 };
 
 // Enemy data arrays
-const unsigned char * const Enemy_list[] = {
+const uint8_t* const Enemy_list[] = {
     w1l1_enemies,
     w1l2_enemies,
     w1l3_enemies
@@ -341,6 +369,10 @@ const unsigned char * const Levels_list[] = {
 const unsigned char Level_offsets[] = {
     0, 8, 16
 };
+
+// Maximum rooms and scroll limits
+const uint8_t max_rooms[] = {8, 8, 8};  // Each level has 8 rooms
+const uint8_t scroll_limits[] = {7, 7, 7};  // Each level has 7 scroll limits
 
 #define MAX_ROOMS (8-1)
 #define MAX_SCROLL (MAX_ROOMS*0x100)-1
