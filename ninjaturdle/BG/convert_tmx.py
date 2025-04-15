@@ -57,8 +57,8 @@ def process_layer(layer, room_num):
     for y in range(min(15, height)):
         row = tile_data[y][start_x:end_x]
         if len(row) == 16:  # Only add complete rows
-            # Don't subtract 1 from tile IDs - keep raw values from Tiled
-            room_data.extend(row)
+            # Subtract 1 from tile IDs (unless 0)
+            room_data.extend([(x - 1) if x > 0 else 0 for x in row])
             
     return room_data
 
