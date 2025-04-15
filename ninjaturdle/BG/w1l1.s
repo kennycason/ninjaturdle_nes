@@ -1953,73 +1953,73 @@ _w1l1_main_7:
 	.byte	$17
 	.byte	$17
 _w1l1_coins:
-	.byte	$04
+	.byte	$40
 	.byte	$00
 	.byte	$E0
 	.byte	$02
-	.byte	$04
+	.byte	$40
 	.byte	$01
 	.byte	$00
 	.byte	$02
-	.byte	$04
+	.byte	$40
 	.byte	$06
 	.byte	$60
 	.byte	$02
-	.byte	$04
+	.byte	$40
 	.byte	$06
 	.byte	$80
 	.byte	$02
-	.byte	$06
+	.byte	$60
 	.byte	$02
 	.byte	$90
 	.byte	$02
-	.byte	$06
+	.byte	$60
 	.byte	$03
 	.byte	$B0
 	.byte	$02
-	.byte	$06
+	.byte	$60
 	.byte	$03
 	.byte	$F0
 	.byte	$02
-	.byte	$07
+	.byte	$70
 	.byte	$03
 	.byte	$40
 	.byte	$02
-	.byte	$08
+	.byte	$80
 	.byte	$05
 	.byte	$00
 	.byte	$02
 	.byte	$FF
 _w1l1_enemies:
-	.byte	$04
+	.byte	$40
 	.byte	$04
 	.byte	$C0
 	.byte	$10
-	.byte	$08
+	.byte	$80
 	.byte	$00
 	.byte	$B0
 	.byte	$10
-	.byte	$0A
+	.byte	$A0
 	.byte	$04
 	.byte	$70
 	.byte	$10
-	.byte	$0C
+	.byte	$C0
 	.byte	$01
 	.byte	$E0
 	.byte	$11
-	.byte	$0C
+	.byte	$C0
 	.byte	$02
 	.byte	$30
 	.byte	$11
-	.byte	$0C
+	.byte	$C0
 	.byte	$02
 	.byte	$90
 	.byte	$11
-	.byte	$0C
+	.byte	$C0
 	.byte	$05
 	.byte	$90
 	.byte	$11
-	.byte	$0C
+	.byte	$C0
 	.byte	$07
 	.byte	$C0
 	.byte	$1F

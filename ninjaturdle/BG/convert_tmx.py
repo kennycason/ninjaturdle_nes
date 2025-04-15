@@ -196,13 +196,13 @@ def convert_tmx(tmx_file, output_file):
             # Write coin data
             f.write(f'const uint8_t w{world}l{level}_coins[] = {{\n')
             for x, y in coin_data:
-                f.write(f'    0x{y:02x}, {x//16}, 0x{(x%16)*16:02x}, 0x02,\n')  # 0x02 = COIN_REG
+                f.write(f'    0x{(y*16):02x}, {x//16}, 0x{(x%16)*16:02x}, 0x02,\n')  # 0x02 = COIN_REG
             f.write('    0xff  // End marker\n};\n\n')
             
             # Write enemy data  
             f.write(f'const uint8_t w{world}l{level}_enemies[] = {{\n')
             for x, y, enemy_type in enemy_data:
-                f.write(f'    0x{y:02x}, {x//16}, 0x{(x%16)*16:02x}, 0x{enemy_type:02x},\n')
+                f.write(f'    0x{(y*16):02x}, {x//16}, 0x{(x%16)*16:02x}, 0x{enemy_type:02x},\n')
             f.write('    0xff  // End marker\n};\n\n')
             
             # Write room pointers array
