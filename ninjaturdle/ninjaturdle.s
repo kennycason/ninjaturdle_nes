@@ -8182,9 +8182,9 @@ L0003:	rts
 ;
 	lda     #$00
 	sta     _index
-L0032:	lda     _index
+L003C:	lda     _index
 	cmp     #$04
-	bcs     L0033
+	bcs     L003D
 ;
 ; turd_active[index] = 0;
 ;
@@ -8195,11 +8195,11 @@ L0032:	lda     _index
 ; for (index = 0; index < MAX_TURDS; ++index) {
 ;
 	inc     _index
-	jmp     L0032
+	jmp     L003C
 ;
 ; NINJA.health = MAX_HEALTH;
 ;
-L0033:	lda     #$0A
+L003D:	lda     #$0A
 	sta     _NINJA+8
 ;
 ; NINJA.invincible = 0;
@@ -8209,7 +8209,7 @@ L0033:	lda     #$0A
 ;
 ; while (game_mode == MODE_TITLE) {
 ;
-	jmp     L0034
+	jmp     L0042
 ;
 ; ppu_wait_nmi();
 ;
@@ -8251,7 +8251,7 @@ L000A:	jsr     _ppu_wait_nmi
 ; if (pad1_new & PAD_START) {
 ;
 	and     #$10
-	beq     L0034
+	jeq     L0042
 ;
 ; pal_fade_to(4,0); // fade to black
 ;
@@ -8263,6 +8263,43 @@ L000A:	jsr     _ppu_wait_nmi
 ; ppu_off();
 ;
 	jsr     _ppu_off
+;
+; oam_clear();
+;
+	jsr     _oam_clear
+;
+; clear_vram_buffer();
+;
+	jsr     _clear_vram_buffer
+;
+; mmc1_write(MMC1_CONTROL, 0x12);  // 4KB CHR mode
+;
+	ldx     #$80
+	lda     #$00
+	jsr     pushax
+	lda     #$12
+	jsr     _mmc1_write
+;
+; mmc1_write(MMC1_CHR0, CHR_BANK_MAP);     // Pattern Table 0 (background)
+;
+	ldx     #$A0
+	lda     #$00
+	jsr     pushax
+	lda     #$02
+	jsr     _mmc1_write
+;
+; mmc1_write(MMC1_CHR1, CHR_BANK_SPRITES); // Pattern Table 1 (sprites)
+;
+	ldx     #$C0
+	lda     #$00
+	jsr     pushax
+	lda     #$03
+	jsr     _mmc1_write
+;
+; bank_spr(1);
+;
+	lda     #$01
+	jsr     _bank_spr
 ;
 ; load_room();
 ;
@@ -8299,27 +8336,78 @@ L000A:	jsr     _ppu_wait_nmi
 ;
 	jsr     _set_scroll_x
 ;
-; ppu_on_all();  
+; check_spr_objects();
+;
+	jsr     _check_spr_objects
+;
+; draw_sprites();
+;
+	jsr     _draw_sprites
+;
+; pal_bright(0);
+;
+	lda     #$00
+	jsr     _pal_bright
+;
+; ppu_on_all();
 ;
 	jsr     _ppu_on_all
 ;
-; pal_bright(4); // back to normal brightness 
+; if (level == 0) {
 ;
-	lda     #$04
+	lda     _level
+	bne     L0041
+;
+; for (temp1 = 0; temp1 < 8; ++temp1) {
+;
+	sta     _temp1
+L003E:	lda     _temp1
+	cmp     #$08
+	bcs     L003F
+;
+; ppu_wait_nmi();
+;
+	jsr     _ppu_wait_nmi
+;
+; for (temp1 = 0; temp1 < 8; ++temp1) {
+;
+	inc     _temp1
+	jmp     L003E
+;
+; for (bright = 0; bright < 5; ++bright) {
+;
+L003F:	lda     #$00
+	sta     _bright
+L0040:	lda     _bright
+	cmp     #$05
+	bcs     L0042
+;
+; pal_bright(bright);
+;
+	jsr     _pal_bright
+;
+; for (bright = 0; bright < 5; ++bright) {
+;
+	inc     _bright
+	jmp     L0040
+;
+; pal_bright(4);
+;
+L0041:	lda     #$04
 	jsr     _pal_bright
 ;
 ; while (game_mode == MODE_TITLE) {
 ;
-L0034:	lda     _game_mode
-	beq     L000A
+L0042:	lda     _game_mode
+	jeq     L000A
 ;
 ; while (game_mode == MODE_GAME) {
 ;
-	jmp     L0035
+	jmp     L0043
 ;
 ; ppu_wait_nmi();
 ;
-L000F:	jsr     _ppu_wait_nmi
+L0019:	jsr     _ppu_wait_nmi
 ;
 ; set_music_speed(8);
 ;
@@ -8378,7 +8466,7 @@ L000F:	jsr     _ppu_wait_nmi
 ;
 	lda     _pad1_new
 	and     #$10
-	beq     L0012
+	beq     L001C
 ;
 ; game_mode = MODE_PAUSE;
 ;
@@ -8401,12 +8489,12 @@ L000F:	jsr     _ppu_wait_nmi
 ;
 ; break; // out of the game loop
 ;
-	jmp     L0037
+	jmp     L0045
 ;
 ; if (level_up) {
 ;
-L0012:	lda     _level_up
-	beq     L0013
+L001C:	lda     _level_up
+	beq     L001D
 ;
 ; game_mode = MODE_SWITCH;
 ;
@@ -8434,9 +8522,9 @@ L0012:	lda     _level_up
 ;
 ; else if (death) {
 ;
-	jmp     L0035
-L0013:	lda     _death
-	beq     L0035
+	jmp     L0043
+L001D:	lda     _death
+	beq     L0043
 ;
 ; death = 0;
 ;
@@ -8498,17 +8586,17 @@ L0013:	lda     _death
 ;
 ; while (game_mode == MODE_GAME) {
 ;
-L0035:	lda     _game_mode
+L0043:	lda     _game_mode
 	cmp     #$01
-	jeq     L000F
+	jeq     L0019
 ;
 ; while (game_mode == MODE_SWITCH) { 
 ;
-	jmp     L0037
+	jmp     L0045
 ;
 ; ppu_wait_nmi();
 ;
-L0016:	jsr     _ppu_wait_nmi
+L0020:	jsr     _ppu_wait_nmi
 ;
 ; ++bright_count;
 ;
@@ -8518,7 +8606,7 @@ L0016:	jsr     _ppu_wait_nmi
 ;
 	lda     _bright_count
 	cmp     #$10
-	bcc     L001A
+	bcc     L0024
 ;
 ; bright_count = 0;
 ;
@@ -8533,12 +8621,12 @@ L0016:	jsr     _ppu_wait_nmi
 ;
 	lda     _bright
 	cmp     #$FF
-	beq     L001A
+	beq     L0024
 	jsr     _pal_bright
 ;
 ; set_scroll_x(scroll_x);
 ;
-L001A:	lda     _scroll_x
+L0024:	lda     _scroll_x
 	ldx     _scroll_x+1
 	jsr     _set_scroll_x
 ;
@@ -8546,7 +8634,7 @@ L001A:	lda     _scroll_x
 ;
 	lda     _bright
 	cmp     #$FF
-	bne     L0037
+	bne     L0045
 ;
 ; ppu_off();
 ;
@@ -8571,7 +8659,7 @@ L001A:	lda     _scroll_x
 ;
 	lda     _level
 	cmp     #$03
-	bcs     L0036
+	bcs     L0044
 ;
 ; load_room();
 ;
@@ -8584,11 +8672,11 @@ L001A:	lda     _scroll_x
 ;
 ; else { // set end of game. Did we win?
 ;
-	jmp     L003E
+	jmp     L004C
 ;
 ; game_mode = MODE_END;
 ;
-L0036:	lda     #$04
+L0044:	lda     #$04
 	sta     _game_mode
 ;
 ; vram_adr(NAMETABLE_A);
@@ -8606,7 +8694,7 @@ L0036:	lda     #$04
 ;
 ; ppu_on_all();
 ;
-L003E:	jsr     _ppu_on_all
+L004C:	jsr     _ppu_on_all
 ;
 ; pal_bright(4); // back to normal brighness
 ;
@@ -8615,17 +8703,17 @@ L003E:	jsr     _ppu_on_all
 ;
 ; while (game_mode == MODE_SWITCH) { 
 ;
-L0037:	lda     _game_mode
+L0045:	lda     _game_mode
 	cmp     #$03
-	beq     L0016
+	beq     L0020
 ;
 ; while (game_mode == MODE_PAUSE) {
 ;
-	jmp     L0038
+	jmp     L0046
 ;
 ; ppu_wait_nmi();
 ;
-L001E:	jsr     _ppu_wait_nmi
+L0028:	jsr     _ppu_wait_nmi
 ;
 ; pad1 = pad_poll(0); // read the first controller
 ;
@@ -8647,7 +8735,7 @@ L001E:	jsr     _ppu_wait_nmi
 ;
 	lda     _pad1_new
 	and     #$10
-	beq     L0038
+	beq     L0046
 ;
 ; game_mode = MODE_GAME;
 ;
@@ -8670,17 +8758,17 @@ L001E:	jsr     _ppu_wait_nmi
 ;
 ; while (game_mode == MODE_PAUSE) {
 ;
-L0038:	lda     _game_mode
+L0046:	lda     _game_mode
 	cmp     #$02
-	beq     L001E
+	beq     L0028
 ;
 ; while (game_mode == MODE_END) {
 ;
-	jmp     L0039
+	jmp     L0047
 ;
 ; ppu_wait_nmi();
 ;
-L0022:	jsr     _ppu_wait_nmi
+L002C:	jsr     _ppu_wait_nmi
 ;
 ; oam_clear();
 ;
@@ -8816,17 +8904,17 @@ L0022:	jsr     _ppu_wait_nmi
 ;
 ; while (game_mode == MODE_END) {
 ;
-L0039:	lda     _game_mode
+L0047:	lda     _game_mode
 	cmp     #$04
-	jeq     L0022
+	jeq     L002C
 ;
 ; while (game_mode == MODE_GAME_OVER) { // you died, death
 ;
-	jmp     L003A
+	jmp     L0048
 ;
 ; ppu_wait_nmi();
 ;
-L0027:	jsr     _ppu_wait_nmi
+L0031:	jsr     _ppu_wait_nmi
 ;
 ; oam_clear();
 ;
@@ -8900,17 +8988,17 @@ L0027:	jsr     _ppu_wait_nmi
 ;
 ; while (game_mode == MODE_GAME_OVER) { // you died, death
 ;
-L003A:	lda     _game_mode
+L0048:	lda     _game_mode
 	cmp     #$05
-	beq     L0027
+	beq     L0031
 ;
 ; while (game_mode == MODE_RESET) {
 ;
-	jmp     L003C
+	jmp     L004A
 ;
 ; delay(240); // 4 seconds
 ;
-L003B:	lda     #$F0
+L0049:	lda     #$F0
 	jsr     _delay
 ;
 ; delay(60); // 1 second
@@ -8920,7 +9008,7 @@ L003B:	lda     #$F0
 ;
 ; ppu_wait_nmi();
 ;
-L002D:	jsr     _ppu_wait_nmi
+L0037:	jsr     _ppu_wait_nmi
 ;
 ; pad1 = pad_poll(0); // read the first controller
 ;
@@ -8937,7 +9025,7 @@ L002D:	jsr     _ppu_wait_nmi
 ; if (pad1_new & PAD_START) {
 ;
 	and     #$10
-	beq     L002D
+	beq     L0037
 ;
 ; ppu_off();
 ;
@@ -8970,13 +9058,13 @@ L002D:	jsr     _ppu_wait_nmi
 ;
 ; while (game_mode == MODE_RESET) {
 ;
-L003C:	lda     _game_mode
+L004A:	lda     _game_mode
 	cmp     #$06
-	beq     L003B
+	beq     L0049
 ;
 ; while (1) {
 ;
-	jmp     L0034
+	jmp     L0042
 
 .endproc
 

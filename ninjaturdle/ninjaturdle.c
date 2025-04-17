@@ -71,6 +71,19 @@ void main(void) {
 			if (pad1_new & PAD_START) {
 				pal_fade_to(4,0); // fade to black
 				ppu_off();
+				
+				// Clear all sprite and VRAM data
+				oam_clear();
+				clear_vram_buffer();
+				
+				// Set up MMC1 banks first
+				mmc1_write(MMC1_CONTROL, 0x12);  // 4KB CHR mode
+				mmc1_write(MMC1_CHR0, CHR_BANK_MAP);     // Pattern Table 0 (background)
+				mmc1_write(MMC1_CHR1, CHR_BANK_SPRITES); // Pattern Table 1 (sprites)
+				
+				// Ensure sprite pattern table is set
+				bank_spr(1);
+				
 				load_room();
 				game_mode = MODE_GAME;
 				pal_bg(palette_bg);
@@ -78,8 +91,37 @@ void main(void) {
 				music_play(song);
 				scroll_x = 0;
 				set_scroll_x(scroll_x);
-				ppu_on_all();		
-				pal_bright(4); // back to normal brightness	
+				
+				// Do one full update cycle while PPU is off
+				check_spr_objects();
+				draw_sprites();
+				
+				// Wait even longer before enabling PPU
+				// for (temp1 = 0; temp1 < 8; ++temp1) {
+				// 	ppu_wait_nmi();
+				// }
+				
+				// Start with black screen
+				pal_bright(0);
+				ppu_on_all();
+				
+				// Only for initial level 1 load
+				if (level == 0) {
+					// Longer wait after PPU on
+					for (temp1 = 0; temp1 < 8; ++temp1) {
+						ppu_wait_nmi();
+					}
+					
+					// Slower fade in
+					for (bright = 0; bright < 5; ++bright) {
+						// for (temp1 = 0; temp1 < 12; ++temp1) {
+						// 	ppu_wait_nmi();
+						// }
+						pal_bright(bright);
+					}
+				} else {
+					pal_bright(4);
+				}
 			}
 		}
 		
