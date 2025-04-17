@@ -2042,31 +2042,31 @@ _w1l3_enemies:
 	.byte	$50
 	.byte	$02
 	.byte	$70
-	.byte	$11
+	.byte	$0A
 	.byte	$50
 	.byte	$04
 	.byte	$90
-	.byte	$10
+	.byte	$09
 	.byte	$60
 	.byte	$01
 	.byte	$10
-	.byte	$10
+	.byte	$09
 	.byte	$80
 	.byte	$03
 	.byte	$C0
-	.byte	$10
+	.byte	$09
 	.byte	$A0
 	.byte	$07
 	.byte	$B0
-	.byte	$1F
+	.byte	$10
 	.byte	$B0
 	.byte	$04
 	.byte	$C0
-	.byte	$10
+	.byte	$09
 	.byte	$C0
 	.byte	$02
 	.byte	$30
-	.byte	$11
+	.byte	$0A
 	.byte	$FF
 _w1l3_main:
 	.addr	_w1l3_main_0

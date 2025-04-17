@@ -9,9 +9,9 @@ import argparse
 # Tile type constants - matching sprite sheet layout
 TILE_HP_UP = 0x01     # First tile in top row (0,0)
 TILE_CORN_UP = 0x02   # Second tile in top row (1,0)
-TILE_ENEMY_WASP = 0x10   # First tile in second row
-TILE_ENEMY_BOUNCE = 0x11  # Second tile in second row
-TILE_ENEMY_BOSS1 = 0x1F   # Boss enemy
+TILE_ENEMY_WASP = 0x10   # Flying wasp (converted from 0x89)
+TILE_ENEMY_BOUNCE = 0x11  # Bouncing enemy (converted from 0x8A)
+TILE_ENEMY_BOSS1 = 0x1F   # Boss enemy (converted from 0x90)
 
 # Sprite tileset GIDs (firstgid=129)
 SPRITE_GID_HP_UP = 129      # 129 + 0 (first tile at 0,0)

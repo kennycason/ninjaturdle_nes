@@ -4276,7 +4276,7 @@ L0003:	lda     #$01
 ;
 	ldy     _index
 	lda     _enemy_type,y
-	cmp     #$1F
+	cmp     #$10
 	jne     L0002
 ;
 ; ENTITY1.x = enemy_x[index];
@@ -4950,7 +4950,7 @@ L0044:	sta     ptr1
 	rts
 L0002:	ldy     _index
 	lda     _enemy_type,y
-	cmp     #$10
+	cmp     #$09
 	jne     L0046
 ;
 ; ENTITY1.x = enemy_x[index];
@@ -5156,7 +5156,7 @@ L0093:	adc     #<(_enemy_anim)
 	rts
 L0046:	ldy     _index
 	lda     _enemy_type,y
-	cmp     #$11
+	cmp     #$0A
 	beq     L00B4
 ;
 ; }
@@ -5654,7 +5654,7 @@ L0028:	lda     _index
 ;
 	ldy     _index
 	lda     _enemy_type,y
-	cmp     #$1F
+	cmp     #$10
 	bne     L0029
 ;
 ; ENTITY1.width = 28;  // 32 pixels - 4 pixels for safety
@@ -7377,7 +7377,7 @@ L004B:	lda     _index2
 ;
 	ldy     _index2
 	lda     _enemy_type,y
-	cmp     #$1F
+	cmp     #$10
 	bne     L004C
 ;
 ; ENTITY2.width = 28;  // 32 pixels - 4 pixels for safety

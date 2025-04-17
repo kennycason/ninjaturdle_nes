@@ -150,7 +150,7 @@ _w1l1_main_0:
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$04
+	.byte	$0D
 	.byte	$04
 	.byte	$04
 	.byte	$1E
@@ -208,7 +208,7 @@ _w1l1_main_0:
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$04
+	.byte	$0D
 	.byte	$04
 	.byte	$04
 	.byte	$04
@@ -1994,35 +1994,35 @@ _w1l1_enemies:
 	.byte	$40
 	.byte	$04
 	.byte	$C0
-	.byte	$10
+	.byte	$09
 	.byte	$80
 	.byte	$00
 	.byte	$B0
-	.byte	$10
+	.byte	$09
 	.byte	$A0
 	.byte	$04
 	.byte	$70
-	.byte	$10
+	.byte	$09
 	.byte	$C0
 	.byte	$01
 	.byte	$E0
-	.byte	$11
+	.byte	$0A
 	.byte	$C0
 	.byte	$02
 	.byte	$30
-	.byte	$11
+	.byte	$0A
 	.byte	$C0
 	.byte	$02
 	.byte	$90
-	.byte	$11
+	.byte	$0A
 	.byte	$C0
 	.byte	$05
 	.byte	$90
-	.byte	$11
+	.byte	$0A
 	.byte	$C0
 	.byte	$07
 	.byte	$C0
-	.byte	$1F
+	.byte	$10
 	.byte	$FF
 _w1l1_main:
 	.addr	_w1l1_main_0

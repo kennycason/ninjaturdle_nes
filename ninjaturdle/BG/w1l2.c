@@ -161,7 +161,7 @@ const uint8_t w1l2_coins[] = {
 };
 
 const uint8_t w1l2_enemies[] = {
-    0xb0, 7, 0xc0, 0x1f,
+    0xb0, 7, 0xc0, 0x10,
     0xff  // End marker
 };
 

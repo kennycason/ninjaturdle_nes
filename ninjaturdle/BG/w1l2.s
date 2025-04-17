@@ -2006,7 +2006,7 @@ _w1l2_enemies:
 	.byte	$B0
 	.byte	$07
 	.byte	$C0
-	.byte	$1F
+	.byte	$10
 	.byte	$FF
 _w1l2_main:
 	.addr	_w1l2_main_0
