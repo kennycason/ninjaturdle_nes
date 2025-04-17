@@ -2630,6 +2630,7 @@ L002F:	lda     _index
 ;
 	ldy     _index
 	lda     _coin_type,y
+	cmp     #$02
 	bne     L0012
 ;
 ; oam_meta_spr(temp_x, temp_y, CoinSpr);
@@ -5521,6 +5522,7 @@ L0024:	lda     _index
 ;
 	ldy     _index
 	lda     _coin_type,y
+	cmp     #$02
 	bne     L0025
 ;
 ; ENTITY2.width = COIN_WIDTH;
@@ -5595,7 +5597,7 @@ L0021:	sta     _ENTITY2+3
 ;
 	ldy     _index
 	lda     _coin_type,y
-	cmp     #$01
+	cmp     #$08
 	bne     L0026
 	inc     _level_up
 ;
