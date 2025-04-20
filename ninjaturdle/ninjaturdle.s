@@ -6309,10 +6309,10 @@ L001E:	rts
 ;
 	jsr     _bg_collision_sub
 ;
-; if (bg_collision_sub() & COL_ALL) {
+; if (bg_collision_sub() & COLLISION_SOLID) {
 ;
 	jsr     _bg_collision_sub
-	and     #$60
+	and     #$40
 	beq     L0006
 ;
 ; ++collision_L;
@@ -6343,10 +6343,10 @@ L0006:	lda     _ENTITY1+2
 ;
 	jsr     _bg_collision_sub
 ;
-; if (bg_collision_sub() & COL_ALL) { // find a corner in the collision map
+; if (bg_collision_sub() & COLLISION_SOLID) { // find a corner in the collision map
 ;
 	jsr     _bg_collision_sub
-	and     #$60
+	and     #$40
 	beq     L0005
 ;
 ; ++collision_R;
@@ -6403,10 +6403,10 @@ L0005:	rts
 	adc     #$02
 	sta     _temp_y
 ;
-; if (bg_collision_sub() & COL_ALL) return 1;
+; if (bg_collision_sub() & COLLISION_SOLID) return 1;
 ;
 	jsr     _bg_collision_sub
-	and     #$60
+	and     #$40
 	beq     L0006
 	ldx     #$00
 	lda     #$01
@@ -6425,11 +6425,11 @@ L0006:	lda     _ENTITY1+1
 	sbc     #$02
 	sta     _temp_y
 ;
-; if (bg_collision_sub() & COL_ALL) return 1;
+; if (bg_collision_sub() & COLLISION_SOLID) return 1;
 ;
 	jsr     _bg_collision_sub
 	ldx     #$00
-	and     #$60
+	and     #$40
 	beq     L0008
 	lda     #$01
 	rts
@@ -6493,10 +6493,10 @@ L0006:	sta     _temp5
 	adc     #$02
 	sta     _temp_y
 ;
-; if (bg_collision_sub() & COL_ALL) return 1;
+; if (bg_collision_sub() & COLLISION_SOLID) return 1;
 ;
 	jsr     _bg_collision_sub
-	and     #$60
+	and     #$40
 	beq     L0008
 	ldx     #$00
 	lda     #$01
@@ -6515,11 +6515,11 @@ L0008:	lda     _ENTITY1+1
 	sbc     #$02
 	sta     _temp_y
 ;
-; if (bg_collision_sub() & COL_ALL) return 1;
+; if (bg_collision_sub() & COLLISION_SOLID) return 1;
 ;
 	jsr     _bg_collision_sub
 	ldx     #$00
-	and     #$60
+	and     #$40
 	beq     L000A
 	lda     #$01
 	rts
@@ -6580,10 +6580,10 @@ L0002:	lda     _temp5
 	ora     #$F0
 	sta     _eject_U
 ;
-; if (bg_collision_sub() & COL_ALL) return 1;
+; if (bg_collision_sub() & COLLISION_SOLID) return 1;
 ;
 	jsr     _bg_collision_sub
-	and     #$60
+	and     #$40
 	beq     L0007
 	ldx     #$00
 	lda     #$01
@@ -6625,11 +6625,11 @@ L0004:	lda     _temp5
 	lda     _temp5+1
 	sta     _temp_room
 ;
-; if (bg_collision_sub() & COL_ALL) return 1;
+; if (bg_collision_sub() & COLLISION_SOLID) return 1;
 ;
 	jsr     _bg_collision_sub
 	ldx     #$00
-	and     #$60
+	and     #$40
 	beq     L0009
 	lda     #$01
 	rts
@@ -6709,10 +6709,10 @@ L000C:	lda     _temp_y
 	and     #$0F
 	sta     _eject_D
 ;
-; if (bg_collision_sub() ) return 1;
+; if (bg_collision_sub() & (COLLISION_SOLID | COLLISION_PLATFORM)) return 1;
 ;
 	jsr     _bg_collision_sub
-	tax
+	and     #$60
 	beq     L000D
 	ldx     #$00
 	lda     #$01
@@ -6724,7 +6724,7 @@ L000D:	lda     _ENTITY1
 	clc
 	adc     _scroll_x
 	pha
-	txa
+	lda     #$00
 	adc     _scroll_x+1
 	tax
 	pla
@@ -6754,12 +6754,12 @@ L0007:	lda     _temp5
 	lda     _temp5+1
 	sta     _temp_room
 ;
-; if (bg_collision_sub() ) return 1;
+; if (bg_collision_sub() & (COLLISION_SOLID | COLLISION_PLATFORM)) return 1;
 ;
 	jsr     _bg_collision_sub
-	tax
-	beq     L000E
 	ldx     #$00
+	and     #$60
+	beq     L000E
 	lda     #$01
 	rts
 ;
@@ -6823,10 +6823,10 @@ L0002:	lda     _temp5
 	adc     _temp_y
 	sta     _temp_y
 ;
-; if (bg_collision_sub() ) return 1;
+; if (bg_collision_sub() & (COLLISION_SOLID | COLLISION_PLATFORM)) return 1;
 ;
 	jsr     _bg_collision_sub
-	tax
+	and     #$60
 	beq     L0008
 	ldx     #$00
 	lda     #$01
@@ -6838,7 +6838,7 @@ L0008:	lda     _ENTITY1
 	clc
 	adc     _scroll_x
 	pha
-	txa
+	lda     #$00
 	adc     _scroll_x+1
 	tax
 	pla
@@ -6868,12 +6868,12 @@ L0004:	lda     _temp5
 	lda     _temp5+1
 	sta     _temp_room
 ;
-; if (bg_collision_sub() ) return 1;
+; if (bg_collision_sub() & (COLLISION_SOLID | COLLISION_PLATFORM)) return 1;
 ;
 	jsr     _bg_collision_sub
-	tax
-	beq     L000A
 	ldx     #$00
+	and     #$60
+	beq     L000A
 	lda     #$01
 	rts
 ;

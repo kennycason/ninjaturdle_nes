@@ -937,7 +937,7 @@ void bg_collision_fast(void) {
 	
 	bg_collision_sub();
 	
-	if (bg_collision_sub() & COL_ALL) {
+	if (bg_collision_sub() & COLLISION_SOLID) {
 		++collision_L;
 	}
 	
@@ -949,7 +949,7 @@ void bg_collision_fast(void) {
 	// temp_y is unchanged
 	bg_collision_sub();
 	
-	if (bg_collision_sub() & COL_ALL) { // find a corner in the collision map
+	if (bg_collision_sub() & COLLISION_SOLID) { // find a corner in the collision map
 		++collision_R;
 	}
 }
@@ -964,11 +964,11 @@ char bg_coll_L(void) {
     
     eject_L = temp_x | 0xf0;
     temp_y = ENTITY1.y + 2;
-    if (bg_collision_sub() & COL_ALL) return 1;
+    if (bg_collision_sub() & COLLISION_SOLID) return 1;
     
     temp_y = ENTITY1.y + ENTITY1.height;
     temp_y -= 2;
-    if (bg_collision_sub() & COL_ALL) return 1;
+    if (bg_collision_sub() & COLLISION_SOLID) return 1;
     
     return 0;
 }
@@ -981,11 +981,11 @@ char bg_coll_R(void) {
     
     eject_R = (temp_x + 1) & 0x0f;
     temp_y = ENTITY1.y + 2;
-    if (bg_collision_sub() & COL_ALL) return 1;
+    if (bg_collision_sub() & COLLISION_SOLID) return 1;
     
     temp_y = ENTITY1.y + ENTITY1.height;
     temp_y -= 2;
-    if (bg_collision_sub() & COL_ALL) return 1;
+    if (bg_collision_sub() & COLLISION_SOLID) return 1;
     
     return 0;
 }
@@ -999,14 +999,14 @@ char bg_coll_U(void) {
     
     temp_y = ENTITY1.y;
     eject_U = temp_y | 0xf0;
-    if (bg_collision_sub() & COL_ALL) return 1;
+    if (bg_collision_sub() & COLLISION_SOLID) return 1;
     
     temp5 = ENTITY1.x + scroll_x + ENTITY1.width;
     temp5 -= 2;
     temp_x = (char)temp5; // low byte
     temp_room = temp5 >> 8; // high byte
     
-    if (bg_collision_sub() & COL_ALL) return 1;
+    if (bg_collision_sub() & COLLISION_SOLID) return 1;
     
     return 0;
 }
@@ -1026,14 +1026,15 @@ char bg_coll_D(void) {
     
     eject_D = (temp_y + 1) & 0x0f;
     
-    if (bg_collision_sub() ) return 1;
+    // Check for both solid and platform collisions when falling
+    if (bg_collision_sub() & (COLLISION_SOLID | COLLISION_PLATFORM)) return 1;
     
     temp5 = ENTITY1.x + scroll_x + ENTITY1.width;
     temp5 -= 2;
     temp_x = (char)temp5; // low byte
     temp_room = temp5 >> 8; // high byte
     
-    if (bg_collision_sub() ) return 1;
+    if (bg_collision_sub() & (COLLISION_SOLID | COLLISION_PLATFORM)) return 1;
     
     return 0;
 }
@@ -1048,14 +1049,14 @@ char bg_coll_D2(void) {
     
     temp_y = ENTITY1.y + ENTITY1.height;
     temp_y += 2;
-    if (bg_collision_sub() ) return 1;
+    if (bg_collision_sub() & (COLLISION_SOLID | COLLISION_PLATFORM)) return 1;
     
     temp5 = ENTITY1.x + scroll_x + ENTITY1.width;
     temp5 -= 2;
     temp_x = (char)temp5; // low byte
     temp_room = temp5 >> 8; // high byte
     
-    if (bg_collision_sub() ) return 1;
+    if (bg_collision_sub() & (COLLISION_SOLID | COLLISION_PLATFORM)) return 1;
     
     return 0;
 }
@@ -1082,11 +1083,12 @@ char bg_collision_sub(void) {
         return COLLISION_SOLID;  // Solid collision from all sides
     }
     else if (IS_PLATFORM(temp1)) {
-        // Only return platform collision if approaching from above
+        // Only return platform collision if falling (vel_y > 0)
+        // This allows jumping up through platforms and passing through them horizontally
         if (NINJA.vel_y > 0) {
             return COLLISION_PLATFORM;
         }
-        return 0;  // Pass through from below
+        return 0;  // No collision when moving up or horizontally
     }
     
     return 0;  // No collision with background tiles
