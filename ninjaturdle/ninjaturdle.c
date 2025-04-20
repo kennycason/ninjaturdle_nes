@@ -735,6 +735,9 @@ char get_position(void) {
 
 
 void enemy_moves(void) {
+	unsigned char old_width;
+	unsigned char old_height;
+	
 	if (enemy_type[index] == ENEMY_BOSS1) {
 		// Set collision box to center-bottom of the boss
 		ENTITY1.x = enemy_x[index];
@@ -756,7 +759,7 @@ void enemy_moves(void) {
 				enemy_anim[index] = Boss1SprR; // Use right-facing sprite
 			}
             
-            // Shoot linear bullet during standing phase
+            // Always try to shoot during standing phase, regardless of collision
             if (enemy_bullet_cooldown[index] == 0) {
                 fire_enemy_bullet(index, BULLET_LINEAR);
             }
@@ -781,7 +784,7 @@ void enemy_moves(void) {
 				enemy_anim[index] = Boss1SprR;
 			}
             
-            // Shoot thrown bullet at peak of jump
+            // Always try to shoot at peak of jump, regardless of collision
             if (temp1 == 20 && enemy_bullet_cooldown[index] == 0) {
                 fire_enemy_bullet(index, BULLET_THROW);
             }
@@ -807,13 +810,23 @@ void enemy_moves(void) {
 				enemy_anim[index] = Boss1SprR;
 			}
 			
+			// Save current collision box
+			old_width = ENTITY1.width;
+			old_height = ENTITY1.height;
+			
 			//check ground collision
 			ENTITY1.x = enemy_x[index];
 			ENTITY1.y = enemy_y[index] + 28; // Bottom of the boss
+			ENTITY1.width = 28;
+			ENTITY1.height = 4;
 			
 			if (bg_coll_D()) {
 				enemy_y[index] -= eject_D;
 			}
+			
+			// Restore collision box
+			ENTITY1.width = old_width;
+			ENTITY1.height = old_height;
 		}
 		
 		// Update bullet cooldown
@@ -1497,9 +1510,16 @@ void draw_turds(void) {
 
 // Function to fire enemy bullets
 void fire_enemy_bullet(unsigned char enemy_index, unsigned char bullet_type) {
-    // Find an inactive bullet slot
+    // Find two inactive bullet slots for the boss
+    char slots_found = 0;
+    char first_slot = -1;
+    
     for(index = 0; index < MAX_ENEMY_BULLETS; ++index) {
         if (!enemy_bullet_active[index]) {
+            if (slots_found == 0) {
+                first_slot = index;
+            }
+            
             enemy_bullet_active[index] = 1;
             enemy_bullet_type[index] = bullet_type;
             
@@ -1508,34 +1528,47 @@ void fire_enemy_bullet(unsigned char enemy_index, unsigned char bullet_type) {
             if (enemy_x[enemy_index] > ENTITY2.x) {
                 // Boss is to the right of player, fire left
                 enemy_bullet_x[index] = enemy_x[enemy_index] - 4;
-                enemy_bullet_vel_x[index] = -ENEMY_BULLET_SPEED;
+                enemy_bullet_vel_x[index] = -3; // Same speed as ninja's turds
             } else {
                 // Boss is to the left of player, fire right
                 enemy_bullet_x[index] = enemy_x[enemy_index] + 28;
-                enemy_bullet_vel_x[index] = ENEMY_BULLET_SPEED;
+                enemy_bullet_vel_x[index] = 3; // Same speed as ninja's turds
             }
             enemy_bullet_y[index] = enemy_y[enemy_index] + 16; // From middle of boss
             
-            // Always throw with an upward arc like ninja's turds
-            enemy_bullet_vel_y[index] = ENEMY_BULLET_JUMP;
+            // Different arcs for each bullet
+            if (slots_found == 0) {
+                // First bullet - higher arc
+                enemy_bullet_vel_y[index] = -8; // Higher arc than ninja's turds
+            } else {
+                // Second bullet - lower arc
+                enemy_bullet_vel_y[index] = -6; // Similar to ninja's turds
+            }
             
-            // Set the room for the bullet
-            enemy_bullet_room[index] = enemy_room[enemy_index];
+            ++slots_found;
             
-            // Set cooldown for this enemy
-            enemy_bullet_cooldown[enemy_index] = ENEMY_BULLET_COOLDOWN;
-            
-            // Play sound effect
-            sfx_play(SFX_NOISE, 0);
-            break;
+            // Break if we've fired both bullets
+            if (slots_found >= 2) {
+                // Set cooldown for this enemy
+                enemy_bullet_cooldown[enemy_index] = ENEMY_BULLET_COOLDOWN;
+                
+                // Play sound effect only once
+                sfx_play(SFX_NOISE, 0);
+                break;
+            }
         }
+    }
+    
+    // If we only found one slot, still set the cooldown
+    if (slots_found == 1) {
+        enemy_bullet_cooldown[enemy_index] = ENEMY_BULLET_COOLDOWN;
+        sfx_play(SFX_NOISE, 0);
     }
 }
 
 // Function to update enemy bullets
 void update_enemy_bullets(void) {
     char i;
-    char collision;
     
     for (i = 0; i < MAX_ENEMY_BULLETS; i++) {
         if (enemy_bullet_active[i]) {
@@ -1543,24 +1576,31 @@ void update_enemy_bullets(void) {
             enemy_bullet_x[i] += enemy_bullet_vel_x[i];
             enemy_bullet_y[i] += enemy_bullet_vel_y[i];
             
-            // Apply gravity
-            enemy_bullet_vel_y[i] += GRAVITY;
+            // Apply gravity (same as ninja's turds)
+            enemy_bullet_vel_y[i] += 1;
+            
+            // Cap falling speed
+            if (enemy_bullet_vel_y[i] > 5) {
+                enemy_bullet_vel_y[i] = 5;
+            }
             
             // Check for collisions
-            temp_x = enemy_bullet_x[i];
+            temp5 = enemy_bullet_x[i] + scroll_x;
+            temp_x = temp5 & 0xff;
+            temp_room = temp5 >> 8;
             temp_y = enemy_bullet_y[i];
-            temp_room = enemy_bullet_room[i];
             
-            collision = bg_collision_sub();
+            // Get the tile we're colliding with
+            temp1 = bg_collision_sub();
             
-            // Only check for solid block collisions, ignore platforms
-            if (collision == COLLISION_SOLID) {
+            // Only collide with solid blocks, ignore platforms completely
+            if (IS_SOLID(temp1)) {
                 enemy_bullet_active[i] = 0;
                 continue;
             }
             
             // Check if bullet is off screen
-            if (enemy_bullet_y[i] >= 0xf0) {
+            if (enemy_bullet_y[i] >= 0xf0 || enemy_bullet_x[i] < 5 || enemy_bullet_x[i] > 250) {
                 enemy_bullet_active[i] = 0;
                 continue;
             }
@@ -1577,10 +1617,18 @@ void update_enemy_bullets(void) {
             ENTITY2.height = HERO_HEIGHT;
             
             if (check_collision(&ENTITY1, &ENTITY2)) {
-                if (!NINJA.invincible) {
-                    NINJA.health--;
-                    NINJA.invincible = INVINCIBLE_TIME;
-                    sfx_play(SFX_HIT, 0);
+                // Only take damage if not in cooldown period
+                if (damage_cooldown == 0) {
+                    player_health -= 2;
+                    damage_cooldown = DAMAGE_COOLDOWN_TIME;
+                    
+                    // Play damage sound
+                    sfx_play(SFX_NOISE, 0);
+                    
+                    // Only set death flag if health is depleted
+                    if (player_health <= 0) {
+                        death = 1;
+                    }
                 }
                 enemy_bullet_active[i] = 0;
             }

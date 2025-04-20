@@ -4336,6 +4336,7 @@ L0003:	lda     #$01
 ;
 ; if (enemy_type[index] == ENEMY_BOSS1) {
 ;
+	jsr     decsp2
 	ldy     _index
 	lda     _enemy_type,y
 	cmp     #$10
@@ -4369,15 +4370,11 @@ L0003:	lda     #$01
 ;
 	lda     _enemy_frames
 	and     #$01
-	beq     L00AB
-;
-; }
-;
-	rts
+	jne     L0070
 ;
 ; temp1 = enemy_frames + (index << 3);
 ;
-L00AB:	lda     _index
+	lda     _index
 	asl     a
 	asl     a
 	asl     a
@@ -4816,6 +4813,17 @@ L0091:	adc     #<(_enemy_anim)
 	lda     #>(_Boss1SprR)
 L00AA:	sta     (ptr1),y
 ;
+; old_width = ENTITY1.width;
+;
+	lda     _ENTITY1+2
+	sta     (sp),y
+;
+; old_height = ENTITY1.height;
+;
+	lda     _ENTITY1+3
+	dey
+	sta     (sp),y
+;
 ; ENTITY1.x = enemy_x[index];
 ;
 	ldy     _index
@@ -4830,11 +4838,21 @@ L00AA:	sta     (ptr1),y
 	adc     #$1C
 	sta     _ENTITY1+1
 ;
+; ENTITY1.width = 28;
+;
+	lda     #$1C
+	sta     _ENTITY1+2
+;
+; ENTITY1.height = 4;
+;
+	lda     #$04
+	sta     _ENTITY1+3
+;
 ; if (bg_coll_D()) {
 ;
 	jsr     _bg_coll_D
 	tax
-	beq     L000E
+	beq     L0031
 ;
 ; enemy_y[index] -= eject_D;
 ;
@@ -4853,6 +4871,18 @@ L0032:	sta     sreg
 	sec
 	sbc     _eject_D
 	sta     (sreg),y
+;
+; ENTITY1.width = old_width;
+;
+L0031:	ldy     #$01
+	lda     (sp),y
+	sta     _ENTITY1+2
+;
+; ENTITY1.height = old_height;
+;
+	dey
+	lda     (sp),y
+	sta     _ENTITY1+3
 ;
 ; if (enemy_bullet_cooldown[index] > 0) {
 ;
@@ -4895,15 +4925,11 @@ L0033:	ldy     _index
 ; if (collision_L) return;
 ;
 	lda     _collision_L
-	beq     L00AC
-;
-; }
-;
-	rts
+	jne     L0070
 ;
 ; if (enemy_actual_x[index] == 0) --enemy_room[index];
 ;
-L00AC:	ldy     _index
+	ldy     _index
 	lda     _enemy_actual_x,y
 	bne     L0039
 	lda     #<(_enemy_room)
@@ -4938,19 +4964,15 @@ L003C:	sta     ptr1
 ;
 ; else if (enemy_x[index] < ENTITY2.x) {
 ;
-	rts
+	jmp     incsp2
 L0036:	ldy     _index
 	lda     _enemy_x,y
 	cmp     _ENTITY2
-	bcc     L00AD
-;
-; }
-;
-	rts
+	jcs     L0070
 ;
 ; ENTITY1.x += 1; // test going right
 ;
-L00AD:	inc     _ENTITY1
+	inc     _ENTITY1
 ;
 ; bg_collision_fast();
 ;
@@ -4959,15 +4981,11 @@ L00AD:	inc     _ENTITY1
 ; if (collision_R) return;
 ;
 	lda     _collision_R
-	beq     L00AE
-;
-; }
-;
-	rts
+	jne     L0070
 ;
 ; ++enemy_actual_x[index];
 ;
-L00AE:	lda     #<(_enemy_actual_x)
+	lda     #<(_enemy_actual_x)
 	ldx     #>(_enemy_actual_x)
 	clc
 	adc     _index
@@ -4985,15 +5003,8 @@ L0041:	sta     ptr1
 ;
 	ldy     _index
 	lda     _enemy_actual_x,y
-	beq     L00AF
-;
-; }
-;
-	rts
-;
-; if (enemy_actual_x[index] == 0) ++enemy_room[index];
-;
-L00AF:	lda     #<(_enemy_room)
+	jne     L0070
+	lda     #<(_enemy_room)
 	ldx     #>(_enemy_room)
 	clc
 	adc     _index
@@ -5009,7 +5020,7 @@ L0044:	sta     ptr1
 ;
 ; else if (enemy_type[index] == ENEMY_WASP) {
 ;
-	rts
+	jmp     incsp2
 L0002:	ldy     _index
 	lda     _enemy_type,y
 	cmp     #$09
@@ -5043,15 +5054,11 @@ L0002:	ldy     _index
 ;
 	lda     _enemy_frames
 	and     #$01
-	beq     L00B0
-;
-; }
-;
-	rts
+	jne     L0070
 ;
 ; if (enemy_x[index] > ENTITY2.x) {
 ;
-L00B0:	ldy     _index
+	ldy     _index
 	lda     _enemy_x,y
 	cmp     _ENTITY2
 	bcc     L004C
@@ -5068,15 +5075,11 @@ L00B0:	ldy     _index
 ; if (collision_L) return;
 ;
 	lda     _collision_L
-	beq     L00B1
-;
-; }
-;
-	rts
+	jne     L0070
 ;
 ; if (enemy_actual_x[index] == 0) --enemy_room[index];
 ;
-L00B1:	ldy     _index
+	ldy     _index
 	lda     _enemy_actual_x,y
 	bne     L004F
 	lda     #<(_enemy_room)
@@ -5130,19 +5133,15 @@ L0092:	adc     #<(_enemy_anim)
 ;
 ; else if (enemy_x[index] < ENTITY2.x) {
 ;
-	rts
+	jmp     incsp2
 L004C:	ldy     _index
 	lda     _enemy_x,y
 	cmp     _ENTITY2
-	bcc     L00B2
-;
-; }
-;
-	rts
+	jcs     L0070
 ;
 ; ENTITY1.x += 1; // test going right
 ;
-L00B2:	inc     _ENTITY1
+	inc     _ENTITY1
 ;
 ; bg_collision_fast();
 ;
@@ -5151,15 +5150,11 @@ L00B2:	inc     _ENTITY1
 ; if (collision_R) return;
 ;
 	lda     _collision_R
-	beq     L00B3
-;
-; }
-;
-	rts
+	jne     L0070
 ;
 ; ++enemy_actual_x[index];
 ;
-L00B3:	lda     #<(_enemy_actual_x)
+	lda     #<(_enemy_actual_x)
 	ldx     #>(_enemy_actual_x)
 	clc
 	adc     _index
@@ -5215,19 +5210,15 @@ L0093:	adc     #<(_enemy_anim)
 ;
 ; else if (enemy_type[index] == ENEMY_BOUNCE) {
 ;
-	rts
+	jmp     incsp2
 L0046:	ldy     _index
 	lda     _enemy_type,y
 	cmp     #$0A
-	beq     L00B4
-;
-; }
-;
-	rts
+	jne     L0070
 ;
 ; temp1 = enemy_frames + (index << 3);
 ;
-L00B4:	lda     _index
+	lda     _index
 	asl     a
 	asl     a
 	asl     a
@@ -5267,7 +5258,7 @@ L0094:	adc     #<(_enemy_anim)
 ;
 ; else if (temp1 < 22) {
 ;
-	rts
+	jmp     incsp2
 L00A4:	lda     _temp1
 	cmp     #$16
 	bcs     L00A5
@@ -5324,7 +5315,7 @@ L0095:	adc     #<(_enemy_anim)
 ;
 ; else if (temp1 < 42) {
 ;
-	rts
+	jmp     incsp2
 L00A5:	lda     _temp1
 	cmp     #$2A
 	bcs     L00A6
@@ -5366,7 +5357,7 @@ L0096:	adc     #<(_enemy_anim)
 ;
 ; else if (temp1 < 44) { // use short anim. 2 frames
 ;
-	rts
+	jmp     incsp2
 L00A6:	lda     _temp1
 	cmp     #$2C
 	bcs     L0067
@@ -5408,7 +5399,7 @@ L0097:	adc     #<(_enemy_anim)
 ;
 ; else {
 ;
-	rts
+	jmp     incsp2
 ;
 ; ++enemy_y[index]; // fall
 ;
@@ -5521,7 +5512,7 @@ L0071:	sta     sreg
 ;
 ; }
 ;
-L0070:	rts
+L0070:	jmp     incsp2
 
 .endproc
 
@@ -7689,11 +7680,21 @@ L0003:	rts
 ;
 	jsr     pusha
 ;
+; char slots_found = 0;
+;
+	lda     #$00
+	jsr     pusha
+;
+; char first_slot = -1;
+;
+	lda     #$FF
+	jsr     pusha
+;
 ; for(index = 0; index < MAX_ENEMY_BULLETS; ++index) {
 ;
 	lda     #$00
 	sta     _index
-L001D:	lda     _index
+L0023:	lda     _index
 	cmp     #$08
 	jcs     L0003
 ;
@@ -7701,30 +7702,42 @@ L001D:	lda     _index
 ;
 	ldy     _index
 	lda     _enemy_bullet_active,y
-	jne     L001E
+	jne     L0024
+;
+; if (slots_found == 0) {
+;
+	ldy     #$01
+	lda     (sp),y
+	bne     L0008
+;
+; first_slot = index;
+;
+	lda     _index
+	dey
+	sta     (sp),y
 ;
 ; enemy_bullet_active[index] = 1;
 ;
-	ldy     _index
+L0008:	ldy     _index
 	lda     #$01
 	sta     _enemy_bullet_active,y
 ;
 ; enemy_bullet_type[index] = bullet_type;
 ;
-	ldy     #$00
+	ldy     #$02
 	lda     (sp),y
 	ldy     _index
 	sta     _enemy_bullet_type,y
 ;
 ; if (enemy_x[enemy_index] > ENTITY2.x) {
 ;
-	ldy     #$01
+	ldy     #$03
 	lda     (sp),y
 	tay
 	lda     _enemy_x,y
 	cmp     _ENTITY2
-	bcc     L000A
-	beq     L000A
+	bcc     L000B
+	beq     L000B
 ;
 ; enemy_bullet_x[index] = enemy_x[enemy_index] - 4;
 ;
@@ -7732,11 +7745,11 @@ L001D:	lda     _index
 	ldx     #>(_enemy_bullet_x)
 	clc
 	adc     _index
-	bcc     L000C
+	bcc     L000D
 	inx
-L000C:	sta     ptr1
+L000D:	sta     ptr1
 	stx     ptr1+1
-	ldy     #$01
+	ldy     #$03
 	lda     (sp),y
 	tay
 	lda     _enemy_x,y
@@ -7745,26 +7758,26 @@ L000C:	sta     ptr1
 	ldy     #$00
 	sta     (ptr1),y
 ;
-; enemy_bullet_vel_x[index] = -ENEMY_BULLET_SPEED;
+; enemy_bullet_vel_x[index] = -3; // Same speed as ninja's turds
 ;
 	ldy     _index
-	lda     #$FC
+	lda     #$FD
 ;
 ; } else {
 ;
-	jmp     L001C
+	jmp     L0021
 ;
 ; enemy_bullet_x[index] = enemy_x[enemy_index] + 28;
 ;
-L000A:	lda     #<(_enemy_bullet_x)
+L000B:	lda     #<(_enemy_bullet_x)
 	ldx     #>(_enemy_bullet_x)
 	clc
 	adc     _index
-	bcc     L0011
+	bcc     L0012
 	inx
-L0011:	sta     ptr1
+L0012:	sta     ptr1
 	stx     ptr1+1
-	ldy     #$01
+	ldy     #$03
 	lda     (sp),y
 	tay
 	lda     _enemy_x,y
@@ -7773,11 +7786,11 @@ L0011:	sta     ptr1
 	ldy     #$00
 	sta     (ptr1),y
 ;
-; enemy_bullet_vel_x[index] = ENEMY_BULLET_SPEED;
+; enemy_bullet_vel_x[index] = 3; // Same speed as ninja's turds
 ;
 	ldy     _index
-	lda     #$04
-L001C:	sta     _enemy_bullet_vel_x,y
+	lda     #$03
+L0021:	sta     _enemy_bullet_vel_x,y
 ;
 ; enemy_bullet_y[index] = enemy_y[enemy_index] + 16; // From middle of boss
 ;
@@ -7785,11 +7798,11 @@ L001C:	sta     _enemy_bullet_vel_x,y
 	ldx     #>(_enemy_bullet_y)
 	clc
 	adc     _index
-	bcc     L0015
+	bcc     L0016
 	inx
-L0015:	sta     ptr1
+L0016:	sta     ptr1
 	stx     ptr1+1
-	ldy     #$01
+	ldy     #$03
 	lda     (sp),y
 	tay
 	lda     _enemy_y,y
@@ -7798,32 +7811,43 @@ L0015:	sta     ptr1
 	ldy     #$00
 	sta     (ptr1),y
 ;
-; enemy_bullet_vel_y[index] = ENEMY_BULLET_JUMP;
+; if (slots_found == 0) {
+;
+	iny
+	lda     (sp),y
+	bne     L0019
+;
+; enemy_bullet_vel_y[index] = -8; // Higher arc than ninja's turds
 ;
 	ldy     _index
+	lda     #$F8
+;
+; } else {
+;
+	jmp     L0022
+;
+; enemy_bullet_vel_y[index] = -6; // Similar to ninja's turds
+;
+L0019:	ldy     _index
 	lda     #$FA
-	sta     _enemy_bullet_vel_y,y
+L0022:	sta     _enemy_bullet_vel_y,y
 ;
-; enemy_bullet_room[index] = enemy_room[enemy_index];
+; ++slots_found;
 ;
-	lda     #<(_enemy_bullet_room)
-	ldx     #>(_enemy_bullet_room)
-	clc
-	adc     _index
-	bcc     L0019
-	inx
-L0019:	sta     ptr1
-	stx     ptr1+1
 	ldy     #$01
-	lda     (sp),y
-	tay
-	lda     _enemy_room,y
-	ldy     #$00
-	sta     (ptr1),y
+	clc
+	tya
+	adc     (sp),y
+	sta     (sp),y
+;
+; if (slots_found >= 2) {
+;
+	cmp     #$02
+	bcc     L0024
 ;
 ; enemy_bullet_cooldown[enemy_index] = ENEMY_BULLET_COOLDOWN;
 ;
-	iny
+	ldy     #$03
 	lda     (sp),y
 	tay
 	lda     #$5A
@@ -7838,16 +7862,38 @@ L0019:	sta     ptr1
 ;
 ; break;
 ;
-	jmp     incsp2
+	jmp     L0003
 ;
 ; for(index = 0; index < MAX_ENEMY_BULLETS; ++index) {
 ;
-L001E:	inc     _index
-	jmp     L001D
+L0024:	inc     _index
+	jmp     L0023
+;
+; if (slots_found == 1) {
+;
+L0003:	ldy     #$01
+	lda     (sp),y
+	cmp     #$01
+	bne     L001F
+;
+; enemy_bullet_cooldown[enemy_index] = ENEMY_BULLET_COOLDOWN;
+;
+	ldy     #$03
+	lda     (sp),y
+	tay
+	lda     #$5A
+	sta     _enemy_bullet_cooldown,y
+;
+; sfx_play(SFX_NOISE, 0);
+;
+	lda     #$02
+	jsr     pusha
+	lda     #$00
+	jsr     _sfx_play
 ;
 ; }
 ;
-L0003:	jmp     incsp2
+L001F:	jmp     incsp4
 
 .endproc
 
@@ -7864,10 +7910,10 @@ L0003:	jmp     incsp2
 ;
 ; for (i = 0; i < MAX_ENEMY_BULLETS; i++) {
 ;
-	jsr     decsp2
+	jsr     decsp1
 	lda     #$00
-	ldy     #$01
-L001D:	sta     (sp),y
+	tay
+L0026:	sta     (sp),y
 	cmp     #$08
 	jcs     L0003
 ;
@@ -7882,7 +7928,7 @@ L001D:	sta     (sp),y
 ;
 	lda     #<(_enemy_bullet_x)
 	ldx     #>(_enemy_bullet_x)
-	ldy     #$01
+	ldy     #$00
 	clc
 	adc     (sp),y
 	bcc     L0008
@@ -7891,18 +7937,15 @@ L0008:	sta     ptr2
 	stx     ptr2+1
 	sta     ptr1
 	stx     ptr1+1
-	dey
 	lda     (ptr1),y
 	sta     sreg
 	lda     #<(_enemy_bullet_vel_x)
 	ldx     #>(_enemy_bullet_vel_x)
 	clc
-	iny
 	adc     (sp),y
-	bcc     L0009
+	bcc     L0027
 	inx
-L0009:	dey
-	jsr     ldaidx
+L0027:	jsr     ldaidx
 	clc
 	adc     sreg
 	sta     (ptr2),y
@@ -7911,7 +7954,6 @@ L0009:	dey
 ;
 	lda     #<(_enemy_bullet_y)
 	ldx     #>(_enemy_bullet_y)
-	iny
 	clc
 	adc     (sp),y
 	bcc     L000A
@@ -7920,92 +7962,133 @@ L000A:	sta     ptr2
 	stx     ptr2+1
 	sta     ptr1
 	stx     ptr1+1
-	dey
 	lda     (ptr1),y
 	sta     sreg
 	lda     #<(_enemy_bullet_vel_y)
 	ldx     #>(_enemy_bullet_vel_y)
 	clc
-	iny
 	adc     (sp),y
-	bcc     L000B
+	bcc     L0028
 	inx
-L000B:	dey
-	jsr     ldaidx
+L0028:	jsr     ldaidx
 	clc
 	adc     sreg
 	sta     (ptr2),y
 ;
-; enemy_bullet_vel_y[i] += GRAVITY;
+; enemy_bullet_vel_y[i] += 1;
 ;
 	lda     #<(_enemy_bullet_vel_y)
 	ldx     #>(_enemy_bullet_vel_y)
-	iny
 	clc
 	adc     (sp),y
 	bcc     L000C
 	inx
 L000C:	sta     sreg
 	stx     sreg+1
-	dey
 	jsr     ldaidx
 	clc
-	adc     #$4C
+	adc     #$01
 	sta     (sreg),y
 ;
-; temp_x = enemy_bullet_x[i];
+; if (enemy_bullet_vel_y[i] > 5) {
 ;
-	iny
+	lda     #<(_enemy_bullet_vel_y)
+	ldx     #>(_enemy_bullet_vel_y)
+	clc
+	adc     (sp),y
+	bcc     L0029
+	inx
+L0029:	jsr     ldaidx
+	sec
+	sbc     #$06
+	bvs     L000F
+	eor     #$80
+L000F:	bpl     L002A
+;
+; enemy_bullet_vel_y[i] = 5;
+;
 	lda     (sp),y
 	tay
+	lda     #$05
+	sta     _enemy_bullet_vel_y,y
+;
+; temp5 = enemy_bullet_x[i] + scroll_x;
+;
+	ldy     #$00
+L002A:	lda     (sp),y
+	tay
 	lda     _enemy_bullet_x,y
+	clc
+	adc     _scroll_x
+	pha
+	lda     #$00
+	adc     _scroll_x+1
+	sta     _temp5+1
+	pla
+	sta     _temp5
+;
+; temp_x = temp5 & 0xff;
+;
 	sta     _temp_x
+;
+; temp_room = temp5 >> 8;
+;
+	lda     _temp5+1
+	sta     _temp_room
 ;
 ; temp_y = enemy_bullet_y[i];
 ;
-	ldy     #$01
+	ldy     #$00
 	lda     (sp),y
 	tay
 	lda     _enemy_bullet_y,y
 	sta     _temp_y
 ;
-; temp_room = enemy_bullet_room[i];
-;
-	ldy     #$01
-	lda     (sp),y
-	tay
-	lda     _enemy_bullet_room,y
-	sta     _temp_room
-;
-; collision = bg_collision_sub();
+; temp1 = bg_collision_sub();
 ;
 	jsr     _bg_collision_sub
-	ldy     #$00
-	sta     (sp),y
+	sta     _temp1
 ;
-; if (collision == COLLISION_SOLID) {
+; if (IS_SOLID(temp1)) {
 ;
-	cmp     #$40
+	and     #$07
+	cmp     #$06
+	lda     #$00
+	sbc     #$00
+	bvs     L0014
+	eor     #$80
 ;
 ; continue;
 ;
-	beq     L0018
+L0014:	jmi     L0020
 ;
-; if (enemy_bullet_y[i] >= 0xf0) {
+; if (enemy_bullet_y[i] >= 0xf0 || enemy_bullet_x[i] < 5 || enemy_bullet_x[i] > 250) {
 ;
-	iny
+	ldy     #$00
 	lda     (sp),y
 	tay
 	lda     _enemy_bullet_y,y
 	cmp     #$F0
+	jcs     L0020
+	ldy     #$00
+	lda     (sp),y
+	tay
+	lda     _enemy_bullet_x,y
+	cmp     #$05
+	bcc     L0020
+	ldy     #$00
+	lda     (sp),y
+	tay
+	lda     _enemy_bullet_x,y
+	cmp     #$FB
 ;
 ; continue;
 ;
-	bcs     L0018
+	bcs     L0020
 ;
 ; ENTITY1.x = enemy_bullet_x[i];
 ;
-	ldy     #$01
+	ldy     #$00
 	lda     (sp),y
 	tay
 	lda     _enemy_bullet_x,y
@@ -8013,7 +8096,7 @@ L000C:	sta     sreg
 ;
 ; ENTITY1.y = enemy_bullet_y[i];
 ;
-	ldy     #$01
+	ldy     #$00
 	lda     (sp),y
 	tay
 	lda     _enemy_bullet_y,y
@@ -8060,30 +8143,43 @@ L000C:	sta     sreg
 	tax
 	beq     L0004
 ;
-; if (!NINJA.invincible) {
+; if (damage_cooldown == 0) {
 ;
-	lda     _NINJA+9
-	bne     L0018
+	lda     _damage_cooldown
+	bne     L0020
 ;
-; NINJA.health--;
+; player_health -= 2;
 ;
-	dec     _NINJA+8
+	lda     _player_health
+	sec
+	sbc     #$02
+	sta     _player_health
 ;
-; NINJA.invincible = INVINCIBLE_TIME;
+; damage_cooldown = DAMAGE_COOLDOWN_TIME;
 ;
 	lda     #$3C
-	sta     _NINJA+9
+	sta     _damage_cooldown
 ;
-; sfx_play(SFX_HIT, 0);
+; sfx_play(SFX_NOISE, 0);
 ;
-	lda     #$03
+	lda     #$02
 	jsr     pusha
 	lda     #$00
 	jsr     _sfx_play
 ;
+; if (player_health <= 0) {
+;
+	lda     _player_health
+	bne     L0020
+;
+; death = 1;
+;
+	lda     #$01
+	sta     _death
+;
 ; enemy_bullet_active[i] = 0;
 ;
-L0018:	ldy     #$01
+L0020:	ldy     #$00
 	lda     (sp),y
 	tay
 	lda     #$00
@@ -8091,15 +8187,15 @@ L0018:	ldy     #$01
 ;
 ; for (i = 0; i < MAX_ENEMY_BULLETS; i++) {
 ;
-L0004:	ldy     #$01
+L0004:	tay
 	clc
-	tya
+	lda     #$01
 	adc     (sp),y
-	jmp     L001D
+	jmp     L0026
 ;
 ; }
 ;
-L0003:	jmp     incsp2
+L0003:	jmp     incsp1
 
 .endproc
 
