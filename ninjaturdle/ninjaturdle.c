@@ -1083,10 +1083,30 @@ char bg_collision_sub(void) {
         return COLLISION_SOLID;  // Solid collision from all sides
     }
     else if (IS_PLATFORM(temp1)) {
-        // Only return platform collision if falling (vel_y > 0)
-        // This allows jumping up through platforms and passing through them horizontally
-        if (NINJA.vel_y > 0) {
-            return COLLISION_PLATFORM;
+        // For ninja, only return platform collision if falling (vel_y > 0)
+        if (ENTITY1.width == HERO_WIDTH) {  // This is the ninja
+            if (NINJA.vel_y > 0) {
+                return COLLISION_PLATFORM;
+            }
+        }
+        // For turds and bullets, check their own velocity
+        else if (ENTITY1.width == TURD_WIDTH) {  // This is a turd
+            if (turd_vel_y[index] > 0) {
+                return COLLISION_PLATFORM;
+            }
+        }
+        else if (ENTITY1.width == ENEMY_BULLET_WIDTH) {  // This is an enemy bullet
+            // Find which bullet this is by checking its position
+            for (index2 = 0; index2 < MAX_ENEMY_BULLETS; ++index2) {
+                if (enemy_bullet_active[index2] && 
+                    enemy_bullet_x[index2] == ENTITY1.x && 
+                    enemy_bullet_y[index2] == ENTITY1.y) {
+                    if (enemy_bullet_vel_y[index2] > 0) {
+                        return COLLISION_PLATFORM;
+                    }
+                    break;
+                }
+            }
         }
         return 0;  // No collision when moving up or horizontally
     }
@@ -1430,17 +1450,8 @@ void update_turds(void) {
             ENTITY1.width = TURD_WIDTH;
             ENTITY1.height = TURD_HEIGHT;
             
-            // Set up coordinates for collision check
-            temp5 = turd_x[index] + scroll_x;
-            temp_x = temp5 & 0xff;
-            temp_room = temp5 >> 8;
-            temp_y = turd_y[index];
-            
-            // Get the tile we're colliding with
-            temp1 = bg_collision_sub();
-            
-            // Only collide with solid blocks, ignore platforms completely
-            if (IS_SOLID(temp1)) {
+            // Check for collisions using bg_coll_D, just like the ninja
+            if (bg_coll_D()) {
                 turd_active[index] = 0;
                 continue;
             }
@@ -1587,16 +1598,13 @@ void update_enemy_bullets(void) {
             }
             
             // Check for collisions
-            temp5 = enemy_bullet_x[i] + scroll_x;
-            temp_x = temp5 & 0xff;
-            temp_room = temp5 >> 8;
-            temp_y = enemy_bullet_y[i];
+            ENTITY1.x = enemy_bullet_x[i];
+            ENTITY1.y = enemy_bullet_y[i];
+            ENTITY1.width = ENEMY_BULLET_WIDTH;
+            ENTITY1.height = ENEMY_BULLET_HEIGHT;
             
-            // Get the tile we're colliding with
-            temp1 = bg_collision_sub();
-            
-            // Only collide with solid blocks, ignore platforms completely
-            if (IS_SOLID(temp1)) {
+            // Check for collisions using bg_coll_D, just like the ninja
+            if (bg_coll_D()) {
                 enemy_bullet_active[i] = 0;
                 continue;
             }
@@ -1608,11 +1616,6 @@ void update_enemy_bullets(void) {
             }
             
             // Check collision with player
-            ENTITY1.x = enemy_bullet_x[i];
-            ENTITY1.y = enemy_bullet_y[i];
-            ENTITY1.width = ENEMY_BULLET_WIDTH;
-            ENTITY1.height = ENEMY_BULLET_HEIGHT;
-            
             ENTITY2.x = high_byte(NINJA.x);
             ENTITY2.y = high_byte(NINJA.y);
             ENTITY2.width = HERO_WIDTH;
