@@ -58,7 +58,7 @@ all: ninjaturdle.nes
 ##############################################################################
 # Special rule for crt0.s
 ##############################################################################
-crt0.o: crt0.s ninjaturdle.chr ninjaturdle2.chr MUSIC/TestMusic3.s MUSIC/SoundFx.s
+crt0.o: crt0.s ninjaturdle.chr ninjaturdle2.chr sound/TestMusic3.s sound/SoundFx.s
 	$(CA65) $(AFLAGS) $< -o $@
 
 ##############################################################################
