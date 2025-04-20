@@ -174,13 +174,23 @@ void main(void) {
 				set_scroll_x(scroll_x);
 				ppu_off();
 				clear_vram_buffer();
-				delay(5);
 				
-				oam_clear();
-				game_mode = MODE_GAME_OVER;
+				// Set up CHR banks and palette BEFORE turning PPU back on
+				mmc1_write(MMC1_CONTROL, 0x12);  // 4KB CHR mode
+				mmc1_write(MMC1_CHR0, CHR_BANK_FONT);   // Font tiles
+				mmc1_write(MMC1_CHR1, CHR_BANK_TITLE);  // Title graphics
+				
+				// Clear nametable and set palette
 				vram_adr(NAMETABLE_A);
 				vram_fill(0, 1024); // blank the screen
+				pal_bg(palette_title);
+				
+				// Draw the game over text
+				vram_adr(NTADR_A(12,14));
+				multi_vram_buffer_horz(DEAD_TEXT, sizeof(DEAD_TEXT), NTADR_A(12,14));
+				
 				ppu_on_all();
+				game_mode = MODE_GAME_OVER;
 			}
 		}
 		
@@ -262,27 +272,15 @@ void main(void) {
             game_mode = MODE_RESET;
 		}
 		
-		while (game_mode == MODE_GAME_OVER) { // you died, death
+		while (game_mode == MODE_GAME_OVER) {
 			ppu_wait_nmi();
 			oam_clear();
-			
-			// Switch to CHR bank 0 for fonts/text and set up proper palette
-			mmc1_write(MMC1_CONTROL, 0x12);  // 4KB CHR mode
-			mmc1_write(MMC1_CHR0, CHR_BANK_FONT);   // Font tiles
-			mmc1_write(MMC1_CHR1, CHR_BANK_TITLE);  // Title graphics
-			
-			// Set up palette for text
-			pal_bg(palette_title);
-			
-			// Ensure correct VRAM addressing
-			vram_adr(NTADR_A(12,14));
-			multi_vram_buffer_horz(DEAD_TEXT, sizeof(DEAD_TEXT), NTADR_A(12,14));
-			
 			set_scroll_x(0);
 			
+			// Wait a bit before stopping music and transitioning
+			delay(60); // Wait 1 second
 			music_stop();
-            
-            game_mode = MODE_RESET;
+			game_mode = MODE_RESET;
 		}
         
         while (game_mode == MODE_RESET) {

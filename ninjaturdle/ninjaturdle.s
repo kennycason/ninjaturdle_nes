@@ -151,6 +151,7 @@
 	.export		_END_TEXT2
 	.export		_END_TEXT3
 	.export		_DEAD_TEXT
+	.export		_KENNY_CASON_TEXT
 	.export		_title
 	.export		_load_title
 	.export		_load_room
@@ -671,15 +672,73 @@ _palette_sp:
 	.byte	$13
 	.byte	$33
 _END_TEXT:
-	.byte	$43,$6F,$6E,$67,$72,$61,$74,$75,$6C,$61,$74,$69,$6F,$6E,$73,$21
-	.byte	$00
+	.byte	$23
+	.byte	$2F
+	.byte	$2E
+	.byte	$27
+	.byte	$22
+	.byte	$21
+	.byte	$24
+	.byte	$2C
+	.byte	$21
+	.byte	$24
+	.byte	$2F
+	.byte	$2E
+	.byte	$23
+	.byte	$1B
 _END_TEXT2:
-	.byte	$59,$6F,$75,$20,$73,$61,$76,$65,$64,$20,$53,$74,$65,$76,$65,$2C
-	.byte	$20,$61,$67,$61,$69,$6E,$2E,$00
+	.byte	$28
+	.byte	$2F
+	.byte	$24
+	.byte	$10
+	.byte	$23
+	.byte	$21
+	.byte	$25
+	.byte	$25
+	.byte	$24
+	.byte	$10
+	.byte	$23
+	.byte	$24
+	.byte	$25
+	.byte	$25
+	.byte	$25
+	.byte	$1A
+	.byte	$10
+	.byte	$21
+	.byte	$27
+	.byte	$21
+	.byte	$29
+	.byte	$2E
+	.byte	$1B
 _END_TEXT3:
-	.byte	$43,$6F,$72,$6E,$3A,$20,$00
+	.byte	$23
+	.byte	$2F
+	.byte	$22
+	.byte	$2E
+	.byte	$1A
+	.byte	$10
 _DEAD_TEXT:
-	.byte	$47,$61,$6D,$65,$20,$4F,$76,$65,$72,$00
+	.byte	$27
+	.byte	$41
+	.byte	$4D
+	.byte	$45
+	.byte	$00
+	.byte	$2F
+	.byte	$56
+	.byte	$45
+	.byte	$52
+_KENNY_CASON_TEXT:
+	.byte	$2B
+	.byte	$45
+	.byte	$4E
+	.byte	$4E
+	.byte	$59
+	.byte	$00
+	.byte	$23
+	.byte	$41
+	.byte	$53
+	.byte	$4F
+	.byte	$4E
 _title:
 	.byte	$01
 	.byte	$00
@@ -8553,19 +8612,28 @@ L001D:	lda     _death
 ;
 	jsr     _clear_vram_buffer
 ;
-; delay(5);
+; mmc1_write(MMC1_CONTROL, 0x12);  // 4KB CHR mode
 ;
-	lda     #$05
-	jsr     _delay
+	ldx     #$80
+	lda     #$00
+	jsr     pushax
+	lda     #$12
+	jsr     _mmc1_write
 ;
-; oam_clear();
+; mmc1_write(MMC1_CHR0, CHR_BANK_FONT);   // Font tiles
 ;
-	jsr     _oam_clear
+	ldx     #$A0
+	lda     #$00
+	jsr     pushax
+	jsr     _mmc1_write
 ;
-; game_mode = MODE_GAME_OVER;
+; mmc1_write(MMC1_CHR1, CHR_BANK_TITLE);  // Title graphics
 ;
-	lda     #$05
-	sta     _game_mode
+	ldx     #$C0
+	lda     #$00
+	jsr     pushax
+	lda     #$01
+	jsr     _mmc1_write
 ;
 ; vram_adr(NAMETABLE_A);
 ;
@@ -8580,9 +8648,42 @@ L001D:	lda     _death
 	ldx     #$04
 	jsr     _vram_fill
 ;
+; pal_bg(palette_title);
+;
+	lda     #<(_palette_title)
+	ldx     #>(_palette_title)
+	jsr     _pal_bg
+;
+; vram_adr(NTADR_A(12,14));
+;
+	ldx     #$21
+	lda     #$CC
+	jsr     _vram_adr
+;
+; multi_vram_buffer_horz(DEAD_TEXT, sizeof(DEAD_TEXT), NTADR_A(12,14));
+;
+	jsr     decsp3
+	lda     #<(_DEAD_TEXT)
+	ldy     #$01
+	sta     (sp),y
+	iny
+	lda     #>(_DEAD_TEXT)
+	sta     (sp),y
+	lda     #$09
+	ldy     #$00
+	sta     (sp),y
+	ldx     #$21
+	lda     #$CC
+	jsr     _multi_vram_buffer_horz
+;
 ; ppu_on_all();
 ;
 	jsr     _ppu_on_all
+;
+; game_mode = MODE_GAME_OVER;
+;
+	lda     #$05
+	sta     _game_mode
 ;
 ; while (game_mode == MODE_GAME) {
 ;
@@ -8812,7 +8913,7 @@ L002C:	jsr     _ppu_wait_nmi
 	iny
 	lda     #>(_END_TEXT)
 	sta     (sp),y
-	lda     #$11
+	lda     #$0E
 	ldy     #$00
 	sta     (sp),y
 	ldx     #$21
@@ -8828,7 +8929,7 @@ L002C:	jsr     _ppu_wait_nmi
 	iny
 	lda     #>(_END_TEXT2)
 	sta     (sp),y
-	lda     #$18
+	lda     #$17
 	ldy     #$00
 	sta     (sp),y
 	ldx     #$21
@@ -8844,7 +8945,7 @@ L002C:	jsr     _ppu_wait_nmi
 	iny
 	lda     #>(_END_TEXT3)
 	sta     (sp),y
-	lda     #$07
+	lda     #$06
 	ldy     #$00
 	sta     (sp),y
 	ldx     #$22
@@ -8908,7 +9009,7 @@ L0047:	lda     _game_mode
 	cmp     #$04
 	jeq     L002C
 ;
-; while (game_mode == MODE_GAME_OVER) { // you died, death
+; while (game_mode == MODE_GAME_OVER) {
 ;
 	jmp     L0048
 ;
@@ -8920,62 +9021,16 @@ L0031:	jsr     _ppu_wait_nmi
 ;
 	jsr     _oam_clear
 ;
-; mmc1_write(MMC1_CONTROL, 0x12);  // 4KB CHR mode
-;
-	ldx     #$80
-	lda     #$00
-	jsr     pushax
-	lda     #$12
-	jsr     _mmc1_write
-;
-; mmc1_write(MMC1_CHR0, CHR_BANK_FONT);   // Font tiles
-;
-	ldx     #$A0
-	lda     #$00
-	jsr     pushax
-	jsr     _mmc1_write
-;
-; mmc1_write(MMC1_CHR1, CHR_BANK_TITLE);  // Title graphics
-;
-	ldx     #$C0
-	lda     #$00
-	jsr     pushax
-	lda     #$01
-	jsr     _mmc1_write
-;
-; pal_bg(palette_title);
-;
-	lda     #<(_palette_title)
-	ldx     #>(_palette_title)
-	jsr     _pal_bg
-;
-; vram_adr(NTADR_A(12,14));
-;
-	ldx     #$21
-	lda     #$CC
-	jsr     _vram_adr
-;
-; multi_vram_buffer_horz(DEAD_TEXT, sizeof(DEAD_TEXT), NTADR_A(12,14));
-;
-	jsr     decsp3
-	lda     #<(_DEAD_TEXT)
-	ldy     #$01
-	sta     (sp),y
-	iny
-	lda     #>(_DEAD_TEXT)
-	sta     (sp),y
-	lda     #$0A
-	ldy     #$00
-	sta     (sp),y
-	ldx     #$21
-	lda     #$CC
-	jsr     _multi_vram_buffer_horz
-;
 ; set_scroll_x(0);
 ;
 	ldx     #$00
 	txa
 	jsr     _set_scroll_x
+;
+; delay(60); // Wait 1 second
+;
+	lda     #$3C
+	jsr     _delay
 ;
 ; music_stop();
 ;
@@ -8986,7 +9041,7 @@ L0031:	jsr     _ppu_wait_nmi
 	lda     #$06
 	sta     _game_mode
 ;
-; while (game_mode == MODE_GAME_OVER) { // you died, death
+; while (game_mode == MODE_GAME_OVER) {
 ;
 L0048:	lda     _game_mode
 	cmp     #$05
