@@ -261,8 +261,8 @@ void main(void) {
 			multi_vram_buffer_horz(END_TEXT, sizeof(END_TEXT), NTADR_A(6,13));
 			multi_vram_buffer_horz(END_TEXT2, sizeof(END_TEXT2), NTADR_A(8,15));
 			multi_vram_buffer_horz(END_TEXT3, sizeof(END_TEXT3), NTADR_A(11,17));
-			temp1 = (coins / 10) + 0x30;
-			temp2 = (coins % 10) + 0x30;
+			temp1 = (coins / 10) + 0xF0;  // Use 0xF0-0xF9 for digits like the HUD
+			temp2 = (coins % 10) + 0xF0;
 			one_vram_buffer(temp1, NTADR_A(18,17));
 			one_vram_buffer(temp2, NTADR_A(19,17));
 			

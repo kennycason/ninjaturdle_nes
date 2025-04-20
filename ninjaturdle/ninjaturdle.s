@@ -672,51 +672,52 @@ _palette_sp:
 	.byte	$13
 	.byte	$33
 _END_TEXT:
-	.byte	$23
-	.byte	$2F
-	.byte	$2E
-	.byte	$27
-	.byte	$22
-	.byte	$21
-	.byte	$24
-	.byte	$2C
-	.byte	$21
-	.byte	$24
-	.byte	$2F
-	.byte	$2E
-	.byte	$23
-	.byte	$1B
+	.byte	$43
+	.byte	$4F
+	.byte	$4E
+	.byte	$47
+	.byte	$52
+	.byte	$41
+	.byte	$54
+	.byte	$55
+	.byte	$4C
+	.byte	$41
+	.byte	$54
+	.byte	$49
+	.byte	$4F
+	.byte	$4E
+	.byte	$53
+	.byte	$01
 _END_TEXT2:
-	.byte	$28
-	.byte	$2F
-	.byte	$24
-	.byte	$10
-	.byte	$23
-	.byte	$21
-	.byte	$25
-	.byte	$25
-	.byte	$24
-	.byte	$10
-	.byte	$23
-	.byte	$24
-	.byte	$25
-	.byte	$25
-	.byte	$25
-	.byte	$1A
-	.byte	$10
-	.byte	$21
-	.byte	$27
-	.byte	$21
-	.byte	$29
-	.byte	$2E
-	.byte	$1B
+	.byte	$59
+	.byte	$4F
+	.byte	$55
+	.byte	$00
+	.byte	$53
+	.byte	$41
+	.byte	$56
+	.byte	$45
+	.byte	$44
+	.byte	$00
+	.byte	$53
+	.byte	$54
+	.byte	$45
+	.byte	$56
+	.byte	$45
+	.byte	$00
+	.byte	$41
+	.byte	$47
+	.byte	$41
+	.byte	$49
+	.byte	$4E
+	.byte	$0E
 _END_TEXT3:
-	.byte	$23
-	.byte	$2F
-	.byte	$22
-	.byte	$2E
+	.byte	$43
+	.byte	$4F
+	.byte	$52
+	.byte	$4E
 	.byte	$1A
-	.byte	$10
+	.byte	$00
 _DEAD_TEXT:
 	.byte	$27
 	.byte	$41
@@ -8913,7 +8914,7 @@ L002C:	jsr     _ppu_wait_nmi
 	iny
 	lda     #>(_END_TEXT)
 	sta     (sp),y
-	lda     #$0E
+	lda     #$10
 	ldy     #$00
 	sta     (sp),y
 	ldx     #$21
@@ -8929,7 +8930,7 @@ L002C:	jsr     _ppu_wait_nmi
 	iny
 	lda     #>(_END_TEXT2)
 	sta     (sp),y
-	lda     #$17
+	lda     #$16
 	ldy     #$00
 	sta     (sp),y
 	ldx     #$21
