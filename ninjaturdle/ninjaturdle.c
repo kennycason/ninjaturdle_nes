@@ -84,7 +84,7 @@ void main(void) {
 				// Ensure sprite pattern table is set
 				bank_spr(1);
 				
-				level = 2;  // TESTING: Skip to end screen
+				// level = 2;  // TESTING: Skip to end screen
 				load_room();
 				game_mode = MODE_GAME;
 				pal_bg(palette_bg);
@@ -1415,9 +1415,17 @@ void update_turds(void) {
             ENTITY1.width = TURD_WIDTH;
             ENTITY1.height = TURD_HEIGHT;
             
-            // Only check horizontal collisions and ground collisions
-            // Allow passing through platforms from below
-            if (bg_coll_L() || bg_coll_R() || (turd_vel_y[index] > 0 && bg_coll_D())) {
+            // Set up coordinates for collision check
+            temp5 = turd_x[index] + scroll_x;
+            temp_x = temp5 & 0xff;
+            temp_room = temp5 >> 8;
+            temp_y = turd_y[index];
+            
+            // Get the tile we're colliding with
+            temp1 = bg_collision_sub();
+            
+            // Only collide with solid blocks, ignore platforms completely
+            if (IS_SOLID(temp1)) {
                 turd_active[index] = 0;
                 continue;
             }
@@ -1545,9 +1553,8 @@ void update_enemy_bullets(void) {
             
             collision = bg_collision_sub();
             
-            // Handle collisions - deactivate on solid collision or platform from above
-            if (collision == COLLISION_SOLID || 
-                (collision == COLLISION_PLATFORM && enemy_bullet_vel_y[i] > 0)) {
+            // Only check for solid block collisions, ignore platforms
+            if (collision == COLLISION_SOLID) {
                 enemy_bullet_active[i] = 0;
                 continue;
             }

@@ -917,8 +917,8 @@ _w1l3_main_3:
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$00
-	.byte	$00
+	.byte	$16
+	.byte	$16
 	.byte	$16
 	.byte	$16
 	.byte	$00
@@ -1905,7 +1905,7 @@ _w1l3_main_7:
 	.byte	$15
 	.byte	$16
 	.byte	$00
-	.byte	$82
+	.byte	$00
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -2055,7 +2055,7 @@ _w1l3_enemies:
 	.byte	$03
 	.byte	$C0
 	.byte	$09
-	.byte	$A0
+	.byte	$90
 	.byte	$07
 	.byte	$B0
 	.byte	$10

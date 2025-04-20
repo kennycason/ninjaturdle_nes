@@ -2003,6 +2003,10 @@ _w1l1_enemies:
 	.byte	$04
 	.byte	$70
 	.byte	$09
+	.byte	$B0
+	.byte	$07
+	.byte	$C0
+	.byte	$10
 	.byte	$C0
 	.byte	$01
 	.byte	$E0
@@ -2019,10 +2023,6 @@ _w1l1_enemies:
 	.byte	$05
 	.byte	$90
 	.byte	$0A
-	.byte	$C0
-	.byte	$07
-	.byte	$C0
-	.byte	$10
 	.byte	$FF
 _w1l1_main:
 	.addr	_w1l1_main_0

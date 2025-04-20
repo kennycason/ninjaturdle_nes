@@ -150,25 +150,25 @@ _w1l2_main_0:
 	.byte	$00
 	.byte	$00
 	.byte	$00
+	.byte	$00
+	.byte	$00
+	.byte	$00
+	.byte	$07
+	.byte	$00
+	.byte	$00
+	.byte	$00
+	.byte	$00
+	.byte	$00
+	.byte	$00
+	.byte	$00
+	.byte	$00
+	.byte	$00
+	.byte	$00
+	.byte	$00
+	.byte	$00
 	.byte	$0D
 	.byte	$04
 	.byte	$04
-	.byte	$07
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$1F
-	.byte	$07
-	.byte	$07
 	.byte	$07
 	.byte	$00
 	.byte	$00
@@ -378,8 +378,8 @@ _w1l2_main_1:
 	.byte	$00
 	.byte	$07
 	.byte	$07
-	.byte	$04
-	.byte	$05
+	.byte	$00
+	.byte	$00
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -394,8 +394,8 @@ _w1l2_main_1:
 	.byte	$00
 	.byte	$0C
 	.byte	$00
-	.byte	$07
-	.byte	$1F
+	.byte	$04
+	.byte	$05
 	.byte	$00
 	.byte	$00
 	.byte	$00
