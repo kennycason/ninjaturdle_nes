@@ -243,6 +243,7 @@
 	.export		_coyote_time
 	.export		_was_jumping
 	.export		_main
+	.export		_digit_to_font_tile
 
 .segment	"DATA"
 
@@ -8361,6 +8362,11 @@ L000A:	jsr     _ppu_wait_nmi
 	lda     #$01
 	jsr     _bank_spr
 ;
+; level = 2;  // TESTING: Skip to end screen
+;
+	lda     #$02
+	sta     _level
+;
 ; load_room();
 ;
 	jsr     _load_room
@@ -8953,24 +8959,24 @@ L002C:	jsr     _ppu_wait_nmi
 	lda     #$2B
 	jsr     _multi_vram_buffer_horz
 ;
-; temp1 = (coins / 10) + 0x30;
+; temp1 = (coins / 10) + 0x10;  // Map 0-9 to 0x10-0x19 in current font bank
 ;
 	lda     _coins
 	jsr     pusha0
 	lda     #$0A
 	jsr     tosudiva0
 	clc
-	adc     #$30
+	adc     #$10
 	sta     _temp1
 ;
-; temp2 = (coins % 10) + 0x30;
+; temp2 = (coins % 10) + 0x10;
 ;
 	lda     _coins
 	jsr     pusha0
 	lda     #$0A
 	jsr     tosumoda0
 	clc
-	adc     #$30
+	adc     #$10
 	sta     _temp2
 ;
 ; one_vram_buffer(temp1, NTADR_A(18,17));
@@ -9121,6 +9127,35 @@ L004A:	lda     _game_mode
 ; while (1) {
 ;
 	jmp     L0042
+
+.endproc
+
+; ---------------------------------------------------------------
+; unsigned char __near__ digit_to_font_tile (unsigned char digit)
+; ---------------------------------------------------------------
+
+.segment	"CODE"
+
+.proc	_digit_to_font_tile: near
+
+.segment	"CODE"
+
+;
+; unsigned char digit_to_font_tile(unsigned char digit) {
+;
+	jsr     pusha
+;
+; return digit + 0x10;  // 0x10-0x19 are the number tiles in the font bank
+;
+	ldy     #$00
+	lda     (sp),y
+	clc
+	adc     #$10
+	ldx     #$00
+;
+; }
+;
+	jmp     incsp1
 
 .endproc
 

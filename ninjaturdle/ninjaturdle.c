@@ -84,6 +84,7 @@ void main(void) {
 				// Ensure sprite pattern table is set
 				bank_spr(1);
 				
+				level = 2;  // TESTING: Skip to end screen
 				load_room();
 				game_mode = MODE_GAME;
 				pal_bg(palette_bg);
@@ -261,8 +262,8 @@ void main(void) {
 			multi_vram_buffer_horz(END_TEXT, sizeof(END_TEXT), NTADR_A(6,13));
 			multi_vram_buffer_horz(END_TEXT2, sizeof(END_TEXT2), NTADR_A(8,15));
 			multi_vram_buffer_horz(END_TEXT3, sizeof(END_TEXT3), NTADR_A(11,17));
-			temp1 = (coins / 10) + 0xF0;  // Use 0xF0-0xF9 for digits like the HUD
-			temp2 = (coins % 10) + 0xF0;
+			temp1 = (coins / 10) + 0x10;  // Map 0-9 to 0x10-0x19 in current font bank
+			temp2 = (coins % 10) + 0x10;
 			one_vram_buffer(temp1, NTADR_A(18,17));
 			one_vram_buffer(temp2, NTADR_A(19,17));
 			
@@ -306,6 +307,11 @@ void main(void) {
             }
         }
 	}
+}
+
+// Helper function to convert digit to font tile
+unsigned char digit_to_font_tile(unsigned char digit) {
+    return digit + 0x10;  // 0x10-0x19 are the number tiles in the font bank
 }
 
 void load_title(void) {
