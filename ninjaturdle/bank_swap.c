@@ -1,6 +1,6 @@
-#include "LIB/neslib.h"
-#include "LIB/nesdoug.h"
-#include "LIB/kenes.h"  // Add this include for MMC1 definitions
+#include "lib/neslib.h"
+#include "lib/nesdoug.h"
+#include "lib/kenes.h"  // Add this include for MMC1 definitions
 
 // MMC1 registers
 #define MMC1_CTRL    0x8000

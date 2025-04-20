@@ -2,9 +2,9 @@
  * Ninja Turdle II - NES
  */	
  
-#include "LIB/neslib.h"
-#include "LIB/nesdoug.h"
-#include "LIB/kenes.h"
+#include "lib/neslib.h"
+#include "lib/nesdoug.h"
+#include "lib/kenes.h"
 #include "sprites.h"
 #include "ninjaturdle.h"
 #include "level_data.c"

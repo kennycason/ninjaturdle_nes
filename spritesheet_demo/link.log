@@ -12,27 +12,27 @@ spritesheet_demo.o:
     BSS               Offs=000000  Size=000002  Align=00001  Fill=0000
 chr_rom.o:
     CHRROM            Offs=000000  Size=001000  Align=00001  Fill=0000
-/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(addysp.o):
+/Users/kenny/code/nes/tools/cc65/lib/nes.lib(addysp.o):
     CODE              Offs=000E87  Size=00000E  Align=00001  Fill=0000
-/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(condes.o):
+/Users/kenny/code/nes/tools/cc65/lib/nes.lib(condes.o):
     CODE              Offs=000E95  Size=00000C  Align=00001  Fill=0000
     DATA              Offs=000000  Size=000025  Align=00001  Fill=0000
     ONCE              Offs=000000  Size=00000C  Align=00001  Fill=0000
-/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(copydata.o):
+/Users/kenny/code/nes/tools/cc65/lib/nes.lib(copydata.o):
     CODE              Offs=000EA1  Size=00002D  Align=00001  Fill=0000
-/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(decsp4.o):
+/Users/kenny/code/nes/tools/cc65/lib/nes.lib(decsp4.o):
     CODE              Offs=000ECE  Size=00000D  Align=00001  Fill=0000
-/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(decsp6.o):
+/Users/kenny/code/nes/tools/cc65/lib/nes.lib(decsp6.o):
     CODE              Offs=000EDB  Size=00000D  Align=00001  Fill=0000
-/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(incsp2.o):
+/Users/kenny/code/nes/tools/cc65/lib/nes.lib(incsp2.o):
     CODE              Offs=000EE8  Size=000016  Align=00001  Fill=0000
-/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(incsp6.o):
+/Users/kenny/code/nes/tools/cc65/lib/nes.lib(incsp6.o):
     CODE              Offs=000EFE  Size=000005  Align=00001  Fill=0000
-/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(popa.o):
+/Users/kenny/code/nes/tools/cc65/lib/nes.lib(popa.o):
     CODE              Offs=000F03  Size=00000C  Align=00001  Fill=0000
-/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(zerobss.o):
+/Users/kenny/code/nes/tools/cc65/lib/nes.lib(zerobss.o):
     CODE              Offs=000F0F  Size=000023  Align=00001  Fill=0000
-/Users/kennycason/code/nes/tools/cc65/lib/nes.lib(zeropage.o):
+/Users/kenny/code/nes/tools/cc65/lib/nes.lib(zeropage.o):
     ZEROPAGE          Offs=00002C  Size=00001A  Align=00001  Fill=0000
 
 
@@ -175,7 +175,7 @@ sp (zeropage.o):
     decsp6.o                  runtime/decsp6.s:8
     decsp4.o                  runtime/decsp4.s:8
     spritesheet_demo.o        spritesheet_demo.s:10
-    crt0.o                    /Users/kennycason/code/nes/tools/cc65/asminc/zeropage.inc:11
+    crt0.o                    /Users/kenny/code/nes/tools/cc65/asminc/zeropage.inc:11
 tmp1 (zeropage.o):
     copydata.o                common/copydata.s:9
 zerobss (zerobss.o):
