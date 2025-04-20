@@ -20,7 +20,7 @@ const unsigned char NinjaSprR[]={
 
 const unsigned char CoinSpr[]={
 	  0xff,  0xff,0x20,1,
-	  0xff,  7,0x30,1,
+	//   0xff,  7,0x30,1,
 	128
 };
 
@@ -39,7 +39,7 @@ const unsigned char BigCoinSpr[]={
 };
 
 const unsigned char CoinHud[]={
-	  0,  0,0x23,1,
+	  0,  0,0x20,1,
 	//   8,  0,0x24,1,
 	//   0,  8,0x33,1,
 	//   8,  8,0x34,1,
@@ -146,6 +146,6 @@ const unsigned char TurdSpr[]={
 };
 
 const unsigned char TurdLifeSpr[]={
-    0, 0, 0x40, 1, 
+    0, 0, 0x30, 1, 
     128
 };

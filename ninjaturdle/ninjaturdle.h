@@ -1,3 +1,9 @@
+#ifndef NINJATURDLE_H
+#define NINJATURDLE_H
+
+#include "tile_types.h"
+#include "collision.h"
+
 #define ACCEL 30
 #define DECEL 50
 #define GRAVITY 0x4c
@@ -8,9 +14,23 @@
 
 #pragma bss-name(push, "ZEROPAGE")
 
-// CHR bank definitions
-#define CHR_BANK_0 0  // First tileset (font + title + sprites)
-#define CHR_BANK_1 1  // Second tileset (map tiles)
+// CHR bank definitions for MMC1 4KB mode
+#define CHR_BANK_FONT 0     // Font tiles and title screen (top half)
+#define CHR_BANK_TITLE 1    // Title screen graphics (bottom half)
+#define CHR_BANK_MAP 2      // Map tiles (top half)
+#define CHR_BANK_SPRITES 3  // Sprite tiles (bottom half)
+
+// MMC1 registers
+#define MMC1_CONTROL    0x8000
+#define MMC1_CHR0       0xA000
+#define MMC1_CHR1       0xC000
+#define MMC1_PRG        0xE000
+
+// MMC1 control flags
+#define MMC1_MIRROR_ONE_SCREEN_LOW    0x00
+#define MMC1_MIRROR_ONE_SCREEN_HIGH   0x01
+#define MMC1_MIRROR_VERTICAL          0x02
+#define MMC1_MIRROR_HORIZONTAL        0x03
 
 // GLOBAL VARIABLES
 unsigned char pad1;
@@ -66,7 +86,8 @@ enum {
 enum { 
 	SFX_JUMP, 
 	SFX_DING, 
-	SFX_NOISE
+	SFX_NOISE,
+	SFX_HIT
 };
 
 unsigned char game_mode;
@@ -117,6 +138,8 @@ struct Ninja {
 	unsigned int y;
 	signed int vel_x; // speed, signed, low byte is sub-pixel
 	signed int vel_y;
+	unsigned char health;    // Player health
+	unsigned char invincible; // Invincibility timer
 };
 
 struct Ninja NINJA;
@@ -232,7 +255,7 @@ char bg_coll_D2(void);
 #define TURD_HEIGHT 7
 #define TURD_SPEED 3  // Horizontal speed
 #define TURD_GRAVITY 1 // How fast turds fall
-#define TURD_COOLDOWN 15 // Frames between shots
+#define TURD_COOLDOWN 20 // Frames between shots
 
 // Turd direction constants
 #define TURD_RIGHT 0
@@ -250,7 +273,7 @@ unsigned char turd_direction[MAX_TURDS];
 
 // Corn mode variables
 unsigned char corn_mode; // 0 = turd mode, 1 = corn mode
-#define CORN_DAMAGE_MULTIPLIER 2 // Corn chunks do double damage
+#define CORN_DAMAGE_MULTIPLIER 3 // Corn chunks do double damage
 
 // Add these definitions for enemy bullets
 #define MAX_ENEMY_BULLETS 8  // Maximum number of enemy bullets on screen at once
@@ -258,6 +281,7 @@ unsigned char corn_mode; // 0 = turd mode, 1 = corn mode
 #define ENEMY_BULLET_HEIGHT 11 // Make bullets bigger (same as HERO_HEIGHT)
 #define ENEMY_BULLET_DAMAGE 2  // Damage per hit
 #define ENEMY_BULLET_COOLDOWN 90  // Frames between shots (slower than player)
+#define INVINCIBLE_TIME 60  // Frames of invincibility after being hit
 
 // Enemy bullet types
 #define BULLET_LINEAR 0  // Moves in a straight line
@@ -276,6 +300,7 @@ signed char enemy_bullet_vel_x[MAX_ENEMY_BULLETS];
 signed char enemy_bullet_vel_y[MAX_ENEMY_BULLETS];
 unsigned char enemy_bullet_type[MAX_ENEMY_BULLETS];
 unsigned char enemy_bullet_cooldown[MAX_ENEMY_BULLETS];  // Cooldown for each enemy
+unsigned char enemy_bullet_room[MAX_ENEMY_BULLETS];      // Room for each enemy bullet
 
 // Turd power flag (default to true for now)
 unsigned char has_turd_power;
@@ -297,7 +322,13 @@ unsigned char player_health;
 unsigned char damage_cooldown; // Invincibility frames after taking damage
 #define DAMAGE_COOLDOWN_TIME 60 // 1 second of invincibility
 
-#define ENEMY_BOSS1 2
 #define BOSS_MAX_HEALTH 20
-#define BOSS_DAMAGE_PER_HIT 1
+#define BOSS_DAMAGE_PER_HIT 2
 unsigned char boss_health;
+
+// Collision type checks
+#define IS_BACKGROUND(tile) ((tile & 0x07) < 0x04)  // Columns 0-3
+#define IS_PLATFORM(tile)   ((tile & 0x07) >= 0x04 && (tile & 0x07) <= 0x05)  // Columns 4-5
+#define IS_SOLID(tile)      ((tile & 0x07) >= 0x06)  // Columns 6-7
+
+#endif // NINJATURDLE_H

@@ -28,8 +28,8 @@
 	.import		_sfx_play
 	.import		_pad_poll
 	.import		_bank_spr
-	.import		_bank_bg
 	.import		_vram_adr
+	.import		_vram_put
 	.import		_vram_fill
 	.import		_vram_unrle
 	.import		_memcpy
@@ -51,11 +51,14 @@
 	.import		_buffer_4_mt
 	.import		_flush_vram_update2
 	.import		_color_emphasis
+	.export		_mmc1_write
+	.export		_mmc1_init
 	.export		_setup_pattern_tables
 	.export		_fade_in_palette
 	.export		_fade_out_palette
 	.export		_create_sprite
 	.export		_update_sprite_pos
+	.export		_draw_border
 	.export		_NinjaSprL
 	.export		_NinjaSprR
 	.export		_CoinSpr
@@ -181,6 +184,7 @@
 	.export		_enemy_bullet_vel_y
 	.export		_enemy_bullet_type
 	.export		_enemy_bullet_cooldown
+	.export		_enemy_bullet_room
 	.export		_has_turd_power
 	.export		_turd_cooldown
 	.export		_fire_turd
@@ -192,55 +196,51 @@
 	.export		_player_health
 	.export		_damage_cooldown
 	.export		_boss_health
-	.export		_level_1_coins
-	.export		_level_2_coins
-	.export		_level_3_coins
 	.export		_Coins_list
-	.export		_level_1_enemies
-	.export		_level_2_enemies
-	.export		_level_3_enemies
 	.export		_Enemy_list
+	.export		_level_main_data
+	.import		_w1l1_main
+	.import		_w1l2_main
+	.import		_w1l3_main
+	.import		_w1l1_coins
+	.import		_w1l2_coins
+	.import		_w1l3_coins
+	.import		_w1l1_enemies
+	.import		_w1l2_enemies
+	.import		_w1l3_enemies
+	.import		_w1l1_main_0
+	.import		_w1l1_main_1
+	.import		_w1l1_main_2
+	.import		_w1l1_main_3
+	.import		_w1l1_main_4
+	.import		_w1l1_main_5
+	.import		_w1l1_main_6
+	.import		_w1l1_main_7
+	.import		_w1l2_main_0
+	.import		_w1l2_main_1
+	.import		_w1l2_main_2
+	.import		_w1l2_main_3
+	.import		_w1l2_main_4
+	.import		_w1l2_main_5
+	.import		_w1l2_main_6
+	.import		_w1l2_main_7
+	.import		_w1l3_main_0
+	.import		_w1l3_main_1
+	.import		_w1l3_main_2
+	.import		_w1l3_main_3
+	.import		_w1l3_main_4
+	.import		_w1l3_main_5
+	.import		_w1l3_main_6
+	.import		_w1l3_main_7
 	.export		_metatiles1
-	.export		_is_solid
-	.export		_Level1_0
-	.export		_Level1_1
-	.export		_Level1_2
-	.export		_Level1_3
-	.export		_Level1_4
-	.export		_Level1_5
-	.export		_Level1_6
-	.export		_Level1_7
-	.export		_Level1_list
-	.export		_w1l1_main_0
-	.export		_w1l1_main_1
-	.export		_w1l1_main_2
-	.export		_w1l1_main_3
-	.export		_w1l1_main_4
-	.export		_w1l1_main_5
-	.export		_w1l1_main_6
-	.export		_w1l1_main_7
-	.export		_w1l1_main_list
-	.export		_Level2_0
-	.export		_Level2_1
-	.export		_Level2_2
-	.export		_Level2_3
-	.export		_Level2_4
-	.export		_Level2_5
-	.export		_Level2_6
-	.export		_Level2_7
-	.export		_Level2_list
-	.export		_Level3_0
-	.export		_Level3_1
-	.export		_Level3_2
-	.export		_Level3_3
-	.export		_Level3_4
-	.export		_Level3_5
-	.export		_Level3_6
-	.export		_Level3_7
-	.export		_Level3_list
+	.export		_metatiles_pal1
 	.export		_Levels_list
 	.export		_Level_offsets
+	.export		_max_rooms
+	.export		_scroll_limits
 	.export		_bounce
+	.export		_coyote_time
+	.export		_was_jumping
 	.export		_main
 
 .segment	"DATA"
@@ -298,10 +298,6 @@ _CoinSpr:
 	.byte	$FF
 	.byte	$20
 	.byte	$01
-	.byte	$FF
-	.byte	$07
-	.byte	$30
-	.byte	$01
 	.byte	$80
 _CornSelectedSpr:
 	.byte	$FF
@@ -334,7 +330,7 @@ _BigCoinSpr:
 _CoinHud:
 	.byte	$00
 	.byte	$00
-	.byte	$23
+	.byte	$20
 	.byte	$01
 	.byte	$80
 _EnemyWaspSprL:
@@ -550,7 +546,7 @@ _TurdSpr:
 _TurdLifeSpr:
 	.byte	$00
 	.byte	$00
-	.byte	$40
+	.byte	$30
 	.byte	$01
 	.byte	$80
 _shuffle_array:
@@ -806,23 +802,23 @@ _title:
 	.byte	$00
 	.byte	$01
 	.byte	$AF
-	.byte	$32
-	.byte	$30
-	.byte	$32
-	.byte	$35
+	.byte	$12
+	.byte	$10
+	.byte	$12
+	.byte	$15
 	.byte	$00
 	.byte	$00
-	.byte	$4B
-	.byte	$65
-	.byte	$6E
-	.byte	$6E
-	.byte	$79
+	.byte	$2B
+	.byte	$45
+	.byte	$4E
+	.byte	$4E
+	.byte	$59
 	.byte	$00
-	.byte	$43
-	.byte	$61
-	.byte	$73
-	.byte	$6F
-	.byte	$6E
+	.byte	$23
+	.byte	$41
+	.byte	$53
+	.byte	$4F
+	.byte	$4E
 	.byte	$00
 	.byte	$01
 	.byte	$FE
@@ -832,8104 +828,404 @@ _title:
 	.byte	$00
 	.byte	$01
 	.byte	$00
-_level_1_coins:
-	.byte	$90
-	.byte	$00
-	.byte	$70
-	.byte	$00
-	.byte	$90
-	.byte	$00
-	.byte	$90
-	.byte	$00
-	.byte	$50
-	.byte	$01
-	.byte	$40
-	.byte	$00
-	.byte	$70
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$50
-	.byte	$02
-	.byte	$70
-	.byte	$00
-	.byte	$50
-	.byte	$03
-	.byte	$A0
-	.byte	$00
-	.byte	$50
-	.byte	$03
-	.byte	$D0
-	.byte	$00
-	.byte	$60
-	.byte	$04
-	.byte	$F0
-	.byte	$00
-	.byte	$60
-	.byte	$05
-	.byte	$20
-	.byte	$00
-	.byte	$30
-	.byte	$06
-	.byte	$C0
-	.byte	$00
-	.byte	$30
-	.byte	$06
-	.byte	$E0
-	.byte	$00
-	.byte	$30
-	.byte	$07
-	.byte	$80
-	.byte	$00
-	.byte	$B0
-	.byte	$07
-	.byte	$C0
-	.byte	$01
-	.byte	$FF
-_level_2_coins:
-	.byte	$A0
-	.byte	$01
-	.byte	$20
-	.byte	$00
-	.byte	$A0
-	.byte	$01
-	.byte	$40
-	.byte	$00
-	.byte	$60
-	.byte	$02
-	.byte	$70
-	.byte	$00
-	.byte	$30
-	.byte	$03
-	.byte	$20
-	.byte	$00
-	.byte	$30
-	.byte	$03
-	.byte	$70
-	.byte	$00
-	.byte	$C0
-	.byte	$05
-	.byte	$00
-	.byte	$00
-	.byte	$C0
-	.byte	$05
-	.byte	$50
-	.byte	$00
-	.byte	$40
-	.byte	$06
-	.byte	$90
-	.byte	$00
-	.byte	$40
-	.byte	$06
-	.byte	$D0
-	.byte	$00
-	.byte	$40
-	.byte	$07
-	.byte	$40
-	.byte	$00
-	.byte	$A0
-	.byte	$07
-	.byte	$C0
-	.byte	$01
-	.byte	$FF
-_level_3_coins:
-	.byte	$80
-	.byte	$00
-	.byte	$80
-	.byte	$00
-	.byte	$70
-	.byte	$01
-	.byte	$50
-	.byte	$00
-	.byte	$80
-	.byte	$01
-	.byte	$D0
-	.byte	$00
-	.byte	$80
-	.byte	$02
-	.byte	$40
-	.byte	$00
-	.byte	$80
-	.byte	$02
-	.byte	$80
-	.byte	$00
-	.byte	$80
-	.byte	$02
-	.byte	$C0
-	.byte	$00
-	.byte	$80
-	.byte	$03
-	.byte	$30
-	.byte	$00
-	.byte	$50
-	.byte	$07
-	.byte	$25
-	.byte	$00
-	.byte	$50
-	.byte	$07
-	.byte	$80
-	.byte	$01
-	.byte	$B0
-	.byte	$07
-	.byte	$D0
-	.byte	$00
-	.byte	$FF
+_level_main_data:
+	.addr	_w1l1_main
+	.addr	_w1l2_main
+	.addr	_w1l3_main
 _Coins_list:
-	.addr	_level_1_coins
-	.addr	_level_2_coins
-	.addr	_level_3_coins
-_level_1_enemies:
-	.byte	$90
-	.byte	$00
-	.byte	$C0
-	.byte	$00
-	.byte	$C0
-	.byte	$01
-	.byte	$E0
-	.byte	$01
-	.byte	$C0
-	.byte	$02
-	.byte	$30
-	.byte	$01
-	.byte	$80
-	.byte	$02
-	.byte	$90
-	.byte	$00
-	.byte	$B0
-	.byte	$03
-	.byte	$20
-	.byte	$01
-	.byte	$C0
-	.byte	$03
-	.byte	$B0
-	.byte	$00
-	.byte	$80
-	.byte	$05
-	.byte	$00
-	.byte	$01
-	.byte	$C0
-	.byte	$05
-	.byte	$90
-	.byte	$00
-	.byte	$B0
-	.byte	$07
-	.byte	$70
-	.byte	$02
-	.byte	$FF
-_level_2_enemies:
-	.byte	$C0
-	.byte	$00
-	.byte	$90
-	.byte	$00
-	.byte	$C0
-	.byte	$01
-	.byte	$D0
-	.byte	$00
-	.byte	$40
-	.byte	$03
-	.byte	$40
-	.byte	$01
-	.byte	$C0
-	.byte	$04
-	.byte	$30
-	.byte	$01
-	.byte	$C0
-	.byte	$04
-	.byte	$80
-	.byte	$01
-	.byte	$C0
-	.byte	$06
-	.byte	$20
-	.byte	$00
-	.byte	$C0
-	.byte	$07
-	.byte	$20
-	.byte	$01
-	.byte	$C0
-	.byte	$07
-	.byte	$60
-	.byte	$01
-	.byte	$FF
-_level_3_enemies:
-	.byte	$C0
-	.byte	$00
-	.byte	$C0
-	.byte	$01
-	.byte	$C0
-	.byte	$00
-	.byte	$F0
-	.byte	$01
-	.byte	$C0
-	.byte	$01
-	.byte	$80
-	.byte	$00
-	.byte	$C0
-	.byte	$01
-	.byte	$D0
-	.byte	$00
-	.byte	$C0
-	.byte	$02
-	.byte	$40
-	.byte	$01
-	.byte	$C0
-	.byte	$02
-	.byte	$80
-	.byte	$01
-	.byte	$C0
-	.byte	$02
-	.byte	$C0
-	.byte	$01
-	.byte	$B0
-	.byte	$03
-	.byte	$10
-	.byte	$01
-	.byte	$B0
-	.byte	$04
-	.byte	$60
-	.byte	$00
-	.byte	$90
-	.byte	$05
-	.byte	$40
-	.byte	$01
-	.byte	$90
-	.byte	$06
-	.byte	$50
-	.byte	$01
-	.byte	$A0
-	.byte	$06
-	.byte	$C0
-	.byte	$01
-	.byte	$C0
-	.byte	$07
-	.byte	$E0
-	.byte	$00
-	.byte	$FF
+	.addr	_w1l1_coins
+	.addr	_w1l2_coins
+	.addr	_w1l3_coins
 _Enemy_list:
-	.addr	_level_1_enemies
-	.addr	_level_2_enemies
-	.addr	_level_3_enemies
+	.addr	_w1l1_enemies
+	.addr	_w1l2_enemies
+	.addr	_w1l3_enemies
 _metatiles1:
 	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$0B
-	.byte	$0B
-	.byte	$0B
-	.byte	$0B
-	.byte	$03
-	.byte	$0D
-	.byte	$0E
-	.byte	$1D
-	.byte	$1E
-	.byte	$00
-	.byte	$05
-	.byte	$06
-	.byte	$15
-	.byte	$16
 	.byte	$01
-	.byte	$06
-	.byte	$06
-	.byte	$16
-	.byte	$16
+	.byte	$10
+	.byte	$11
+	.byte	$03
+	.byte	$02
+	.byte	$03
+	.byte	$12
+	.byte	$13
+	.byte	$02
+	.byte	$04
+	.byte	$05
+	.byte	$14
+	.byte	$15
 	.byte	$01
 	.byte	$06
 	.byte	$07
 	.byte	$16
 	.byte	$17
 	.byte	$01
-	.byte	$1B
-	.byte	$01
-	.byte	$1B
-	.byte	$01
-	.byte	$02
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$02
-	.byte	$01
-	.byte	$1C
-	.byte	$01
-	.byte	$1C
-	.byte	$02
 	.byte	$08
-	.byte	$01
+	.byte	$09
 	.byte	$18
 	.byte	$19
-	.byte	$02
-	.byte	$01
-	.byte	$01
-	.byte	$19
-	.byte	$19
-	.byte	$02
-	.byte	$01
+	.byte	$21
 	.byte	$0A
-	.byte	$19
+	.byte	$0B
 	.byte	$1A
-	.byte	$02
-_is_solid:
+	.byte	$1B
+	.byte	$21
+	.byte	$0C
+	.byte	$0D
+	.byte	$1C
+	.byte	$1D
+	.byte	$42
+	.byte	$0E
+	.byte	$0F
+	.byte	$1E
+	.byte	$1F
+	.byte	$42
+	.byte	$20
+	.byte	$21
+	.byte	$30
+	.byte	$31
 	.byte	$00
+	.byte	$22
+	.byte	$23
+	.byte	$32
+	.byte	$33
+	.byte	$01
+	.byte	$24
+	.byte	$25
+	.byte	$34
+	.byte	$35
+	.byte	$01
+	.byte	$26
+	.byte	$27
+	.byte	$36
+	.byte	$37
+	.byte	$01
+	.byte	$28
+	.byte	$29
+	.byte	$38
+	.byte	$39
+	.byte	$21
+	.byte	$2A
+	.byte	$2B
+	.byte	$3A
+	.byte	$3B
+	.byte	$21
+	.byte	$2C
+	.byte	$2D
+	.byte	$3C
+	.byte	$3D
+	.byte	$42
+	.byte	$2E
+	.byte	$2F
+	.byte	$3E
+	.byte	$3F
+	.byte	$42
+	.byte	$40
+	.byte	$41
+	.byte	$50
+	.byte	$51
+	.byte	$00
+	.byte	$42
+	.byte	$43
+	.byte	$52
+	.byte	$53
+	.byte	$01
+	.byte	$44
+	.byte	$45
+	.byte	$54
+	.byte	$55
+	.byte	$01
+	.byte	$46
+	.byte	$47
+	.byte	$56
+	.byte	$57
+	.byte	$01
+	.byte	$48
+	.byte	$49
+	.byte	$58
+	.byte	$59
+	.byte	$21
+	.byte	$4A
+	.byte	$4B
+	.byte	$5A
+	.byte	$5B
+	.byte	$21
+	.byte	$4C
+	.byte	$4D
+	.byte	$5C
+	.byte	$5D
+	.byte	$42
+	.byte	$4E
+	.byte	$4F
+	.byte	$5E
+	.byte	$5F
+	.byte	$42
+	.byte	$60
+	.byte	$61
+	.byte	$70
+	.byte	$71
+	.byte	$00
+	.byte	$62
+	.byte	$63
+	.byte	$72
+	.byte	$73
+	.byte	$01
+	.byte	$64
+	.byte	$65
+	.byte	$74
+	.byte	$75
+	.byte	$01
+	.byte	$66
+	.byte	$67
+	.byte	$76
+	.byte	$77
+	.byte	$01
+	.byte	$68
+	.byte	$69
+	.byte	$78
+	.byte	$79
+	.byte	$21
+	.byte	$6A
+	.byte	$6B
+	.byte	$7A
+	.byte	$7B
+	.byte	$21
+	.byte	$6C
+	.byte	$6D
+	.byte	$7C
+	.byte	$7D
+	.byte	$42
+	.byte	$6E
+	.byte	$6F
+	.byte	$7E
+	.byte	$7F
+	.byte	$42
 	.byte	$80
+	.byte	$81
+	.byte	$90
+	.byte	$91
+	.byte	$00
+	.byte	$82
+	.byte	$83
+	.byte	$92
+	.byte	$93
+	.byte	$01
+	.byte	$84
+	.byte	$85
+	.byte	$94
+	.byte	$95
+	.byte	$01
+	.byte	$86
+	.byte	$87
+	.byte	$96
+	.byte	$97
+	.byte	$01
+	.byte	$88
+	.byte	$89
+	.byte	$98
+	.byte	$99
+	.byte	$21
+	.byte	$8A
+	.byte	$8B
+	.byte	$9A
+	.byte	$9B
+	.byte	$21
+	.byte	$8C
+	.byte	$8D
+	.byte	$9C
+	.byte	$9D
+	.byte	$42
+	.byte	$8E
+	.byte	$8F
+	.byte	$9E
+	.byte	$9F
+	.byte	$42
+	.byte	$A0
+	.byte	$A1
+	.byte	$B0
+	.byte	$B1
+	.byte	$00
+	.byte	$A2
+	.byte	$A3
+	.byte	$B2
+	.byte	$B3
+	.byte	$01
+	.byte	$A4
+	.byte	$A5
+	.byte	$B4
+	.byte	$B5
+	.byte	$01
+	.byte	$A6
+	.byte	$A7
+	.byte	$B6
+	.byte	$B7
+	.byte	$01
+	.byte	$A8
+	.byte	$A9
+	.byte	$B8
+	.byte	$B9
+	.byte	$21
+	.byte	$AA
+	.byte	$AB
+	.byte	$BA
+	.byte	$BB
+	.byte	$21
+	.byte	$AC
+	.byte	$AD
+	.byte	$BC
+	.byte	$BD
+	.byte	$42
+	.byte	$AE
+	.byte	$AF
+	.byte	$BE
+	.byte	$BF
+	.byte	$42
 	.byte	$C0
-	.byte	$80
-	.byte	$80
-	.byte	$80
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-_Level1_0:
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$03
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$03
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$05
-	.byte	$07
-	.byte	$07
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$0A
-	.byte	$0A
+	.byte	$C1
+	.byte	$D0
+	.byte	$D1
+	.byte	$00
+	.byte	$C2
+	.byte	$C3
+	.byte	$D2
+	.byte	$D3
 	.byte	$01
+	.byte	$C4
+	.byte	$C5
+	.byte	$D4
+	.byte	$D5
 	.byte	$01
+	.byte	$C6
+	.byte	$C7
+	.byte	$D6
+	.byte	$D7
 	.byte	$01
+	.byte	$C8
+	.byte	$C9
+	.byte	$D8
+	.byte	$D9
+	.byte	$21
+	.byte	$CA
+	.byte	$CB
+	.byte	$DA
+	.byte	$DB
+	.byte	$21
+	.byte	$CC
+	.byte	$CD
+	.byte	$DC
+	.byte	$DD
+	.byte	$42
+	.byte	$CE
+	.byte	$CF
+	.byte	$DE
+	.byte	$DF
+	.byte	$42
+	.byte	$E0
+	.byte	$E1
+	.byte	$F0
+	.byte	$F1
+	.byte	$00
+	.byte	$E2
+	.byte	$E3
+	.byte	$F2
+	.byte	$F3
 	.byte	$01
+	.byte	$E4
+	.byte	$E5
+	.byte	$F4
+	.byte	$F5
 	.byte	$01
+	.byte	$E6
+	.byte	$E7
+	.byte	$F6
+	.byte	$F7
 	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-_Level1_1:
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$04
-	.byte	$05
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$03
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$05
-	.byte	$00
-	.byte	$00
+	.byte	$E8
+	.byte	$E9
+	.byte	$F8
+	.byte	$F9
+	.byte	$21
+	.byte	$EA
+	.byte	$EB
+	.byte	$FA
+	.byte	$FB
+	.byte	$21
+	.byte	$EC
+	.byte	$ED
+	.byte	$FC
+	.byte	$FD
+	.byte	$42
+	.byte	$EE
+	.byte	$EF
+	.byte	$FE
+	.byte	$FF
+	.byte	$42
+_metatiles_pal1:
 	.byte	$03
 	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$09
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
 	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
+	.byte	$00
 	.byte	$01
 	.byte	$01
-_Level1_2:
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
 	.byte	$02
 	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$04
-	.byte	$04
-	.byte	$05
-	.byte	$00
-	.byte	$00
-	.byte	$03
-	.byte	$04
-	.byte	$04
-	.byte	$05
-	.byte	$00
 	.byte	$00
-	.byte	$03
-	.byte	$04
-	.byte	$04
-	.byte	$05
-	.byte	$00
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$0A
-	.byte	$0A
-	.byte	$0B
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
 	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-_Level1_3:
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$03
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$03
-	.byte	$04
-	.byte	$04
-	.byte	$05
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$0A
-	.byte	$0A
-	.byte	$0B
-	.byte	$00
-	.byte	$00
-	.byte	$09
-	.byte	$0A
-	.byte	$0A
-	.byte	$0A
-	.byte	$0A
-	.byte	$0A
-	.byte	$0A
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-_Level1_4:
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$04
-	.byte	$04
-	.byte	$05
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$03
-	.byte	$04
-	.byte	$02
-	.byte	$02
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$09
-	.byte	$0A
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$03
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-_Level1_5:
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$05
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$0A
-	.byte	$0A
-	.byte	$0A
-	.byte	$0B
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$05
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-_Level1_6:
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$03
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$05
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$03
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$05
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$03
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$05
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$0A
-	.byte	$0A
-	.byte	$0A
-	.byte	$0A
-	.byte	$0B
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-_Level1_7:
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$03
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$05
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-_Level1_list:
-	.addr	_Level1_0
-	.addr	_Level1_1
-	.addr	_Level1_2
-	.addr	_Level1_3
-	.addr	_Level1_4
-	.addr	_Level1_5
-	.addr	_Level1_6
-	.addr	_Level1_7
-_w1l1_main_0:
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$03
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$03
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$05
-	.byte	$07
-	.byte	$07
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$0A
-	.byte	$0A
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-_w1l1_main_1:
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$04
-	.byte	$05
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$03
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$05
-	.byte	$00
-	.byte	$00
-	.byte	$03
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$09
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-_w1l1_main_2:
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$04
-	.byte	$04
-	.byte	$05
-	.byte	$00
-	.byte	$00
-	.byte	$03
-	.byte	$04
-	.byte	$04
-	.byte	$05
-	.byte	$00
-	.byte	$00
-	.byte	$03
-	.byte	$04
-	.byte	$04
-	.byte	$05
-	.byte	$00
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$0A
-	.byte	$0A
-	.byte	$0B
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-_w1l1_main_3:
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$03
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$03
-	.byte	$04
-	.byte	$04
-	.byte	$05
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$0A
-	.byte	$0A
-	.byte	$0B
-	.byte	$00
-	.byte	$00
-	.byte	$09
-	.byte	$0A
-	.byte	$0A
-	.byte	$0A
-	.byte	$0A
-	.byte	$0A
-	.byte	$0A
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-_w1l1_main_4:
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$04
-	.byte	$04
-	.byte	$05
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$03
-	.byte	$04
-	.byte	$02
-	.byte	$02
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$09
-	.byte	$0A
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$03
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-_w1l1_main_5:
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$05
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$0A
-	.byte	$0A
-	.byte	$0A
-	.byte	$0B
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$05
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-_w1l1_main_6:
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$03
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$05
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$03
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$05
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$03
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$05
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$0A
-	.byte	$0A
-	.byte	$0A
-	.byte	$0A
-	.byte	$0B
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-_w1l1_main_7:
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
 	.byte	$02
 	.byte	$03
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$05
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
+	.byte	$01
+	.byte	$01
 	.byte	$02
 	.byte	$02
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$08
 	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$03
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$05
-	.byte	$02
+	.byte	$01
 	.byte	$02
 	.byte	$03
-	.byte	$04
-	.byte	$05
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$08
+	.byte	$01
+	.byte	$01
 	.byte	$02
 	.byte	$02
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$08
 	.byte	$00
-	.byte	$00
-	.byte	$00
+	.byte	$01
+	.byte	$02
 	.byte	$03
-	.byte	$05
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$08
+	.byte	$01
+	.byte	$01
 	.byte	$02
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
+	.byte	$02
+	.byte	$00
+	.byte	$01
+	.byte	$02
 	.byte	$03
-	.byte	$04
-	.byte	$05
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$02
-	.byte	$06
-	.byte	$09
-	.byte	$0A
-	.byte	$0B
-	.byte	$09
-	.byte	$0A
-	.byte	$0B
-	.byte	$00
-	.byte	$00
-	.byte	$09
-	.byte	$0A
-	.byte	$0A
-	.byte	$0A
-	.byte	$0A
-	.byte	$0B
-	.byte	$02
 	.byte	$01
 	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-_w1l1_main_list:
-	.addr	_w1l1_main_0
-	.addr	_w1l1_main_1
-	.addr	_w1l1_main_2
-	.addr	_w1l1_main_3
-	.addr	_w1l1_main_4
-	.addr	_w1l1_main_5
-	.addr	_w1l1_main_6
-	.addr	_w1l1_main_7
-_Level2_0:
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
 	.byte	$02
 	.byte	$02
 	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
+	.byte	$01
 	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-_Level2_1:
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-_Level2_2:
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
 	.byte	$03
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$06
 	.byte	$01
 	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-_Level2_3:
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
 	.byte	$02
 	.byte	$02
 	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
+	.byte	$01
+	.byte	$02
 	.byte	$03
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$05
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$05
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$0B
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
 	.byte	$01
 	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-_Level2_4:
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
 	.byte	$02
 	.byte	$02
 	.byte	$00
-	.byte	$00
+	.byte	$01
 	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-_Level2_5:
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-_Level2_6:
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
 	.byte	$03
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$05
-	.byte	$00
 	.byte	$01
 	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-_Level2_7:
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$03
-	.byte	$04
-	.byte	$05
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-_Level2_list:
-	.addr	_Level2_0
-	.addr	_Level2_1
-	.addr	_Level2_2
-	.addr	_Level2_3
-	.addr	_Level2_4
-	.addr	_Level2_5
-	.addr	_Level2_6
-	.addr	_Level2_7
-_Level3_0:
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$03
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$05
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$03
-	.byte	$04
-	.byte	$04
-	.byte	$05
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$0A
-	.byte	$0A
-	.byte	$0A
-	.byte	$0B
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-_Level3_1:
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$03
-	.byte	$04
-	.byte	$04
-	.byte	$04
-	.byte	$05
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$03
-	.byte	$04
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$09
-	.byte	$0A
-	.byte	$06
-	.byte	$07
-	.byte	$07
-	.byte	$07
-	.byte	$08
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-_Level3_2:
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-_Level3_3:
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-_Level3_4:
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-_Level3_5:
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-_Level3_6:
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
 	.byte	$02
 	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-_Level3_7:
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$00
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$00
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-	.byte	$01
-_Level3_list:
-	.addr	_Level3_0
-	.addr	_Level3_1
-	.addr	_Level3_2
-	.addr	_Level3_3
-	.addr	_Level3_4
-	.addr	_Level3_5
-	.addr	_Level3_6
-	.addr	_Level3_7
 _Levels_list:
 	.addr	_w1l1_main_0
 	.addr	_w1l1_main_1
@@ -8939,26 +1235,34 @@ _Levels_list:
 	.addr	_w1l1_main_5
 	.addr	_w1l1_main_6
 	.addr	_w1l1_main_7
-	.addr	_Level2_0
-	.addr	_Level2_1
-	.addr	_Level2_2
-	.addr	_Level2_3
-	.addr	_Level2_4
-	.addr	_Level2_5
-	.addr	_Level2_6
-	.addr	_Level2_7
-	.addr	_Level3_0
-	.addr	_Level3_1
-	.addr	_Level3_2
-	.addr	_Level3_3
-	.addr	_Level3_4
-	.addr	_Level3_5
-	.addr	_Level3_6
-	.addr	_Level3_7
+	.addr	_w1l2_main_0
+	.addr	_w1l2_main_1
+	.addr	_w1l2_main_2
+	.addr	_w1l2_main_3
+	.addr	_w1l2_main_4
+	.addr	_w1l2_main_5
+	.addr	_w1l2_main_6
+	.addr	_w1l2_main_7
+	.addr	_w1l3_main_0
+	.addr	_w1l3_main_1
+	.addr	_w1l3_main_2
+	.addr	_w1l3_main_3
+	.addr	_w1l3_main_4
+	.addr	_w1l3_main_5
+	.addr	_w1l3_main_6
+	.addr	_w1l3_main_7
 _Level_offsets:
 	.byte	$00
 	.byte	$08
 	.byte	$10
+_max_rooms:
+	.byte	$08
+	.byte	$08
+	.byte	$08
+_scroll_limits:
+	.byte	$07
+	.byte	$07
+	.byte	$07
 
 .segment	"BSS"
 
@@ -9075,7 +1379,7 @@ _ENTITY1:
 _ENTITY2:
 	.res	4,$00
 _NINJA:
-	.res	8,$00
+	.res	10,$00
 _coin_x:
 	.res	16,$00
 _coin_y:
@@ -9130,6 +1434,8 @@ _enemy_bullet_type:
 	.res	8,$00
 _enemy_bullet_cooldown:
 	.res	8,$00
+_enemy_bullet_room:
+	.res	8,$00
 _has_turd_power:
 	.res	1,$00
 _turd_cooldown:
@@ -9140,6 +1446,109 @@ _damage_cooldown:
 	.res	1,$00
 _boss_health:
 	.res	1,$00
+_coyote_time:
+	.res	1,$00
+_was_jumping:
+	.res	1,$00
+
+; ---------------------------------------------------------------
+; void __near__ mmc1_write (unsigned int address, unsigned char value)
+; ---------------------------------------------------------------
+
+.segment	"CODE"
+
+.proc	_mmc1_write: near
+
+.segment	"CODE"
+
+;
+; void mmc1_write(unsigned int address, unsigned char value) {
+;
+	jsr     pusha
+;
+; for (i = 0; i < 5; ++i) {
+;
+	jsr     decsp1
+	lda     #$00
+	tay
+L0006:	sta     (sp),y
+	cmp     #$05
+	bcs     L0003
+;
+; *((unsigned char*)address) = value & 1;
+;
+	ldy     #$03
+	lda     (sp),y
+	sta     ptr1+1
+	dey
+	lda     (sp),y
+	sta     ptr1
+	dey
+	lda     (sp),y
+	and     #$01
+	dey
+	sta     (ptr1),y
+;
+; value = value >> 1;
+;
+	iny
+	lda     (sp),y
+	lsr     a
+	sta     (sp),y
+;
+; for (i = 0; i < 5; ++i) {
+;
+	dey
+	clc
+	lda     #$01
+	adc     (sp),y
+	jmp     L0006
+;
+; }
+;
+L0003:	jmp     incsp4
+
+.endproc
+
+; ---------------------------------------------------------------
+; void __near__ mmc1_init (void)
+; ---------------------------------------------------------------
+
+.segment	"CODE"
+
+.proc	_mmc1_init: near
+
+.segment	"CODE"
+
+;
+; *((unsigned char*)MMC1_CONTROL) = 0x80;
+;
+	lda     #$80
+	sta     $8000
+;
+; mmc1_write(MMC1_CONTROL, 0x12);  // 0001 0010
+;
+	tax
+	lda     #$00
+	jsr     pushax
+	lda     #$12
+	jsr     _mmc1_write
+;
+; mmc1_write(MMC1_CHR0, 0);  // First 4KB bank
+;
+	ldx     #$A0
+	lda     #$00
+	jsr     pushax
+	jsr     _mmc1_write
+;
+; mmc1_write(MMC1_CHR1, 0);  // Second 4KB bank
+;
+	ldx     #$C0
+	lda     #$00
+	jsr     pushax
+	jmp     _mmc1_write
+
+.endproc
 
 ; ---------------------------------------------------------------
 ; void __near__ setup_pattern_tables (unsigned char bg_bank, unsigned char spr_bank)
@@ -9156,17 +1565,27 @@ _boss_health:
 ;
 	jsr     pusha
 ;
-; bank_bg(bg_bank);
+; mmc1_write(MMC1_CHR0, bg_bank * 2);      // First 4KB
 ;
-	ldy     #$01
+	ldx     #$A0
+	lda     #$00
+	jsr     pushax
+	ldy     #$03
 	lda     (sp),y
-	jsr     _bank_bg
+	asl     a
+	jsr     _mmc1_write
 ;
-; bank_spr(spr_bank);
+; mmc1_write(MMC1_CHR1, bg_bank * 2 + 1);  // Second 4KB
 ;
-	ldy     #$00
+	ldx     #$C0
+	lda     #$00
+	jsr     pushax
+	ldy     #$03
 	lda     (sp),y
-	jsr     _bank_spr
+	asl     a
+	clc
+	adc     #$01
+	jsr     _mmc1_write
 ;
 ; }
 ;
@@ -9268,7 +1687,7 @@ L000E:	sta     (sp),y
 	cmp     (sp),y
 	bcs     L000B
 ;
-; ppu_wait_nmi(); // Wait for NMI to complete
+; ppu_wait_nmi();
 ;
 	jsr     _ppu_wait_nmi
 ;
@@ -9421,7 +1840,7 @@ L000D:	ldy     #$20
 	adc     (sp),y
 	jmp     L001A
 ;
-; ppu_wait_nmi(); // Wait for NMI to complete
+; ppu_wait_nmi();
 ;
 L000C:	jsr     _ppu_wait_nmi
 ;
@@ -9441,7 +1860,7 @@ L001B:	sta     (sp),y
 	cmp     (sp),y
 	bcs     L0016
 ;
-; ppu_wait_nmi(); // Wait for NMI to complete
+; ppu_wait_nmi();
 ;
 	jsr     _ppu_wait_nmi
 ;
@@ -9590,6 +2009,92 @@ L0004:	jsr     decsp3
 .endproc
 
 ; ---------------------------------------------------------------
+; void __near__ draw_border (unsigned char x, unsigned char y, unsigned char width, unsigned char height)
+; ---------------------------------------------------------------
+
+.segment	"CODE"
+
+.proc	_draw_border: near
+
+.segment	"CODE"
+
+;
+; void draw_border(unsigned char x, unsigned char y, unsigned char width, unsigned char height) {
+;
+	jsr     pusha
+;
+; for(row = 0; row < height; row++) {
+;
+	jsr     decsp2
+	lda     #$00
+	ldy     #$01
+L000C:	sta     (sp),y
+	iny
+	cmp     (sp),y
+	bcs     L0003
+;
+; vram_adr(NTADR_A(x, y + row));
+;
+	ldx     #$00
+	dey
+	lda     (sp),y
+	clc
+	ldy     #$04
+	adc     (sp),y
+	bcc     L000A
+	inx
+L000A:	jsr     aslax4
+	stx     tmp1
+	asl     a
+	rol     tmp1
+	sta     ptr1
+	iny
+	lda     (sp),y
+	ora     ptr1
+	pha
+	lda     tmp1
+	ora     #$20
+	tax
+	pla
+	jsr     _vram_adr
+;
+; for(col = 0; col < width; col++) {
+;
+	lda     #$00
+	tay
+L000B:	sta     (sp),y
+	ldy     #$03
+	cmp     (sp),y
+	bcs     L0004
+;
+; vram_put(TILE_BLANK);
+;
+	lda     #$FF
+	jsr     _vram_put
+;
+; for(col = 0; col < width; col++) {
+;
+	ldy     #$00
+	clc
+	lda     #$01
+	adc     (sp),y
+	jmp     L000B
+;
+; for(row = 0; row < height; row++) {
+;
+L0004:	ldy     #$01
+	clc
+	tya
+	adc     (sp),y
+	jmp     L000C
+;
+; }
+;
+L0003:	jmp     incsp6
+
+.endproc
+
+; ---------------------------------------------------------------
 ; void __near__ load_title (void)
 ; ---------------------------------------------------------------
 
@@ -9600,10 +2105,28 @@ L0004:	jsr     decsp3
 .segment	"CODE"
 
 ;
-; bank_bg(CHR_BANK_0);
+; mmc1_write(MMC1_CONTROL, 0x12);  // 4KB CHR mode
 ;
+	ldx     #$80
 	lda     #$00
-	jsr     _bank_bg
+	jsr     pushax
+	lda     #$12
+	jsr     _mmc1_write
+;
+; mmc1_write(MMC1_CHR0, CHR_BANK_FONT);   // Font tiles
+;
+	ldx     #$A0
+	lda     #$00
+	jsr     pushax
+	jsr     _mmc1_write
+;
+; mmc1_write(MMC1_CHR1, CHR_BANK_TITLE);  // Title graphics
+;
+	ldx     #$C0
+	lda     #$00
+	jsr     pushax
+	lda     #$01
+	jsr     _mmc1_write
 ;
 ; pal_bg(palette_title);
 ;
@@ -9655,10 +2178,34 @@ L0004:	jsr     decsp3
 ;
 	jsr     _clear_vram_buffer
 ;
-; bank_bg(CHR_BANK_0);
+; mmc1_write(MMC1_CONTROL, 0x12);  // 4KB CHR mode
 ;
+	ldx     #$80
 	lda     #$00
-	jsr     _bank_bg
+	jsr     pushax
+	lda     #$12
+	jsr     _mmc1_write
+;
+; mmc1_write(MMC1_CHR0, CHR_BANK_MAP);     // Pattern Table 0 (background) uses map tiles
+;
+	ldx     #$A0
+	lda     #$00
+	jsr     pushax
+	lda     #$02
+	jsr     _mmc1_write
+;
+; mmc1_write(MMC1_CHR1, CHR_BANK_SPRITES); // Pattern Table 1 (sprites) uses sprite tiles
+;
+	ldx     #$C0
+	lda     #$00
+	jsr     pushax
+	lda     #$03
+	jsr     _mmc1_write
+;
+; bank_spr(1);
+;
+	lda     #$01
+	jsr     _bank_spr
 ;
 ; offset = Level_offsets[level];
 ;
@@ -9671,10 +2218,10 @@ L0004:	jsr     decsp3
 	ldx     #$00
 	lda     _offset
 	asl     a
-	bcc     L0019
+	bcc     L001A
 	inx
 	clc
-L0019:	adc     #<(_Levels_list)
+L001A:	adc     #<(_Levels_list)
 	sta     ptr1
 	txa
 	adc     #>(_Levels_list)
@@ -9695,12 +2242,12 @@ L0019:	adc     #<(_Levels_list)
 ; for(y=0; ;y+=0x20) { 
 ;
 	lda     #$00
-L0017:	sta     _y
+L0018:	sta     _y
 ;
 ; for(x=0; ;x+=0x20) {
 ;
 	lda     #$00
-L0016:	sta     _x
+L0017:	sta     _x
 ;
 ; address = get_ppu_addr(0, x, y);
 ;
@@ -9746,41 +2293,41 @@ L0016:	sta     _x
 ;
 	lda     _x
 	cmp     #$E0
-	beq     L001C
+	beq     L001D
 ;
 ; for(x=0; ;x+=0x20) {
 ;
 	lda     #$20
 	clc
 	adc     _x
-	jmp     L0016
+	jmp     L0017
 ;
 ; if (y == 0xe0) break;
 ;
-L001C:	lda     _y
+L001D:	lda     _y
 	cmp     #$E0
-	beq     L001D
+	beq     L001E
 ;
 ; for(y=0; ;y+=0x20) { 
 ;
 	lda     #$20
 	clc
 	adc     _y
-	jmp     L0017
+	jmp     L0018
 ;
 ; ++offset;
 ;
-L001D:	inc     _offset
+L001E:	inc     _offset
 ;
 ; set_data_pointer(Levels_list[offset]);
 ;
 	ldx     #$00
 	lda     _offset
 	asl     a
-	bcc     L001A
+	bcc     L001B
 	inx
 	clc
-L001A:	adc     #<(_Levels_list)
+L001B:	adc     #<(_Levels_list)
 	sta     ptr1
 	txa
 	adc     #>(_Levels_list)
@@ -9795,7 +2342,7 @@ L001A:	adc     #<(_Levels_list)
 ; for(y=0; ;y+=0x20) { 
 ;
 	lda     #$00
-L0018:	sta     _y
+L0019:	sta     _y
 ;
 ; x = 0;
 ;
@@ -9816,10 +2363,18 @@ L0018:	sta     _y
 	sta     _address
 	stx     _address+1
 ;
-; index = (y & 0xf0);
+; index = (y & 0xf0) + (x >> 4);
 ;
 	lda     _y
 	and     #$F0
+	sta     ptr1
+	lda     _x
+	lsr     a
+	lsr     a
+	lsr     a
+	lsr     a
+	clc
+	adc     ptr1
 	sta     _index
 ;
 ; buffer_4_mt(address, index); // ppu_address, index to the data
@@ -9838,18 +2393,18 @@ L0018:	sta     _y
 ;
 	lda     _y
 	cmp     #$E0
-	beq     L001E
+	beq     L001F
 ;
 ; for(y=0; ;y+=0x20) { 
 ;
 	lda     #$20
 	clc
 	adc     _y
-	jmp     L0018
+	jmp     L0019
 ;
 ; --offset;
 ;
-L001E:	dec     _offset
+L001F:	dec     _offset
 ;
 ; memcpy (c_map, Levels_list[offset], 240);
 ;
@@ -9859,10 +2414,10 @@ L001E:	dec     _offset
 	ldx     #$00
 	lda     _offset
 	asl     a
-	bcc     L001B
+	bcc     L001C
 	inx
 	clc
-L001B:	adc     #<(_Levels_list)
+L001C:	adc     #<(_Levels_list)
 	sta     ptr1
 	txa
 	adc     #>(_Levels_list)
@@ -9922,6 +2477,15 @@ L001B:	adc     #<(_Levels_list)
 ;
 	lda     #$14
 	sta     _boss_health
+;
+; coyote_time = 0;
+;
+	lda     #$00
+	sta     _coyote_time
+;
+; was_jumping = 0;
+;
+	sta     _was_jumping
 ;
 ; }
 ;
@@ -10066,6 +2630,7 @@ L002F:	lda     _index
 ;
 	ldy     _index
 	lda     _coin_type,y
+	cmp     #$02
 	bne     L0012
 ;
 ; oam_meta_spr(temp_x, temp_y, CoinSpr);
@@ -10378,31 +2943,37 @@ L002B:	jsr     _oam_meta_spr
 ;
 ; old_x = NINJA.x;
 ;
-	lda     _NINJA+1
-	sta     _old_x+1
+	jsr     decsp6
 	lda     _NINJA
-	sta     _old_x
+	ldx     _NINJA+1
+	ldy     #$03
+	jsr     staxysp
 ;
 ; if (pad1 & PAD_LEFT) {
 ;
 	lda     _pad1
 	and     #$02
-	beq     L005C
+	beq     L005F
+;
+; if (!(pad1 & PAD_B)) {
+;
+	lda     _pad1
+	and     #$40
+	bne     L0003
 ;
 ; direction = LEFT;
 ;
-	lda     #$00
 	sta     _direction
 ;
 ; if (NINJA.vel_x >= DECEL) {
 ;
-	lda     _NINJA+4
+L0003:	lda     _NINJA+4
 	cmp     #$32
 	lda     _NINJA+4+1
 	sbc     #$00
-	bvs     L0004
+	bvs     L0005
 	eor     #$80
-L0004:	bpl     L0003
+L0005:	bpl     L0004
 ;
 ; NINJA.vel_x -= DECEL;
 ;
@@ -10410,19 +2981,19 @@ L0004:	bpl     L0003
 	sec
 	sbc     #$32
 	sta     _NINJA+4
-	jcs     L0020
+	jcs     L0022
 	dec     _NINJA+4+1
 ;
 ; else if (NINJA.vel_x > 0) {
 ;
-	jmp     L0020
-L0003:	lda     _NINJA+4
+	jmp     L0022
+L0004:	lda     _NINJA+4
 	cmp     #$01
 	lda     _NINJA+4+1
 	sbc     #$00
-	bvs     L0008
+	bvs     L0009
 	eor     #$80
-L0008:	bpl     L0007
+L0009:	bpl     L0008
 ;
 ; NINJA.vel_x = 0;
 ;
@@ -10431,35 +3002,41 @@ L0008:	bpl     L0007
 ;
 ; else {
 ;
-	jmp     L005E
+	jmp     L0061
 ;
 ; NINJA.vel_x -= ACCEL;
 ;
-L0007:	lda     _NINJA+4
+L0008:	lda     _NINJA+4
 	sec
 	sbc     #$1E
 	sta     _NINJA+4
-	bcs     L000A
+	bcs     L000B
 	dec     _NINJA+4+1
 ;
 ; if (NINJA.vel_x < -MAX_SPEED) NINJA.vel_x = -MAX_SPEED;
 ;
-L000A:	lda     _NINJA+4
+L000B:	lda     _NINJA+4
 	cmp     #$C0
 	lda     _NINJA+4+1
 	sbc     #$FD
-	bvc     L000C
+	bvc     L000D
 	eor     #$80
-L000C:	jpl     L0020
+L000D:	jpl     L0022
 	ldx     #$FD
 	lda     #$C0
 ;
 ; else if (pad1 & PAD_RIGHT) {
 ;
-	jmp     L005E
-L005C:	lda     _pad1
+	jmp     L0061
+L005F:	lda     _pad1
 	and     #$01
-	beq     L000E
+	beq     L000F
+;
+; if (!(pad1 & PAD_B)) {
+;
+	lda     _pad1
+	and     #$40
+	bne     L0010
 ;
 ; direction = RIGHT;
 ;
@@ -10468,13 +3045,13 @@ L005C:	lda     _pad1
 ;
 ; if (NINJA.vel_x <= DECEL) {
 ;
-	lda     _NINJA+4
+L0010:	lda     _NINJA+4
 	cmp     #$33
 	lda     _NINJA+4+1
 	sbc     #$00
-	bvc     L0010
+	bvc     L0012
 	eor     #$80
-L0010:	bpl     L000F
+L0012:	bpl     L0011
 ;
 ; NINJA.vel_x += DECEL;
 ;
@@ -10482,15 +3059,15 @@ L0010:	bpl     L000F
 	clc
 	adc     _NINJA+4
 	sta     _NINJA+4
-	jcc     L0020
+	jcc     L0022
 	inc     _NINJA+4+1
 ;
 ; else if (NINJA.vel_x < 0) {
 ;
-	jmp     L0020
-L000F:	ldx     _NINJA+4+1
+	jmp     L0022
+L0011:	ldx     _NINJA+4+1
 	cpx     #$80
-	bcc     L0013
+	bcc     L0015
 ;
 ; NINJA.vel_x = 0;
 ;
@@ -10499,78 +3076,78 @@ L000F:	ldx     _NINJA+4+1
 ;
 ; else {
 ;
-	jmp     L005E
+	jmp     L0061
 ;
 ; NINJA.vel_x += ACCEL;
 ;
-L0013:	lda     #$1E
+L0015:	lda     #$1E
 	clc
 	adc     _NINJA+4
 	sta     _NINJA+4
-	bcc     L0015
+	bcc     L0017
 	inc     _NINJA+4+1
 ;
 ; if (NINJA.vel_x >= MAX_SPEED) NINJA.vel_x = MAX_SPEED;
 ;
-L0015:	lda     _NINJA+4
+L0017:	lda     _NINJA+4
 	cmp     #$40
 	lda     _NINJA+4+1
 	sbc     #$02
-	bvs     L0017
+	bvs     L0019
 	eor     #$80
-L0017:	bpl     L0020
+L0019:	bpl     L0022
 	ldx     #$02
 	lda     #$40
 ;
 ; else { // nothing pressed
 ;
-	jmp     L005E
+	jmp     L0061
 ;
 ; if (NINJA.vel_x >= ACCEL) NINJA.vel_x -= ACCEL;
 ;
-L000E:	lda     _NINJA+4
+L000F:	lda     _NINJA+4
 	cmp     #$1E
 	lda     _NINJA+4+1
 	sbc     #$00
-	bvs     L001A
+	bvs     L001C
 	eor     #$80
-L001A:	bpl     L0019
+L001C:	bpl     L001B
 	lda     _NINJA+4
 	sec
 	sbc     #$1E
 	sta     _NINJA+4
-	bcs     L0020
+	bcs     L0022
 	dec     _NINJA+4+1
 ;
 ; else if (NINJA.vel_x < -ACCEL) NINJA.vel_x += ACCEL;
 ;
-	jmp     L0020
-L0019:	lda     _NINJA+4
+	jmp     L0022
+L001B:	lda     _NINJA+4
 	cmp     #$E2
 	lda     _NINJA+4+1
 	sbc     #$FF
-	bvc     L001E
+	bvc     L0020
 	eor     #$80
-L001E:	asl     a
+L0020:	asl     a
 	lda     #$00
 	tax
-	bcc     L005E
+	bcc     L0061
 	lda     #$1E
 	clc
 	adc     _NINJA+4
 	sta     _NINJA+4
-	bcc     L0020
+	bcc     L0022
 	inc     _NINJA+4+1
 ;
 ; else NINJA.vel_x = 0;
 ;
-	jmp     L0020
-L005E:	sta     _NINJA+4
+	jmp     L0022
+L0061:	sta     _NINJA+4
 	stx     _NINJA+4+1
 ;
 ; NINJA.x += NINJA.vel_x;
 ;
-L0020:	lda     _NINJA+4
+L0022:	lda     _NINJA+4
 	clc
 	adc     _NINJA
 	sta     _NINJA
@@ -10584,17 +3161,21 @@ L0020:	lda     _NINJA+4
 	cmp     #$01
 	lda     _NINJA+1
 	sbc     #$F0
-	bcc     L0061
+	bcc     L0064
 ;
 ; if (old_x >= 0x8000) {
 ;
-	lda     _old_x
+	ldy     #$04
+	lda     (sp),y
+	tax
+	dey
+	lda     (sp),y
 	cmp     #$00
-	lda     _old_x+1
+	txa
 	sbc     #$80
 	lda     #$00
 	tax
-	bcc     L0060
+	bcc     L0063
 ;
 ; NINJA.x = 0xf000; // max right
 ;
@@ -10602,7 +3183,7 @@ L0020:	lda     _NINJA+4
 ;
 ; NINJA.x = 0x0000; // max left
 ;
-L0060:	sta     _NINJA
+L0063:	sta     _NINJA
 	stx     _NINJA+1
 ;
 ; NINJA.vel_x = 0;
@@ -10612,7 +3193,7 @@ L0060:	sta     _NINJA
 ;
 ; ENTITY1.x = high_byte(NINJA.x); // this is much faster than passing a pointer to NINJA
 ;
-L0061:	lda     _NINJA+1
+L0064:	lda     _NINJA+1
 	sta     _ENTITY1
 ;
 ; ENTITY1.y = high_byte(NINJA.y);
@@ -10634,13 +3215,13 @@ L0061:	lda     _NINJA+1
 ;
 	ldx     _NINJA+4+1
 	cpx     #$80
-	bcc     L0024
+	bcc     L0026
 ;
 ; if (bg_coll_L() ) { // check collision left
 ;
 	jsr     _bg_coll_L
 	tax
-	beq     L002B
+	beq     L002D
 ;
 ; high_byte(NINJA.x) = high_byte(NINJA.x) - eject_L;
 ;
@@ -10661,7 +3242,7 @@ L0061:	lda     _NINJA+1
 	cmp     #$01
 	lda     _NINJA+1
 	sbc     #$F0
-	bcc     L002B
+	bcc     L002D
 ;
 ; NINJA.x = 0xf000;
 ;
@@ -10669,20 +3250,20 @@ L0061:	lda     _NINJA+1
 ;
 ; else if (NINJA.vel_x > 0) {
 ;
-	jmp     L0073
-L0024:	lda     _NINJA+4
+	jmp     L007A
+L0026:	lda     _NINJA+4
 	cmp     #$01
 	lda     _NINJA+4+1
 	sbc     #$00
-	bvs     L0029
+	bvs     L002B
 	eor     #$80
-L0029:	bpl     L002B
+L002B:	bpl     L002D
 ;
 ; if (bg_coll_R() ) { // check collision right
 ;
 	jsr     _bg_coll_R
 	tax
-	beq     L002B
+	beq     L002D
 ;
 ; high_byte(NINJA.x) = high_byte(NINJA.x) - eject_R;
 ;
@@ -10703,24 +3284,24 @@ L0029:	bpl     L002B
 	cmp     #$01
 	lda     _NINJA+1
 	sbc     #$F0
-	bcc     L002B
+	bcc     L002D
 ;
 ; NINJA.x = 0x0000;
 ;
 	ldx     #$00
-L0073:	lda     #$00
+L007A:	lda     #$00
 	sta     _NINJA
 	stx     _NINJA+1
 ;
 ; if (NINJA.vel_y < 0x300) {
 ;
-L002B:	lda     _NINJA+6
+L002D:	lda     _NINJA+6
 	cmp     #$00
 	lda     _NINJA+6+1
 	sbc     #$03
-	bvc     L002D
+	bvc     L002F
 	eor     #$80
-L002D:	bpl     L002C
+L002F:	bpl     L002E
 ;
 ; NINJA.vel_y += GRAVITY;
 ;
@@ -10728,23 +3309,23 @@ L002D:	bpl     L002C
 	clc
 	adc     _NINJA+6
 	sta     _NINJA+6
-	bcc     L002F
+	bcc     L0031
 	inc     _NINJA+6+1
 ;
 ; else {
 ;
-	jmp     L002F
+	jmp     L0031
 ;
-; NINJA.vel_y = 0x300; // consistent
+; NINJA.vel_y = 0x300; // terminal velocity
 ;
-L002C:	ldx     #$03
+L002E:	ldx     #$03
 	lda     #$00
 	sta     _NINJA+6
 	stx     _NINJA+6+1
 ;
 ; NINJA.y += NINJA.vel_y;
 ;
-L002F:	lda     _NINJA+6
+L0031:	lda     _NINJA+6
 	clc
 	adc     _NINJA+2
 	sta     _NINJA+2
@@ -10768,15 +3349,15 @@ L002F:	lda     _NINJA+6
 	cmp     #$01
 	lda     _NINJA+6+1
 	sbc     #$00
-	bvs     L0031
+	bvs     L0033
 	eor     #$80
-L0031:	bpl     L0030
+L0033:	bpl     L0032
 ;
-; if (bg_coll_D() ) { // check collision below
+; if (bg_coll_D()) { // check collision below
 ;
 	jsr     _bg_coll_D
 	tax
-	beq     L0062
+	beq     L0037
 ;
 ; high_byte(NINJA.y) = high_byte(NINJA.y) - eject_D;
 ;
@@ -10792,28 +3373,18 @@ L0031:	bpl     L0030
 	sta     _NINJA+2
 	stx     _NINJA+2+1
 ;
-; if (NINJA.vel_y > 0) {
-;
-	lda     _NINJA+6
-	cmp     #$01
-	lda     _NINJA+6+1
-	sbc     #$00
-	bvs     L0034
-	eor     #$80
-L0034:	bpl     L0062
-;
 ; else if (NINJA.vel_y < 0) {
 ;
-	jmp     L0074
-L0030:	ldx     _NINJA+6+1
+	jmp     L0078
+L0032:	ldx     _NINJA+6+1
 	cpx     #$80
-	bcc     L0062
+	bcc     L0037
 ;
-; if (bg_coll_U() ) { // check collision above
+; if (bg_coll_U()) { // check collision above
 ;
 	jsr     _bg_coll_U
 	tax
-	beq     L0062
+	beq     L0037
 ;
 ; high_byte(NINJA.y) = high_byte(NINJA.y) - eject_U;
 ;
@@ -10824,31 +3395,56 @@ L0030:	ldx     _NINJA+6+1
 ;
 ; NINJA.vel_y = 0;
 ;
-L0074:	lda     #$00
-	sta     _NINJA+6
+	lda     #$00
+L0078:	sta     _NINJA+6
 	sta     _NINJA+6+1
 ;
-; ENTITY1.y = high_byte(NINJA.y); // the rest should be the same
+; can_jump = bg_coll_D2();
 ;
-L0062:	lda     _NINJA+3
-	sta     _ENTITY1+1
+L0037:	jsr     _bg_coll_D2
+	ldy     #$05
+	sta     (sp),y
 ;
-; if (pad1_new & PAD_A) {
+; if (can_jump) {
 ;
-	lda     _pad1_new
+	lda     (sp),y
+	beq     L0038
+;
+; coyote_time = 5; // Reset coyote time when on ground
+;
+	sty     _coyote_time
+;
+; } else if (coyote_time > 0) {
+;
+	jmp     L0065
+L0038:	lda     _coyote_time
+	beq     L0065
+;
+; --coyote_time;
+;
+	dec     _coyote_time
+;
+; can_jump = 1; // Allow jumping during coyote time
+;
+	lda     #$01
+	sta     (sp),y
+;
+; if (pad1 & PAD_A) {
+;
+L0065:	lda     _pad1
 	and     #$80
-	beq     L0039
+	beq     L006A
 ;
-; if (bg_coll_D2() ) {
+; if (can_jump && !was_jumping) {
 ;
-	jsr     _bg_coll_D2
-	tax
-	beq     L0039
+	lda     (sp),y
+	beq     L0040
+	lda     _was_jumping
+	bne     L0040
 ;
-; NINJA.vel_y = JUMP_VEL; // JUMP
+; NINJA.vel_y = JUMP_VEL;
 ;
 	ldx     #$FA
-	lda     #$00
 	sta     _NINJA+6
 	stx     _NINJA+6+1
 ;
@@ -10857,64 +3453,24 @@ L0062:	lda     _NINJA+3
 	jsr     pusha
 	jsr     _sfx_play
 ;
-; short_jump_count = 1;
+; was_jumping = 1;
 ;
 	lda     #$01
-	sta     _short_jump_count
 ;
-; if (short_jump_count) {
+; was_jumping = 0;
 ;
-L0039:	lda     _short_jump_count
-	beq     L003B
-;
-; ++short_jump_count;
-;
-	inc     _short_jump_count
-;
-; if (short_jump_count > 30) short_jump_count = 0;
-;
-	lda     _short_jump_count
-	cmp     #$1F
-	bcc     L003B
-	lda     #$00
-	sta     _short_jump_count
-;
-; if ((short_jump_count) && ((pad1 & PAD_A) == 0) && (NINJA.vel_y < -0x200)) {
-;
-L003B:	lda     _short_jump_count
-	beq     L003C
-	lda     _pad1
-	and     #$80
-	bne     L003C
-	lda     _NINJA+6
-	cmp     #$00
-	lda     _NINJA+6+1
-	sbc     #$FE
-	bvc     L003F
-	eor     #$80
-L003F:	bpl     L003C
-;
-; NINJA.vel_y = -0x200;
-;
-	ldx     #$FE
-	lda     #$00
-	sta     _NINJA+6
-	stx     _NINJA+6+1
-;
-; short_jump_count = 0;
-;
-	sta     _short_jump_count
+L006A:	sta     _was_jumping
 ;
 ; if ((scroll_x & 0xff) < 4) {
 ;
-L003C:	lda     _scroll_x
+L0040:	lda     _scroll_x
 	cmp     #$04
-	bcs     L0066
+	bcs     L006B
 ;
 ; if (!map_loaded) {
 ;
 	lda     _map_loaded
-	bne     L0045
+	bne     L0044
 ;
 ; new_cmap();
 ;
@@ -10926,48 +3482,50 @@ L003C:	lda     _scroll_x
 ;
 ; else {
 ;
-	jmp     L005A
+	jmp     L005D
 ;
 ; map_loaded = 0;
 ;
-L0066:	lda     #$00
-L005A:	sta     _map_loaded
+L006B:	lda     #$00
+L005D:	sta     _map_loaded
 ;
 ; temp5 = NINJA.x;
 ;
-L0045:	lda     _NINJA+1
-	sta     _temp5+1
-	lda     _NINJA
-	sta     _temp5
+L0044:	lda     _NINJA
+	ldx     _NINJA+1
+	ldy     #$01
+	jsr     staxysp
 ;
 ; if (NINJA.x > MAX_RIGHT) {
 ;
+	lda     _NINJA
 	cmp     #$01
 	lda     _NINJA+1
 	sbc     #$90
-	bcc     L0046
+	bcc     L0045
 ;
 ; temp1 = (NINJA.x - MAX_RIGHT) >> 8;
 ;
 	lda     _NINJA+1
 	sec
 	sbc     #$90
-	sta     _temp1
+	ldy     #$00
+	sta     (sp),y
 ;
 ; if (temp1 > 3) temp1 = 3; // max scroll change
 ;
 	cmp     #$04
-	bcc     L0067
+	bcc     L006D
 	lda     #$03
-	sta     _temp1
+	sta     (sp),y
 ;
 ; scroll_x += temp1;
 ;
-L0067:	lda     _temp1
+L006D:	lda     (sp),y
 	clc
 	adc     _scroll_x
 	sta     _scroll_x
-	lda     #$00
+	tya
 	adc     _scroll_x+1
 	sta     _scroll_x+1
 ;
@@ -10975,16 +3533,16 @@ L0067:	lda     _temp1
 ;
 	lda     _NINJA+1
 	sec
-	sbc     _temp1
+	sbc     (sp),y
 	sta     _NINJA+1
 ;
 ; if (scroll_x >= MAX_SCROLL) {
 ;
-L0046:	lda     _scroll_x
+L0045:	lda     _scroll_x
 	cmp     #$FF
 	lda     _scroll_x+1
 	sbc     #$06
-	bcc     L0068
+	bcc     L006E
 ;
 ; scroll_x = MAX_SCROLL; // stop scrolling right, end of level
 ;
@@ -10995,16 +3553,18 @@ L0046:	lda     _scroll_x
 ;
 ; NINJA.x = temp5; // but allow the x position to go all the way right
 ;
-	lda     _temp5+1
+	ldy     #$02
+	lda     (sp),y
 	sta     _NINJA+1
-	lda     _temp5
+	dey
+	lda     (sp),y
 	sta     _NINJA
 ;
 ; if (high_byte(NINJA.x) >= 0xf1) {
 ;
 	lda     _NINJA+1
 	cmp     #$F1
-	bcc     L0068
+	bcc     L006E
 ;
 ; NINJA.x = 0xf100;
 ;
@@ -11015,8 +3575,8 @@ L0046:	lda     _scroll_x
 ;
 ; if (turd_cooldown > 0) {
 ;
-L0068:	lda     _turd_cooldown
-	beq     L0069
+L006E:	lda     _turd_cooldown
+	beq     L006F
 ;
 ; --turd_cooldown;
 ;
@@ -11024,9 +3584,9 @@ L0068:	lda     _turd_cooldown
 ;
 ; if (pad1_new & PAD_SELECT) {
 ;
-L0069:	lda     _pad1_new
+L006F:	lda     _pad1_new
 	and     #$20
-	beq     L004B
+	beq     L004A
 ;
 ; corn_mode = !corn_mode; // Toggle between 0 and 1
 ;
@@ -11041,22 +3601,40 @@ L0069:	lda     _pad1_new
 	lda     #$00
 	jsr     _sfx_play
 ;
-; if (has_turd_power && pad1_new & PAD_B && turd_cooldown == 0) {
+; if (corn_mode && coins == 0) {
+;
+L004A:	lda     _corn_mode
+	beq     L004B
+	lda     _coins
+	bne     L004B
+;
+; corn_mode = 0;
+;
+	sta     _corn_mode
+;
+; sfx_play(SFX_DING, 0); // Play a sound to indicate mode change
+;
+	lda     #$01
+	jsr     pusha
+	lda     #$00
+	jsr     _sfx_play
+;
+; if (has_turd_power && (pad1 & PAD_B) && turd_cooldown == 0) {
 ;
 L004B:	lda     _has_turd_power
-	beq     L0055
-	lda     _pad1_new
+	beq     L0058
+	lda     _pad1
 	and     #$40
-	beq     L0055
+	beq     L0058
 	lda     _turd_cooldown
-	bne     L0055
+	bne     L0058
 ;
 ; if (corn_mode && coins > 0) {
 ;
 	lda     _corn_mode
-	beq     L0050
+	beq     L0053
 	lda     _coins
-	beq     L0050
+	beq     L0053
 ;
 ; fire_turd();
 ;
@@ -11068,9 +3646,9 @@ L004B:	lda     _has_turd_power
 ;
 ; } else if (!corn_mode) {
 ;
-	jmp     L0072
-L0050:	lda     _corn_mode
-	bne     L0055
+	jmp     L0079
+L0053:	lda     _corn_mode
+	bne     L0058
 ;
 ; fire_turd();
 ;
@@ -11078,12 +3656,16 @@ L0050:	lda     _corn_mode
 ;
 ; turd_cooldown = TURD_COOLDOWN;
 ;
-L0072:	lda     #$0F
+L0079:	lda     #$14
 	sta     _turd_cooldown
 ;
 ; update_turds();
 ;
-L0055:	jmp     _update_turds
+L0058:	jsr     _update_turds
+;
+; } 
+;
+	jmp     incsp6
 
 .endproc
 
@@ -11529,14 +4111,13 @@ L000A:	adc     #<(_Levels_list)
 ;
 	lda     _temp_y
 	cmp     #$F0
-	ldx     #$00
-	bcc     L000A
-	txa
-	rts
+	lda     #$00
+	tax
+	bcs     L001B
 ;
 ; coordinates = (temp_x >> 4) + (temp_y & 0xf0);
 ;
-L000A:	lda     _temp_x
+	lda     _temp_x
 	lsr     a
 	lsr     a
 	lsr     a
@@ -11559,29 +4140,79 @@ L000A:	lda     _temp_x
 	lda     _map
 	bne     L0003
 ;
-; collision = c_map[coordinates];
+; temp1 = c_map[coordinates];
 ;
 	ldy     _coordinates
 	lda     _c_map,y
 ;
 ; else {
 ;
-	jmp     L0009
+	jmp     L0014
 ;
-; collision = c_map2[coordinates];
+; temp1 = c_map2[coordinates];
 ;
 L0003:	ldy     _coordinates
 	lda     _c_map2,y
-L0009:	sta     _collision
+L0014:	sta     _temp1
 ;
-; return is_solid[collision];
+; if (IS_SOLID(temp1)) {
 ;
-	ldy     _collision
-	lda     _is_solid,y
+	and     #$07
+	cmp     #$06
+	txa
+	sbc     #$00
+	bvs     L0008
+	eor     #$80
+L0008:	bpl     L0016
+;
+; return COLLISION_SOLID;  // Solid collision from all sides
+;
+	lda     #$40
+	rts
+;
+; else if (IS_PLATFORM(temp1)) {
+;
+L0016:	lda     _temp1
+	and     #$07
+	cmp     #$04
+	txa
+	sbc     #$00
+	bvs     L000B
+	eor     #$80
+L000B:	asl     a
+	txa
+	bcc     L001B
+	lda     _temp1
+	and     #$07
+	cmp     #$06
+	txa
+	sbc     #$00
+	bvc     L000D
+	eor     #$80
+L000D:	bpl     L0013
+;
+; if (NINJA.vel_y > 0) {
+;
+	lda     _NINJA+6
+	cmp     #$01
+	lda     _NINJA+6+1
+	sbc     #$00
+	bvs     L0011
+	eor     #$80
+L0011:	bpl     L0013
+;
+; return COLLISION_PLATFORM;
+;
+	lda     #$20
+	rts
+;
+; return 0;  // No collision with background tiles
+;
+L0013:	txa
 ;
 ; }
 ;
-	rts
+L001B:	rts
 
 .endproc
 
@@ -11646,7 +4277,7 @@ L0003:	lda     #$01
 ;
 	ldy     _index
 	lda     _enemy_type,y
-	cmp     #$02
+	cmp     #$10
 	jne     L0002
 ;
 ; ENTITY1.x = enemy_x[index];
@@ -12320,6 +4951,7 @@ L0044:	sta     ptr1
 	rts
 L0002:	ldy     _index
 	lda     _enemy_type,y
+	cmp     #$09
 	jne     L0046
 ;
 ; ENTITY1.x = enemy_x[index];
@@ -12525,7 +5157,7 @@ L0093:	adc     #<(_enemy_anim)
 	rts
 L0046:	ldy     _index
 	lda     _enemy_type,y
-	cmp     #$01
+	cmp     #$0A
 	beq     L00B4
 ;
 ; }
@@ -12890,6 +5522,7 @@ L0024:	lda     _index
 ;
 	ldy     _index
 	lda     _coin_type,y
+	cmp     #$02
 	bne     L0025
 ;
 ; ENTITY2.width = COIN_WIDTH;
@@ -12964,7 +5597,7 @@ L0021:	sta     _ENTITY2+3
 ;
 	ldy     _index
 	lda     _coin_type,y
-	cmp     #$01
+	cmp     #$08
 	bne     L0026
 	inc     _level_up
 ;
@@ -13023,7 +5656,7 @@ L0028:	lda     _index
 ;
 	ldy     _index
 	lda     _enemy_type,y
-	cmp     #$02
+	cmp     #$10
 	bne     L0029
 ;
 ; ENTITY1.width = 28;  // 32 pixels - 4 pixels for safety
@@ -13627,7 +6260,7 @@ L001E:	rts
 ; if (bg_collision_sub() & COL_ALL) {
 ;
 	jsr     _bg_collision_sub
-	and     #$40
+	and     #$60
 	beq     L0006
 ;
 ; ++collision_L;
@@ -13661,7 +6294,7 @@ L0006:	lda     _ENTITY1+2
 ; if (bg_collision_sub() & COL_ALL) { // find a corner in the collision map
 ;
 	jsr     _bg_collision_sub
-	and     #$40
+	and     #$60
 	beq     L0005
 ;
 ; ++collision_R;
@@ -13721,7 +6354,7 @@ L0005:	rts
 ; if (bg_collision_sub() & COL_ALL) return 1;
 ;
 	jsr     _bg_collision_sub
-	and     #$40
+	and     #$60
 	beq     L0006
 	ldx     #$00
 	lda     #$01
@@ -13744,7 +6377,7 @@ L0006:	lda     _ENTITY1+1
 ;
 	jsr     _bg_collision_sub
 	ldx     #$00
-	and     #$40
+	and     #$60
 	beq     L0008
 	lda     #$01
 	rts
@@ -13811,7 +6444,7 @@ L0006:	sta     _temp5
 ; if (bg_collision_sub() & COL_ALL) return 1;
 ;
 	jsr     _bg_collision_sub
-	and     #$40
+	and     #$60
 	beq     L0008
 	ldx     #$00
 	lda     #$01
@@ -13834,7 +6467,7 @@ L0008:	lda     _ENTITY1+1
 ;
 	jsr     _bg_collision_sub
 	ldx     #$00
-	and     #$40
+	and     #$60
 	beq     L000A
 	lda     #$01
 	rts
@@ -13898,7 +6531,7 @@ L0002:	lda     _temp5
 ; if (bg_collision_sub() & COL_ALL) return 1;
 ;
 	jsr     _bg_collision_sub
-	and     #$40
+	and     #$60
 	beq     L0007
 	ldx     #$00
 	lda     #$01
@@ -13944,7 +6577,7 @@ L0004:	lda     _temp5
 ;
 	jsr     _bg_collision_sub
 	ldx     #$00
-	and     #$40
+	and     #$60
 	beq     L0009
 	lda     #$01
 	rts
@@ -14529,9 +7162,9 @@ L0046:	inc     _index
 ;
 	lda     #$00
 	sta     _index
-L0037:	lda     _index
+L003E:	lda     _index
 	cmp     #$04
-	bcc     L0042
+	bcc     L004F
 ;
 ; }
 ;
@@ -14539,9 +7172,9 @@ L0037:	lda     _index
 ;
 ; if (turd_active[index]) {
 ;
-L0042:	ldy     _index
+L004F:	ldy     _index
 	lda     _turd_active,y
-	jeq     L0041
+	jeq     L004E
 ;
 ; turd_x[index] += turd_vel_x[index];
 ;
@@ -14562,9 +7195,9 @@ L0008:	sta     ptr2
 	ldx     #>(_turd_vel_x)
 	clc
 	adc     _index
-	bcc     L0038
+	bcc     L003F
 	inx
-L0038:	jsr     ldaidx
+L003F:	jsr     ldaidx
 	clc
 	adc     sreg
 	sta     (ptr2),y
@@ -14587,9 +7220,9 @@ L000A:	sta     ptr2
 	ldx     #>(_turd_vel_y)
 	clc
 	adc     _index
-	bcc     L0039
+	bcc     L0040
 	inx
-L0039:	jsr     ldaidx
+L0040:	jsr     ldaidx
 	clc
 	adc     sreg
 	sta     (ptr2),y
@@ -14615,9 +7248,9 @@ L000C:	sta     sreg
 	ldx     #>(_turd_vel_y)
 	clc
 	adc     _index
-	bcc     L003A
+	bcc     L0041
 	inx
-L003A:	jsr     ldaidx
+L0041:	jsr     ldaidx
 	sec
 	sbc     #$06
 	bvs     L000F
@@ -14635,15 +7268,15 @@ L000F:	bpl     L000D
 L000D:	ldy     _index
 	lda     _turd_x,y
 	cmp     #$FB
-	bcs     L003B
+	bcs     L0042
 	ldy     _index
 	lda     _turd_y,y
 	cmp     #$F1
-	bcs     L003B
+	bcs     L0042
 	ldy     _index
 	lda     _turd_x,y
 	cmp     #$05
-	bcc     L003B
+	bcc     L0042
 	ldy     _index
 	lda     _turd_y,y
 	cmp     #$05
@@ -14651,13 +7284,13 @@ L000D:	ldy     _index
 ;
 ; turd_active[index] = 0;
 ;
-L003B:	ldy     _index
+L0042:	ldy     _index
 	lda     #$00
 	sta     _turd_active,y
 ;
 ; continue;
 ;
-	jmp     L0041
+	jmp     L004E
 ;
 ; ENTITY1.x = turd_x[index];
 ;
@@ -14680,43 +7313,55 @@ L0011:	ldy     _index
 ;
 	sta     _ENTITY1+3
 ;
-; if (bg_coll_L() || bg_coll_R() || bg_coll_U() || bg_coll_D()) {
+; if (bg_coll_L() || bg_coll_R() || (turd_vel_y[index] > 0 && bg_coll_D())) {
 ;
 	jsr     _bg_coll_L
 	tax
-	bne     L001C
+	bne     L0048
 	jsr     _bg_coll_R
 	tax
-	bne     L001C
-	jsr     _bg_coll_U
-	tax
-	bne     L001C
+	bne     L0048
+	lda     #<(_turd_vel_y)
+	ldx     #>(_turd_vel_y)
+	clc
+	adc     _index
+	bcc     L001D
+	inx
+L001D:	ldy     #$00
+	jsr     ldaidx
+	sec
+	sbc     #$01
+	bvs     L001E
+	eor     #$80
+L001E:	asl     a
+	tya
+	bcc     L004A
 	jsr     _bg_coll_D
 	tax
-	beq     L003D
+	beq     L004A
 ;
 ; turd_active[index] = 0;
 ;
-L001C:	ldy     _index
+L0048:	ldy     _index
 	lda     #$00
 	sta     _turd_active,y
 ;
 ; continue;
 ;
-	jmp     L0041
+	jmp     L004E
 ;
 ; for (index2 = 0; index2 < MAX_ENEMY; ++index2) {
 ;
-L003D:	sta     _index2
-L003E:	lda     _index2
+L004A:	sta     _index2
+L004B:	lda     _index2
 	cmp     #$10
-	jcs     L0041
+	jcs     L004E
 ;
 ; if (enemy_active[index2]) {
 ;
 	ldy     _index2
 	lda     _enemy_active,y
-	jeq     L0040
+	jeq     L004D
 ;
 ; ENTITY2.x = enemy_x[index2];
 ;
@@ -14734,8 +7379,8 @@ L003E:	lda     _index2
 ;
 	ldy     _index2
 	lda     _enemy_type,y
-	cmp     #$02
-	bne     L003F
+	cmp     #$10
+	bne     L004C
 ;
 ; ENTITY2.width = 28;  // 32 pixels - 4 pixels for safety
 ;
@@ -14755,31 +7400,33 @@ L003E:	lda     _index2
 	ldx     #>(_ENTITY2)
 	jsr     _check_collision
 	tax
-	beq     L0040
+	jeq     L004D
 ;
 ; if (corn_mode) {
 ;
 	lda     _corn_mode
-	beq     L002A
+	beq     L002F
 ;
 ; boss_health -= BOSS_DAMAGE_PER_HIT * CORN_DAMAGE_MULTIPLIER;
 ;
 	lda     _boss_health
 	sec
-	sbc     #$02
-	sta     _boss_health
+	sbc     #$06
 ;
 ; } else {
 ;
-	jmp     L002B
+	jmp     L003D
 ;
 ; boss_health -= BOSS_DAMAGE_PER_HIT;
 ;
-L002A:	dec     _boss_health
+L002F:	lda     _boss_health
+	sec
+	sbc     #$02
+L003D:	sta     _boss_health
 ;
 ; turd_active[index] = 0;
 ;
-L002B:	ldy     _index
+	ldy     _index
 	lda     #$00
 	sta     _turd_active,y
 ;
@@ -14793,7 +7440,7 @@ L002B:	ldy     _index
 ; if (boss_health <= 0) {
 ;
 	lda     _boss_health
-	bne     L0041
+	bne     L004E
 ;
 ; enemy_y[index2] = TURN_OFF;
 ;
@@ -14813,11 +7460,11 @@ L002B:	ldy     _index
 ;
 ; break;
 ;
-	jmp     L0041
+	jmp     L004E
 ;
 ; ENTITY2.width = ENEMY_WIDTH;
 ;
-L003F:	lda     #$0D
+L004C:	lda     #$0D
 	sta     _ENTITY2+2
 ;
 ; ENTITY2.height = ENEMY_HEIGHT;
@@ -14833,7 +7480,7 @@ L003F:	lda     #$0D
 	ldx     #>(_ENTITY2)
 	jsr     _check_collision
 	tax
-	beq     L0040
+	beq     L004D
 ;
 ; enemy_y[index2] = TURN_OFF;
 ;
@@ -14861,17 +7508,17 @@ L003F:	lda     #$0D
 ;
 ; break;
 ;
-	jmp     L0041
+	jmp     L004E
 ;
 ; for (index2 = 0; index2 < MAX_ENEMY; ++index2) {
 ;
-L0040:	inc     _index2
-	jmp     L003E
+L004D:	inc     _index2
+	jmp     L004B
 ;
 ; for(index = 0; index < MAX_TURDS; ++index) {
 ;
-L0041:	inc     _index
-	jmp     L0037
+L004E:	inc     _index
+	jmp     L003E
 
 .endproc
 
@@ -14968,7 +7615,7 @@ L0003:	rts
 ;
 	lda     #$00
 	sta     _index
-L001B:	lda     _index
+L001D:	lda     _index
 	cmp     #$08
 	jcs     L0003
 ;
@@ -14976,7 +7623,7 @@ L001B:	lda     _index
 ;
 	ldy     _index
 	lda     _enemy_bullet_active,y
-	jne     L001C
+	jne     L001E
 ;
 ; enemy_bullet_active[index] = 1;
 ;
@@ -15027,7 +7674,7 @@ L000C:	sta     ptr1
 ;
 ; } else {
 ;
-	jmp     L001A
+	jmp     L001C
 ;
 ; enemy_bullet_x[index] = enemy_x[enemy_index] + 28;
 ;
@@ -15052,7 +7699,7 @@ L0011:	sta     ptr1
 ;
 	ldy     _index
 	lda     #$04
-L001A:	sta     _enemy_bullet_vel_x,y
+L001C:	sta     _enemy_bullet_vel_x,y
 ;
 ; enemy_bullet_y[index] = enemy_y[enemy_index] + 16; // From middle of boss
 ;
@@ -15079,9 +7726,26 @@ L0015:	sta     ptr1
 	lda     #$FA
 	sta     _enemy_bullet_vel_y,y
 ;
+; enemy_bullet_room[index] = enemy_room[enemy_index];
+;
+	lda     #<(_enemy_bullet_room)
+	ldx     #>(_enemy_bullet_room)
+	clc
+	adc     _index
+	bcc     L0019
+	inx
+L0019:	sta     ptr1
+	stx     ptr1+1
+	ldy     #$01
+	lda     (sp),y
+	tay
+	lda     _enemy_room,y
+	ldy     #$00
+	sta     (ptr1),y
+;
 ; enemy_bullet_cooldown[enemy_index] = ENEMY_BULLET_COOLDOWN;
 ;
-	ldy     #$01
+	iny
 	lda     (sp),y
 	tay
 	lda     #$5A
@@ -15100,8 +7764,8 @@ L0015:	sta     ptr1
 ;
 ; for(index = 0; index < MAX_ENEMY_BULLETS; ++index) {
 ;
-L001C:	inc     _index
-	jmp     L001B
+L001E:	inc     _index
+	jmp     L001D
 ;
 ; }
 ;
@@ -15120,145 +7784,180 @@ L0003:	jmp     incsp2
 .segment	"CODE"
 
 ;
-; for(index = 0; index < MAX_ENEMY_BULLETS; ++index) {
+; for (i = 0; i < MAX_ENEMY_BULLETS; i++) {
 ;
+	jsr     decsp2
 	lda     #$00
-	sta     _index
-L0026:	lda     _index
+	ldy     #$01
+L0025:	sta     (sp),y
 	cmp     #$08
-	bcc     L002E
+	jcs     L0003
 ;
-; }
+; if (enemy_bullet_active[i]) {
 ;
-	rts
-;
-; if (enemy_bullet_active[index]) {
-;
-L002E:	ldy     _index
+	lda     (sp),y
+	tay
 	lda     _enemy_bullet_active,y
-	jeq     L002C
+	jeq     L0004
 ;
-; enemy_bullet_x[index] += enemy_bullet_vel_x[index];
+; enemy_bullet_x[i] += enemy_bullet_vel_x[i];
 ;
 	lda     #<(_enemy_bullet_x)
 	ldx     #>(_enemy_bullet_x)
+	ldy     #$01
 	clc
-	adc     _index
+	adc     (sp),y
 	bcc     L0008
 	inx
 L0008:	sta     ptr2
 	stx     ptr2+1
 	sta     ptr1
 	stx     ptr1+1
-	ldy     #$00
+	dey
 	lda     (ptr1),y
 	sta     sreg
 	lda     #<(_enemy_bullet_vel_x)
 	ldx     #>(_enemy_bullet_vel_x)
 	clc
-	adc     _index
-	bcc     L0027
+	iny
+	adc     (sp),y
+	bcc     L0009
 	inx
-L0027:	jsr     ldaidx
+L0009:	dey
+	jsr     ldaidx
 	clc
 	adc     sreg
 	sta     (ptr2),y
 ;
-; enemy_bullet_y[index] += enemy_bullet_vel_y[index];
+; enemy_bullet_y[i] += enemy_bullet_vel_y[i];
 ;
 	lda     #<(_enemy_bullet_y)
 	ldx     #>(_enemy_bullet_y)
+	iny
 	clc
-	adc     _index
+	adc     (sp),y
 	bcc     L000A
 	inx
 L000A:	sta     ptr2
 	stx     ptr2+1
 	sta     ptr1
 	stx     ptr1+1
+	dey
 	lda     (ptr1),y
 	sta     sreg
 	lda     #<(_enemy_bullet_vel_y)
 	ldx     #>(_enemy_bullet_vel_y)
 	clc
-	adc     _index
-	bcc     L0028
+	iny
+	adc     (sp),y
+	bcc     L000B
 	inx
-L0028:	jsr     ldaidx
+L000B:	dey
+	jsr     ldaidx
 	clc
 	adc     sreg
 	sta     (ptr2),y
 ;
-; enemy_bullet_vel_y[index] += ENEMY_BULLET_GRAVITY;
+; enemy_bullet_vel_y[i] += GRAVITY;
 ;
 	lda     #<(_enemy_bullet_vel_y)
 	ldx     #>(_enemy_bullet_vel_y)
+	iny
 	clc
-	adc     _index
+	adc     (sp),y
 	bcc     L000C
 	inx
 L000C:	sta     sreg
 	stx     sreg+1
+	dey
 	jsr     ldaidx
 	clc
-	adc     #$01
+	adc     #$4C
 	sta     (sreg),y
 ;
-; if (enemy_bullet_vel_y[index] > 5) {
+; temp_x = enemy_bullet_x[i];
 ;
+	iny
+	lda     (sp),y
+	tay
+	lda     _enemy_bullet_x,y
+	sta     _temp_x
+;
+; temp_y = enemy_bullet_y[i];
+;
+	ldy     #$01
+	lda     (sp),y
+	tay
+	lda     _enemy_bullet_y,y
+	sta     _temp_y
+;
+; temp_room = enemy_bullet_room[i];
+;
+	ldy     #$01
+	lda     (sp),y
+	tay
+	lda     _enemy_bullet_room,y
+	sta     _temp_room
+;
+; collision = bg_collision_sub();
+;
+	jsr     _bg_collision_sub
+	ldy     #$00
+	sta     (sp),y
+;
+; if (collision == COLLISION_SOLID || 
+;
+	cmp     #$40
+	jeq     L001F
+;
+; (collision == COLLISION_PLATFORM && enemy_bullet_vel_y[i] > 0)) {
+;
+	lda     (sp),y
+	cmp     #$20
+	bne     L0010
 	lda     #<(_enemy_bullet_vel_y)
 	ldx     #>(_enemy_bullet_vel_y)
+	iny
 	clc
-	adc     _index
-	bcc     L0029
+	adc     (sp),y
+	bcc     L0013
 	inx
-L0029:	jsr     ldaidx
+L0013:	dey
+	jsr     ldaidx
 	sec
-	sbc     #$06
-	bvs     L000F
+	sbc     #$01
+	bvs     L0014
 	eor     #$80
-L000F:	bpl     L000D
-;
-; enemy_bullet_vel_y[index] = 5;
-;
-	ldy     _index
-	lda     #$05
-	sta     _enemy_bullet_vel_y,y
-;
-; if (enemy_bullet_x[index] > 250 || enemy_bullet_y[index] > 240 || 
-;
-L000D:	ldy     _index
-	lda     _enemy_bullet_x,y
-	cmp     #$FB
-	jcs     L0020
-	ldy     _index
-	lda     _enemy_bullet_y,y
-	cmp     #$F1
-	jcs     L0020
-;
-; enemy_bullet_x[index] < 5 || enemy_bullet_y[index] < 5) {
-;
-	ldy     _index
-	lda     _enemy_bullet_x,y
-	cmp     #$05
-	jcc     L0020
-	ldy     _index
-	lda     _enemy_bullet_y,y
-	cmp     #$05
 ;
 ; continue;
 ;
-	jcc     L0020
+L0014:	bmi     L001F
 ;
-; ENTITY1.x = enemy_bullet_x[index];
+; if (enemy_bullet_y[i] >= 0xf0) {
 ;
-	ldy     _index
+L0010:	iny
+	lda     (sp),y
+	tay
+	lda     _enemy_bullet_y,y
+	cmp     #$F0
+;
+; continue;
+;
+	bcs     L001F
+;
+; ENTITY1.x = enemy_bullet_x[i];
+;
+	ldy     #$01
+	lda     (sp),y
+	tay
 	lda     _enemy_bullet_x,y
 	sta     _ENTITY1
 ;
-; ENTITY1.y = enemy_bullet_y[index];
+; ENTITY1.y = enemy_bullet_y[i];
 ;
-	ldy     _index
+	ldy     #$01
+	lda     (sp),y
+	tay
 	lda     _enemy_bullet_y,y
 	sta     _ENTITY1+1
 ;
@@ -15271,24 +7970,6 @@ L000D:	ldy     _index
 ;
 	lda     #$0B
 	sta     _ENTITY1+3
-;
-; if (bg_coll_L() || bg_coll_R() || bg_coll_U() || bg_coll_D()) {
-;
-	jsr     _bg_coll_L
-	tax
-	bne     L0020
-	jsr     _bg_coll_R
-	tax
-	bne     L0020
-	jsr     _bg_coll_U
-	tax
-	bne     L0020
-	jsr     _bg_coll_D
-	tax
-;
-; continue;
-;
-	bne     L0020
 ;
 ; ENTITY2.x = high_byte(NINJA.x);
 ;
@@ -15319,52 +8000,48 @@ L000D:	ldy     _index
 	ldx     #>(_ENTITY2)
 	jsr     _check_collision
 	tax
-	beq     L002C
+	beq     L0004
 ;
-; if (damage_cooldown == 0) {
+; if (!NINJA.invincible) {
 ;
-	lda     _damage_cooldown
-	bne     L0020
+	lda     _NINJA+9
+	bne     L001F
 ;
-; player_health -= ENEMY_BULLET_DAMAGE;
+; NINJA.health--;
 ;
-	lda     _player_health
-	sec
-	sbc     #$02
-	sta     _player_health
+	dec     _NINJA+8
 ;
-; damage_cooldown = DAMAGE_COOLDOWN_TIME;
+; NINJA.invincible = INVINCIBLE_TIME;
 ;
 	lda     #$3C
-	sta     _damage_cooldown
+	sta     _NINJA+9
 ;
-; sfx_play(SFX_NOISE, 0);
+; sfx_play(SFX_HIT, 0);
 ;
-	lda     #$02
+	lda     #$03
 	jsr     pusha
 	lda     #$00
 	jsr     _sfx_play
 ;
-; if (player_health <= 0) {
+; enemy_bullet_active[i] = 0;
 ;
-	lda     _player_health
-	bne     L0020
-;
-; death = 1;
-;
-	lda     #$01
-	sta     _death
-;
-; enemy_bullet_active[index] = 0;
-;
-L0020:	ldy     _index
+L001F:	ldy     #$01
+	lda     (sp),y
+	tay
 	lda     #$00
 	sta     _enemy_bullet_active,y
 ;
-; for(index = 0; index < MAX_ENEMY_BULLETS; ++index) {
+; for (i = 0; i < MAX_ENEMY_BULLETS; i++) {
 ;
-L002C:	inc     _index
-	jmp     L0026
+L0004:	ldy     #$01
+	clc
+	tya
+	adc     (sp),y
+	jmp     L0025
+;
+; }
+;
+L0003:	jmp     incsp2
 
 .endproc
 
@@ -15434,15 +8111,9 @@ L0003:	rts
 ;
 	jsr     _ppu_off
 ;
-; bank_spr(CHR_BANK_1);    // Sprite pattern table
+; mmc1_init();
 ;
-	lda     #$01
-	jsr     _bank_spr
-;
-; bank_bg(CHR_BANK_0);     // Background pattern table for map tiles
-;
-	lda     #$00
-	jsr     _bank_bg
+	jsr     _mmc1_init
 ;
 ; set_vram_buffer(); // do at least once
 ;
@@ -15451,6 +8122,11 @@ L0003:	rts
 ; load_title();
 ;
 	jsr     _load_title
+;
+; bank_spr(1);
+;
+	lda     #$01
+	jsr     _bank_spr
 ;
 ; ppu_on_all(); // turn on screen
 ;
@@ -15506,9 +8182,9 @@ L0003:	rts
 ;
 	lda     #$00
 	sta     _index
-L0032:	lda     _index
+L003C:	lda     _index
 	cmp     #$04
-	bcs     L0033
+	bcs     L003D
 ;
 ; turd_active[index] = 0;
 ;
@@ -15519,7 +8195,21 @@ L0032:	lda     _index
 ; for (index = 0; index < MAX_TURDS; ++index) {
 ;
 	inc     _index
-	jmp     L0032
+	jmp     L003C
+;
+; NINJA.health = MAX_HEALTH;
+;
+L003D:	lda     #$0A
+	sta     _NINJA+8
+;
+; NINJA.invincible = 0;
+;
+	lda     #$00
+	sta     _NINJA+9
+;
+; while (game_mode == MODE_TITLE) {
+;
+	jmp     L0042
 ;
 ; ppu_wait_nmi();
 ;
@@ -15561,7 +8251,7 @@ L000A:	jsr     _ppu_wait_nmi
 ; if (pad1_new & PAD_START) {
 ;
 	and     #$10
-	beq     L0033
+	jeq     L0042
 ;
 ; pal_fade_to(4,0); // fade to black
 ;
@@ -15573,6 +8263,43 @@ L000A:	jsr     _ppu_wait_nmi
 ; ppu_off();
 ;
 	jsr     _ppu_off
+;
+; oam_clear();
+;
+	jsr     _oam_clear
+;
+; clear_vram_buffer();
+;
+	jsr     _clear_vram_buffer
+;
+; mmc1_write(MMC1_CONTROL, 0x12);  // 4KB CHR mode
+;
+	ldx     #$80
+	lda     #$00
+	jsr     pushax
+	lda     #$12
+	jsr     _mmc1_write
+;
+; mmc1_write(MMC1_CHR0, CHR_BANK_MAP);     // Pattern Table 0 (background)
+;
+	ldx     #$A0
+	lda     #$00
+	jsr     pushax
+	lda     #$02
+	jsr     _mmc1_write
+;
+; mmc1_write(MMC1_CHR1, CHR_BANK_SPRITES); // Pattern Table 1 (sprites)
+;
+	ldx     #$C0
+	lda     #$00
+	jsr     pushax
+	lda     #$03
+	jsr     _mmc1_write
+;
+; bank_spr(1);
+;
+	lda     #$01
+	jsr     _bank_spr
 ;
 ; load_room();
 ;
@@ -15609,27 +8336,78 @@ L000A:	jsr     _ppu_wait_nmi
 ;
 	jsr     _set_scroll_x
 ;
-; ppu_on_all();  
+; check_spr_objects();
+;
+	jsr     _check_spr_objects
+;
+; draw_sprites();
+;
+	jsr     _draw_sprites
+;
+; pal_bright(0);
+;
+	lda     #$00
+	jsr     _pal_bright
+;
+; ppu_on_all();
 ;
 	jsr     _ppu_on_all
 ;
-; pal_bright(4); // back to normal brightness 
+; if (level == 0) {
 ;
-	lda     #$04
+	lda     _level
+	bne     L0041
+;
+; for (temp1 = 0; temp1 < 8; ++temp1) {
+;
+	sta     _temp1
+L003E:	lda     _temp1
+	cmp     #$08
+	bcs     L003F
+;
+; ppu_wait_nmi();
+;
+	jsr     _ppu_wait_nmi
+;
+; for (temp1 = 0; temp1 < 8; ++temp1) {
+;
+	inc     _temp1
+	jmp     L003E
+;
+; for (bright = 0; bright < 5; ++bright) {
+;
+L003F:	lda     #$00
+	sta     _bright
+L0040:	lda     _bright
+	cmp     #$05
+	bcs     L0042
+;
+; pal_bright(bright);
+;
+	jsr     _pal_bright
+;
+; for (bright = 0; bright < 5; ++bright) {
+;
+	inc     _bright
+	jmp     L0040
+;
+; pal_bright(4);
+;
+L0041:	lda     #$04
 	jsr     _pal_bright
 ;
 ; while (game_mode == MODE_TITLE) {
 ;
-L0033:	lda     _game_mode
-	beq     L000A
+L0042:	lda     _game_mode
+	jeq     L000A
 ;
 ; while (game_mode == MODE_GAME) {
 ;
-	jmp     L0034
+	jmp     L0043
 ;
 ; ppu_wait_nmi();
 ;
-L000F:	jsr     _ppu_wait_nmi
+L0019:	jsr     _ppu_wait_nmi
 ;
 ; set_music_speed(8);
 ;
@@ -15688,7 +8466,7 @@ L000F:	jsr     _ppu_wait_nmi
 ;
 	lda     _pad1_new
 	and     #$10
-	beq     L0012
+	beq     L001C
 ;
 ; game_mode = MODE_PAUSE;
 ;
@@ -15711,12 +8489,12 @@ L000F:	jsr     _ppu_wait_nmi
 ;
 ; break; // out of the game loop
 ;
-	jmp     L0036
+	jmp     L0045
 ;
 ; if (level_up) {
 ;
-L0012:	lda     _level_up
-	beq     L0013
+L001C:	lda     _level_up
+	beq     L001D
 ;
 ; game_mode = MODE_SWITCH;
 ;
@@ -15744,9 +8522,9 @@ L0012:	lda     _level_up
 ;
 ; else if (death) {
 ;
-	jmp     L0034
-L0013:	lda     _death
-	beq     L0034
+	jmp     L0043
+L001D:	lda     _death
+	beq     L0043
 ;
 ; death = 0;
 ;
@@ -15808,17 +8586,17 @@ L0013:	lda     _death
 ;
 ; while (game_mode == MODE_GAME) {
 ;
-L0034:	lda     _game_mode
+L0043:	lda     _game_mode
 	cmp     #$01
-	jeq     L000F
+	jeq     L0019
 ;
 ; while (game_mode == MODE_SWITCH) { 
 ;
-	jmp     L0036
+	jmp     L0045
 ;
 ; ppu_wait_nmi();
 ;
-L0016:	jsr     _ppu_wait_nmi
+L0020:	jsr     _ppu_wait_nmi
 ;
 ; ++bright_count;
 ;
@@ -15828,7 +8606,7 @@ L0016:	jsr     _ppu_wait_nmi
 ;
 	lda     _bright_count
 	cmp     #$10
-	bcc     L001A
+	bcc     L0024
 ;
 ; bright_count = 0;
 ;
@@ -15843,12 +8621,12 @@ L0016:	jsr     _ppu_wait_nmi
 ;
 	lda     _bright
 	cmp     #$FF
-	beq     L001A
+	beq     L0024
 	jsr     _pal_bright
 ;
 ; set_scroll_x(scroll_x);
 ;
-L001A:	lda     _scroll_x
+L0024:	lda     _scroll_x
 	ldx     _scroll_x+1
 	jsr     _set_scroll_x
 ;
@@ -15856,7 +8634,7 @@ L001A:	lda     _scroll_x
 ;
 	lda     _bright
 	cmp     #$FF
-	bne     L0036
+	bne     L0045
 ;
 ; ppu_off();
 ;
@@ -15881,7 +8659,7 @@ L001A:	lda     _scroll_x
 ;
 	lda     _level
 	cmp     #$03
-	bcs     L0035
+	bcs     L0044
 ;
 ; load_room();
 ;
@@ -15894,11 +8672,11 @@ L001A:	lda     _scroll_x
 ;
 ; else { // set end of game. Did we win?
 ;
-	jmp     L003D
+	jmp     L004C
 ;
 ; game_mode = MODE_END;
 ;
-L0035:	lda     #$04
+L0044:	lda     #$04
 	sta     _game_mode
 ;
 ; vram_adr(NAMETABLE_A);
@@ -15916,7 +8694,7 @@ L0035:	lda     #$04
 ;
 ; ppu_on_all();
 ;
-L003D:	jsr     _ppu_on_all
+L004C:	jsr     _ppu_on_all
 ;
 ; pal_bright(4); // back to normal brighness
 ;
@@ -15925,17 +8703,17 @@ L003D:	jsr     _ppu_on_all
 ;
 ; while (game_mode == MODE_SWITCH) { 
 ;
-L0036:	lda     _game_mode
+L0045:	lda     _game_mode
 	cmp     #$03
-	beq     L0016
+	beq     L0020
 ;
 ; while (game_mode == MODE_PAUSE) {
 ;
-	jmp     L0037
+	jmp     L0046
 ;
 ; ppu_wait_nmi();
 ;
-L001E:	jsr     _ppu_wait_nmi
+L0028:	jsr     _ppu_wait_nmi
 ;
 ; pad1 = pad_poll(0); // read the first controller
 ;
@@ -15957,7 +8735,7 @@ L001E:	jsr     _ppu_wait_nmi
 ;
 	lda     _pad1_new
 	and     #$10
-	beq     L0037
+	beq     L0046
 ;
 ; game_mode = MODE_GAME;
 ;
@@ -15980,21 +8758,50 @@ L001E:	jsr     _ppu_wait_nmi
 ;
 ; while (game_mode == MODE_PAUSE) {
 ;
-L0037:	lda     _game_mode
+L0046:	lda     _game_mode
 	cmp     #$02
-	beq     L001E
+	beq     L0028
 ;
 ; while (game_mode == MODE_END) {
 ;
-	jmp     L0038
+	jmp     L0047
 ;
 ; ppu_wait_nmi();
 ;
-L0022:	jsr     _ppu_wait_nmi
+L002C:	jsr     _ppu_wait_nmi
 ;
 ; oam_clear();
 ;
 	jsr     _oam_clear
+;
+; mmc1_write(MMC1_CONTROL, 0x12);  // 4KB CHR mode
+;
+	ldx     #$80
+	lda     #$00
+	jsr     pushax
+	lda     #$12
+	jsr     _mmc1_write
+;
+; mmc1_write(MMC1_CHR0, CHR_BANK_FONT);   // Font tiles
+;
+	ldx     #$A0
+	lda     #$00
+	jsr     pushax
+	jsr     _mmc1_write
+;
+; mmc1_write(MMC1_CHR1, CHR_BANK_TITLE);  // Title graphics
+;
+	ldx     #$C0
+	lda     #$00
+	jsr     pushax
+	lda     #$01
+	jsr     _mmc1_write
+;
+; pal_bg(palette_title);
+;
+	lda     #<(_palette_title)
+	ldx     #>(_palette_title)
+	jsr     _pal_bg
 ;
 ; multi_vram_buffer_horz(END_TEXT, sizeof(END_TEXT), NTADR_A(6,13));
 ;
@@ -16097,21 +8904,56 @@ L0022:	jsr     _ppu_wait_nmi
 ;
 ; while (game_mode == MODE_END) {
 ;
-L0038:	lda     _game_mode
+L0047:	lda     _game_mode
 	cmp     #$04
-	jeq     L0022
+	jeq     L002C
 ;
 ; while (game_mode == MODE_GAME_OVER) { // you died, death
 ;
-	jmp     L0039
+	jmp     L0048
 ;
 ; ppu_wait_nmi();
 ;
-L0027:	jsr     _ppu_wait_nmi
+L0031:	jsr     _ppu_wait_nmi
 ;
 ; oam_clear();
 ;
 	jsr     _oam_clear
+;
+; mmc1_write(MMC1_CONTROL, 0x12);  // 4KB CHR mode
+;
+	ldx     #$80
+	lda     #$00
+	jsr     pushax
+	lda     #$12
+	jsr     _mmc1_write
+;
+; mmc1_write(MMC1_CHR0, CHR_BANK_FONT);   // Font tiles
+;
+	ldx     #$A0
+	lda     #$00
+	jsr     pushax
+	jsr     _mmc1_write
+;
+; mmc1_write(MMC1_CHR1, CHR_BANK_TITLE);  // Title graphics
+;
+	ldx     #$C0
+	lda     #$00
+	jsr     pushax
+	lda     #$01
+	jsr     _mmc1_write
+;
+; pal_bg(palette_title);
+;
+	lda     #<(_palette_title)
+	ldx     #>(_palette_title)
+	jsr     _pal_bg
+;
+; vram_adr(NTADR_A(12,14));
+;
+	ldx     #$21
+	lda     #$CC
+	jsr     _vram_adr
 ;
 ; multi_vram_buffer_horz(DEAD_TEXT, sizeof(DEAD_TEXT), NTADR_A(12,14));
 ;
@@ -16146,17 +8988,17 @@ L0027:	jsr     _ppu_wait_nmi
 ;
 ; while (game_mode == MODE_GAME_OVER) { // you died, death
 ;
-L0039:	lda     _game_mode
+L0048:	lda     _game_mode
 	cmp     #$05
-	beq     L0027
+	beq     L0031
 ;
 ; while (game_mode == MODE_RESET) {
 ;
-	jmp     L003B
+	jmp     L004A
 ;
 ; delay(240); // 4 seconds
 ;
-L003A:	lda     #$F0
+L0049:	lda     #$F0
 	jsr     _delay
 ;
 ; delay(60); // 1 second
@@ -16166,7 +9008,7 @@ L003A:	lda     #$F0
 ;
 ; ppu_wait_nmi();
 ;
-L002D:	jsr     _ppu_wait_nmi
+L0037:	jsr     _ppu_wait_nmi
 ;
 ; pad1 = pad_poll(0); // read the first controller
 ;
@@ -16183,7 +9025,7 @@ L002D:	jsr     _ppu_wait_nmi
 ; if (pad1_new & PAD_START) {
 ;
 	and     #$10
-	beq     L002D
+	beq     L0037
 ;
 ; ppu_off();
 ;
@@ -16216,13 +9058,13 @@ L002D:	jsr     _ppu_wait_nmi
 ;
 ; while (game_mode == MODE_RESET) {
 ;
-L003B:	lda     _game_mode
+L004A:	lda     _game_mode
 	cmp     #$06
-	beq     L003A
+	beq     L0049
 ;
 ; while (1) {
 ;
-	jmp     L0033
+	jmp     L0042
 
 .endproc
 

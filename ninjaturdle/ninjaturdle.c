@@ -16,19 +16,22 @@ unsigned char bounce[] = {
     0, 0, 0, 1, 2, 2, 2, 1
 };
 	
+unsigned char boss_health;
+unsigned char coyote_time;  // Frames of coyote time remaining
+unsigned char was_jumping;  // Whether we were jumping last frame
 	
 void main(void) {
-	
 	ppu_off(); // screen off
 	
-	// use the second set of tiles for sprites
-	// both bg and sprites are set to 0 by default
-	bank_spr(CHR_BANK_1);    // Sprite pattern table
-	bank_bg(CHR_BANK_0);     // Background pattern table for map tiles
+	// Initialize MMC1
+	mmc1_init();
 	
 	set_vram_buffer(); // do at least once
 	
 	load_title();
+	
+	// Set sprite pattern table to 1
+	bank_spr(1);
 	
 	ppu_on_all(); // turn on screen
 	
@@ -50,6 +53,10 @@ void main(void) {
 		turd_active[index] = 0;
 	}
 	
+	// Initialize player health and invincibility
+	NINJA.health = MAX_HEALTH;
+	NINJA.invincible = 0;
+	
 	while (1) {
 		while (game_mode == MODE_TITLE) {
 			ppu_wait_nmi();
@@ -64,6 +71,19 @@ void main(void) {
 			if (pad1_new & PAD_START) {
 				pal_fade_to(4,0); // fade to black
 				ppu_off();
+				
+				// Clear all sprite and VRAM data
+				oam_clear();
+				clear_vram_buffer();
+				
+				// Set up MMC1 banks first
+				mmc1_write(MMC1_CONTROL, 0x12);  // 4KB CHR mode
+				mmc1_write(MMC1_CHR0, CHR_BANK_MAP);     // Pattern Table 0 (background)
+				mmc1_write(MMC1_CHR1, CHR_BANK_SPRITES); // Pattern Table 1 (sprites)
+				
+				// Ensure sprite pattern table is set
+				bank_spr(1);
+				
 				load_room();
 				game_mode = MODE_GAME;
 				pal_bg(palette_bg);
@@ -71,8 +91,37 @@ void main(void) {
 				music_play(song);
 				scroll_x = 0;
 				set_scroll_x(scroll_x);
-				ppu_on_all();		
-				pal_bright(4); // back to normal brightness	
+				
+				// Do one full update cycle while PPU is off
+				check_spr_objects();
+				draw_sprites();
+				
+				// Wait even longer before enabling PPU
+				// for (temp1 = 0; temp1 < 8; ++temp1) {
+				// 	ppu_wait_nmi();
+				// }
+				
+				// Start with black screen
+				pal_bright(0);
+				ppu_on_all();
+				
+				// Only for initial level 1 load
+				if (level == 0) {
+					// Longer wait after PPU on
+					for (temp1 = 0; temp1 < 8; ++temp1) {
+						ppu_wait_nmi();
+					}
+					
+					// Slower fade in
+					for (bright = 0; bright < 5; ++bright) {
+						// for (temp1 = 0; temp1 < 12; ++temp1) {
+						// 	ppu_wait_nmi();
+						// }
+						pal_bright(bright);
+					}
+				} else {
+					pal_bright(4);
+				}
 			}
 		}
 		
@@ -191,6 +240,14 @@ void main(void) {
 			ppu_wait_nmi();
 			oam_clear();
 			
+			// Switch to CHR bank 0 for fonts/text and set up proper palette
+			mmc1_write(MMC1_CONTROL, 0x12);  // 4KB CHR mode
+			mmc1_write(MMC1_CHR0, CHR_BANK_FONT);   // Font tiles
+			mmc1_write(MMC1_CHR1, CHR_BANK_TITLE);  // Title graphics
+			
+			// Set up palette for text
+			pal_bg(palette_title);
+			
 			multi_vram_buffer_horz(END_TEXT, sizeof(END_TEXT), NTADR_A(6,13));
 			multi_vram_buffer_horz(END_TEXT2, sizeof(END_TEXT2), NTADR_A(8,15));
 			multi_vram_buffer_horz(END_TEXT3, sizeof(END_TEXT3), NTADR_A(11,17));
@@ -209,6 +266,16 @@ void main(void) {
 			ppu_wait_nmi();
 			oam_clear();
 			
+			// Switch to CHR bank 0 for fonts/text and set up proper palette
+			mmc1_write(MMC1_CONTROL, 0x12);  // 4KB CHR mode
+			mmc1_write(MMC1_CHR0, CHR_BANK_FONT);   // Font tiles
+			mmc1_write(MMC1_CHR1, CHR_BANK_TITLE);  // Title graphics
+			
+			// Set up palette for text
+			pal_bg(palette_title);
+			
+			// Ensure correct VRAM addressing
+			vram_adr(NTADR_A(12,14));
 			multi_vram_buffer_horz(DEAD_TEXT, sizeof(DEAD_TEXT), NTADR_A(12,14));
 			
 			set_scroll_x(0);
@@ -244,8 +311,10 @@ void main(void) {
 }
 
 void load_title(void) {
-	// Switch to the font/title bank
-	bank_bg(CHR_BANK_0);
+	// Make sure MMC1 is in 4KB mode and set banks for title screen
+	mmc1_write(MMC1_CONTROL, 0x12);  // 4KB CHR mode
+	mmc1_write(MMC1_CHR0, CHR_BANK_FONT);   // Font tiles
+	mmc1_write(MMC1_CHR1, CHR_BANK_TITLE);  // Title graphics
 	
 	pal_bg(palette_title);
 	pal_spr(palette_sp);
@@ -257,8 +326,13 @@ void load_title(void) {
 void load_room(void) {
 	clear_vram_buffer();
 	
-	// Switch to the map tiles bank
-	bank_bg(CHR_BANK_0);
+	// Set MMC1 banks for gameplay - different banks for BG and sprites
+	mmc1_write(MMC1_CONTROL, 0x12);  // 4KB CHR mode
+	mmc1_write(MMC1_CHR0, CHR_BANK_MAP);     // Pattern Table 0 (background) uses map tiles
+	mmc1_write(MMC1_CHR1, CHR_BANK_SPRITES); // Pattern Table 1 (sprites) uses sprite tiles
+	
+	// Ensure sprite pattern table is set to 1
+	bank_spr(1);
 	
 	offset = Level_offsets[level];
 	
@@ -283,7 +357,8 @@ void load_room(void) {
 	for(y=0; ;y+=0x20) { 
 		x = 0;
 		address = get_ppu_addr(1, x, y);
-		index = (y & 0xf0);
+		// index = (y & 0xf0);
+		index = (y & 0xf0) + (x >> 4);
 		buffer_4_mt(address, index); // ppu_address, index to the data
 		flush_vram_update2();
 		if (y == 0xe0) break;
@@ -309,6 +384,8 @@ void load_room(void) {
 	
 	// Reset boss health when starting a new level
 	boss_health = BOSS_MAX_HEALTH;
+	coyote_time = 0;
+	was_jumping = 0;
 }
 
 
@@ -405,11 +482,20 @@ void draw_sprites(void) {
 
 	
 void movement(void) {
+    // Declare all variables at the top
+    char can_jump;
+    unsigned int old_x;
+    unsigned int temp5;
+    unsigned char temp1;
+    
     // handle x
-	old_x = NINJA.x;
-	
-	if (pad1 & PAD_LEFT) {
-		direction = LEFT;
+    old_x = NINJA.x;
+    
+    if (pad1 & PAD_LEFT) {
+		// Only change direction if not shooting (B button not held)
+		if (!(pad1 & PAD_B)) {
+			direction = LEFT;
+		}
 		
         if (NINJA.vel_x >= DECEL) {
             NINJA.vel_x -= DECEL;
@@ -423,8 +509,10 @@ void movement(void) {
 		}
 	}
 	else if (pad1 & PAD_RIGHT) {
-		
-		direction = RIGHT;
+		// Only change direction if not shooting (B button not held)
+		if (!(pad1 & PAD_B)) {
+			direction = RIGHT;
+		}
 
 		if (NINJA.vel_x <= DECEL) {
             NINJA.vel_x += DECEL;
@@ -485,61 +573,59 @@ void movement(void) {
     // skip collision if vel = 0
 
 	
-	// handle y
-
-	// gravity
-
-	// NINJA.vel_y is signed
-	if (NINJA.vel_y < 0x300) {
-		NINJA.vel_y += GRAVITY;
-	}
-	else {
-		NINJA.vel_y = 0x300; // consistent
-	}
-	NINJA.y += NINJA.vel_y;
-	
-	ENTITY1.x = high_byte(NINJA.x);
-	ENTITY1.y = high_byte(NINJA.y);
-	
+	// handle y (gravity and jumping)
+    if (NINJA.vel_y < 0x300) {
+        NINJA.vel_y += GRAVITY;
+    }
+    else {
+        NINJA.vel_y = 0x300; // terminal velocity
+    }
+    
+    // Update y position
+    NINJA.y += NINJA.vel_y;
+    
+    // Update collision box position
+    ENTITY1.x = high_byte(NINJA.x);
+    ENTITY1.y = high_byte(NINJA.y);
+    
+    // Check for collisions
     if (NINJA.vel_y > 0) {
-        if (bg_coll_D() ) { // check collision below
+        if (bg_coll_D()) { // check collision below
             high_byte(NINJA.y) = high_byte(NINJA.y) - eject_D;
             NINJA.y &= 0xff00;
-            if (NINJA.vel_y > 0) {
-                NINJA.vel_y = 0;
-            }
+            NINJA.vel_y = 0;
         }
     }
     else if (NINJA.vel_y < 0) {
-        if (bg_coll_U() ) { // check collision above
+        if (bg_coll_U()) { // check collision above
             high_byte(NINJA.y) = high_byte(NINJA.y) - eject_U;
             NINJA.vel_y = 0;
         }
     }
     
-	// check collision down a little lower than hero
-	ENTITY1.y = high_byte(NINJA.y); // the rest should be the same
-	
-	if (pad1_new & PAD_A) {
-        if (bg_coll_D2() ) {
-			NINJA.vel_y = JUMP_VEL; // JUMP
-			sfx_play(SFX_JUMP, 0);
-			short_jump_count = 1;
-		}
-		
-	}
-	
-	// allow shorter jumps
-	if (short_jump_count) {
-		++short_jump_count;
-		if (short_jump_count > 30) short_jump_count = 0;
-	}
-	if ((short_jump_count) && ((pad1 & PAD_A) == 0) && (NINJA.vel_y < -0x200)) {
-		NINJA.vel_y = -0x200;
-		short_jump_count = 0;
-	}
-	
-	// do we need to load a new collision map? (scrolled into a new room)
+    // Check if we can jump (on ground)
+    can_jump = bg_coll_D2();
+    
+    // Add coyote time - allow jumping for a few frames after leaving the ground
+    if (can_jump) {
+        coyote_time = 5; // Reset coyote time when on ground
+    } else if (coyote_time > 0) {
+        --coyote_time;
+        can_jump = 1; // Allow jumping during coyote time
+    }
+    
+    // Handle jumping - use pad1 instead of pad1_new for more responsiveness
+    if (pad1 & PAD_A) {
+        if (can_jump && !was_jumping) {
+            NINJA.vel_y = JUMP_VEL;
+            sfx_play(SFX_JUMP, 0);
+            was_jumping = 1;
+        }
+    } else {
+        was_jumping = 0;
+    }
+    
+    // do we need to load a new collision map? (scrolled into a new room)
 	if ((scroll_x & 0xff) < 4) {
 		if (!map_loaded) {
 			new_cmap();
@@ -579,7 +665,14 @@ void movement(void) {
 		sfx_play(SFX_DING, 0); // Play a sound to indicate mode change
 	}
 	
-	if (has_turd_power && pad1_new & PAD_B && turd_cooldown == 0) {
+	// Automatically switch back to turd mode if corn count is 0
+	if (corn_mode && coins == 0) {
+		corn_mode = 0;
+		sfx_play(SFX_DING, 0); // Play a sound to indicate mode change
+	}
+	
+	// Continuous turd firing when B is held down
+	if (has_turd_power && (pad1 & PAD_B) && turd_cooldown == 0) {
 		// Check if we have enough corn in corn mode
 		if (corn_mode && coins > 0) {
 			fire_turd();
@@ -956,18 +1049,30 @@ char bg_coll_D2(void) {
 char bg_collision_sub(void) {
     if (temp_y >= 0xf0) return 0;
     
-	coordinates = (temp_x >> 4) + (temp_y & 0xf0);
+    coordinates = (temp_x >> 4) + (temp_y & 0xf0);
     // we just need 4 bits each from x and y
-	
-	map = temp_room&1; // high byte
-	if (!map) {
-		collision = c_map[coordinates];
-	}
-	else {
-		collision = c_map2[coordinates];
-	}
-	
-    return is_solid[collision];
+    
+    map = temp_room&1; // high byte
+    if (!map) {
+        temp1 = c_map[coordinates];
+    }
+    else {
+        temp1 = c_map2[coordinates];
+    }
+    
+    // Check collision type based on column position
+    if (IS_SOLID(temp1)) {
+        return COLLISION_SOLID;  // Solid collision from all sides
+    }
+    else if (IS_PLATFORM(temp1)) {
+        // Only return platform collision if approaching from above
+        if (NINJA.vel_y > 0) {
+            return COLLISION_PLATFORM;
+        }
+        return 0;  // Pass through from below
+    }
+    
+    return 0;  // No collision with background tiles
 }
 
 
@@ -1306,7 +1411,9 @@ void update_turds(void) {
             ENTITY1.width = TURD_WIDTH;
             ENTITY1.height = TURD_HEIGHT;
             
-            if (bg_coll_L() || bg_coll_R() || bg_coll_U() || bg_coll_D()) {
+            // Only check horizontal collisions and ground collisions
+            // Allow passing through platforms from below
+            if (bg_coll_L() || bg_coll_R() || (turd_vel_y[index] > 0 && bg_coll_D())) {
                 turd_active[index] = 0;
                 continue;
             }
@@ -1325,7 +1432,7 @@ void update_turds(void) {
                         if (check_collision(&ENTITY1, &ENTITY2)) {
                             // Hit boss
                             if (corn_mode) {
-                                // Double damage in corn mode
+                                // Increased damage in corn mode
                                 boss_health -= BOSS_DAMAGE_PER_HIT * CORN_DAMAGE_MULTIPLIER;
                             } else {
                                 boss_health -= BOSS_DAMAGE_PER_HIT;
@@ -1400,6 +1507,9 @@ void fire_enemy_bullet(unsigned char enemy_index, unsigned char bullet_type) {
             // Always throw with an upward arc like ninja's turds
             enemy_bullet_vel_y[index] = ENEMY_BULLET_JUMP;
             
+            // Set the room for the bullet
+            enemy_bullet_room[index] = enemy_room[enemy_index];
+            
             // Set cooldown for this enemy
             enemy_bullet_cooldown[enemy_index] = ENEMY_BULLET_COOLDOWN;
             
@@ -1412,55 +1522,56 @@ void fire_enemy_bullet(unsigned char enemy_index, unsigned char bullet_type) {
 
 // Function to update enemy bullets
 void update_enemy_bullets(void) {
-    for(index = 0; index < MAX_ENEMY_BULLETS; ++index) {
-        if (enemy_bullet_active[index]) {
-            // Move bullet
-            enemy_bullet_x[index] += enemy_bullet_vel_x[index];
-            enemy_bullet_y[index] += enemy_bullet_vel_y[index];
+    char i;
+    char collision;
+    
+    for (i = 0; i < MAX_ENEMY_BULLETS; i++) {
+        if (enemy_bullet_active[i]) {
+            // Update position
+            enemy_bullet_x[i] += enemy_bullet_vel_x[i];
+            enemy_bullet_y[i] += enemy_bullet_vel_y[i];
             
-            // Apply gravity to all bullets
-            enemy_bullet_vel_y[index] += ENEMY_BULLET_GRAVITY;
+            // Apply gravity
+            enemy_bullet_vel_y[i] += GRAVITY;
             
-            // Cap falling speed
-            if (enemy_bullet_vel_y[index] > 5) {
-                enemy_bullet_vel_y[index] = 5;
-            }
+            // Check for collisions
+            temp_x = enemy_bullet_x[i];
+            temp_y = enemy_bullet_y[i];
+            temp_room = enemy_bullet_room[i];
             
-            // Check if bullet is off screen
-            if (enemy_bullet_x[index] > 250 || enemy_bullet_y[index] > 240 || 
-                enemy_bullet_x[index] < 5 || enemy_bullet_y[index] < 5) {
-                enemy_bullet_active[index] = 0;
+            collision = bg_collision_sub();
+            
+            // Handle collisions - deactivate on solid collision or platform from above
+            if (collision == COLLISION_SOLID || 
+                (collision == COLLISION_PLATFORM && enemy_bullet_vel_y[i] > 0)) {
+                enemy_bullet_active[i] = 0;
                 continue;
             }
             
-            // Check collision with background
-            ENTITY1.x = enemy_bullet_x[index];
-            ENTITY1.y = enemy_bullet_y[index];
-            ENTITY1.width = ENEMY_BULLET_WIDTH;
-            ENTITY1.height = ENEMY_BULLET_HEIGHT;
-            
-            if (bg_coll_L() || bg_coll_R() || bg_coll_U() || bg_coll_D()) {
-                enemy_bullet_active[index] = 0;
+            // Check if bullet is off screen
+            if (enemy_bullet_y[i] >= 0xf0) {
+                enemy_bullet_active[i] = 0;
                 continue;
             }
             
             // Check collision with player
+            ENTITY1.x = enemy_bullet_x[i];
+            ENTITY1.y = enemy_bullet_y[i];
+            ENTITY1.width = ENEMY_BULLET_WIDTH;
+            ENTITY1.height = ENEMY_BULLET_HEIGHT;
+            
             ENTITY2.x = high_byte(NINJA.x);
             ENTITY2.y = high_byte(NINJA.y);
             ENTITY2.width = HERO_WIDTH;
             ENTITY2.height = HERO_HEIGHT;
             
             if (check_collision(&ENTITY1, &ENTITY2)) {
-                if (damage_cooldown == 0) {
-                    player_health -= ENEMY_BULLET_DAMAGE;
-                    damage_cooldown = DAMAGE_COOLDOWN_TIME;
-                    sfx_play(SFX_NOISE, 0);
-                    
-                    if (player_health <= 0) {
-                        death = 1;
-                    }
+                if (!NINJA.invincible) {
+                    NINJA.health--;
+                    NINJA.invincible = INVINCIBLE_TIME;
+                    sfx_play(SFX_HIT, 0);
                 }
-                enemy_bullet_active[index] = 0;
+                enemy_bullet_active[i] = 0;
             }
         }
     }

@@ -254,6 +254,7 @@ detectNTSC:
 
 	.include "LIB/neslib.s"
 	.include "LIB/nesdoug.s"
+	.include "LIB/kenes.s"
 	.include "MUSIC/famitone2.s"
 	
 	
@@ -286,3 +287,4 @@ sounds_data:
 .segment "CHARS"
 
 	.incbin "ninjaturdle.chr"
+	.incbin "ninjaturdle2.chr"

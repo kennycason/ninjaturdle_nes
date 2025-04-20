@@ -4,73 +4,85 @@ This directory contains the background and level data for Ninja Turdle, along wi
 
 ## Overview
 
-The game uses a tile-based approach for level design. Levels are first created in the Tiled map editor (`.tmx` files), then exported to CSV format (`.csv` files), and finally converted to C code (`.c` files) for inclusion in the game.
+The game uses a tile-based approach for level design. Levels are created in the Tiled map editor (`.tmx` files) and then directly converted to C code (`.c` files) for inclusion in the game.
 
-There are two types of level data:
-1. Background tiles (regular `.c` and `.csv` files)
-2. Special objects/sprites (files with `_SP` suffix)
+Each level consists of two layers:
+1. Main layer - Background and collision tiles
+2. Object layer - Special objects and sprites
+
+## Level Design Structure
+
+- Main layer tiles are organized by columns:
+  - Columns 0-3: Background tiles (no collision)
+  - Columns 4-5: Platform tiles (can pass through from below)
+  - Columns 6-7: Solid tiles (collision from all sides)
 
 ## Workflow
 
-The workflow for creating and processing level data is as follows:
+The workflow for creating and processing level data is simple:
 
-1. Design levels in Tiled map editor, saving as `.tmx` files
-2. Export level data from Tiled to `.csv` format
-3. Convert `.csv` files to C code using the Python conversion scripts:
-   - `CSV2C_BIG.py` for background tiles
-   - `CSV2C_SP.py` for special objects/sprites
+1. Design levels in Tiled map editor:
+   - Save as `.tmx` files with naming format `w{world}l{level}.tmx` (e.g., `w1l1.tmx`)
+   - Use the correct firstgid values in tilesets
+   - Ensure the level width is a multiple of 16 (for room divisions)
+
+2. Convert TMX directly to C code using the Python script:
+   ```bash
+   python3 convert_tmx.py <world> <level>
+   ```
+   Example:
+   ```bash
+   python3 convert_tmx.py 1 1  # Converts w1l1.tmx
+   ```
 
 ## File Types
 
 ### TMX Files
-- `Level1.tmx`, `Level2.tmx`, `Level3.tmx`
+- `w{world}l{level}.tmx` (e.g., `w1l1.tmx`)
 - These are Tiled Map Editor files containing the complete level designs
-- They define the layout of tiles and objects in each level
+- They define both the main layer (tiles) and object layer (sprites)
 
-### CSV Files
-- `Level1.csv`, `Level2.csv`, `Level3.csv` - Background tile data
-- `Level1_SP.csv`, `Level2_SP.csv`, `Level3_SP.csv` - Special object/sprite data
-- These are exported from Tiled and contain numerical representations of tiles/objects
-
-### C Files
-- `Level1.c`, `Level2.c`, `Level3.c` - Compiled background tile data
-- `Level1_SP.c`, `Level2_SP.c`, `Level3_SP.c` - Compiled special object/sprite data
-- These contain the level data in a format that can be included in the game code
-
-### Python Scripts
-- `CSV2C_BIG.py` - Converts background tile CSV data to C code
-- `CSV2C_SP.py` - Converts special object/sprite CSV data to C code
+### C Files (Generated)
+- `w{world}l{level}_main.c` - Compiled background tile data
+- `w{world}l{level}_object.c` - Compiled object/sprite data
 
 ### Image Assets
-- `Metatiles.png` - Tileset image containing the background tiles
+- `ninjaturdle2.png` - Tileset image containing the background tiles
 - `Sprites.png` - Image containing the game sprites
 
-## Special Object Format
+## Generated Code Format
 
-The special object files (`_SP` suffix) use the following format:
-
+### Main Layer Format
+The main layer C files contain arrays of tile indices divided into 16-tile wide rooms:
+```c
+const unsigned char w1l1_main_0[] = { /* First room data */ };
+const unsigned char w1l1_main_1[] = { /* Second room data */ };
+// ... more rooms ...
+const unsigned char * const w1l1_main_list[] = { /* Room pointer list */ };
 ```
+
+### Object Layer Format
+The object layer C files use the following format:
+```c
 // Y, room, X, object #
+0x40, 2, 0x30, obj1,  // Example object placement
+TURN_OFF
 ```
-
 Where:
-- Y: Vertical position
+- Y: Vertical position (in hex)
 - room: Room/screen number
-- X: Horizontal position
+- X: Horizontal position in room (in hex)
 - object #: ID of the object to place
 
-## Background Tile Format
+## Dependencies
 
-The background tile files contain arrays of tile indices that define the level layout. Each level is divided into rooms/screens, and each room consists of a grid of tiles.
+To use the conversion script, you need:
+```bash
+pip install pytmx
+```
 
-## Usage
+## Notes
 
-To update level data after making changes in Tiled:
-
-1. Export the level from Tiled to CSV format
-2. Run the appropriate conversion script:
-   ```
-   python CSV2C_BIG.py
-   python CSV2C_SP.py
-   ```
-3. The C files will be updated with the new level data
+- The script automatically handles the conversion from Tiled's 1-based indices to 0-based indices required by the game
+- Make sure your TMX files have the correct layer names ("main" and "object")
+- The level width must be a multiple of 16 tiles for proper room division

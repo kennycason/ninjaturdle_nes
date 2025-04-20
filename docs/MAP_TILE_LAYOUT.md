@@ -1,0 +1,16 @@
+Row 0x00-0x0F: Background Tiles (Non-collidable)
+  0x00-0x0B: Pure background (trees, clouds, decorative elements)
+  0x0C-0x0D: Platform tiles (can pass through from below)
+  0x0E-0x0F: Solid wall tiles (fully collidable)
+
+Row 0x10-0x1F: More Background Tiles
+  0x10-0x1B: Pure background
+  0x1C-0x1D: Platform tiles
+  0x1E-0x1F: Solid wall tiles
+
+Row 0x20-0x2F: More Background Tiles
+  0x20-0x2B: Pure background
+  0x2C-0x2D: Platform tiles
+  0x2E-0x2F: Solid wall tiles
+
+  
