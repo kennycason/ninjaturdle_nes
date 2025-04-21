@@ -24,7 +24,7 @@ This guide explains how to update the sprites in your game.
 
    ### Option B: Use png2chr Tool
    ```bash
-   ../tools/png2chr BG/Sprites.png ninjaturdle.chr
+   ../tools/png2chr map/sprites.png ninjaturdle.chr
    ```
 
 3. **Build the Game**:
@@ -52,7 +52,7 @@ The sprite sheet is organized as follows:
 1. Keep the same dimensions for each sprite
 2. Maintain the color palette limitations
 3. Make sure your changes align with the collision boxes in the code
-4. The BG/Sprites.png file must be indexed color (not RGB)
+4. The map/sprites.png file must be indexed color (not RGB)
 
 ## Advanced: Metasprite Structure
 

@@ -27,9 +27,9 @@ CSRC = \
 
 # Level files to compile
 LEVEL_FILES = \
-  BG/w1l1.c \
-  BG/w1l2.c \
-  BG/w1l3.c
+  map/w1l1.c \
+  map/w1l2.c \
+  map/w1l3.c
 
 # Object files from level files
 LEVEL_OBJS = $(LEVEL_FILES:.c=.o)
@@ -58,17 +58,17 @@ all: ninjaturdle.nes
 ##############################################################################
 # Special rule for crt0.s
 ##############################################################################
-crt0.o: crt0.s ninjaturdle.chr ninjaturdle2.chr MUSIC/TestMusic3.s MUSIC/SoundFx.s
+crt0.o: crt0.s ninjaturdle.chr ninjaturdle2.chr sound/TestMusic3.s sound/SoundFx.s
 	$(CA65) $(AFLAGS) $< -o $@
 
 ##############################################################################
 # Link
 ##############################################################################
-ninjaturdle.nes: ninjaturdle.o bank_swap.o $(LEVEL_OBJS) crt0.o
+ninjaturdle.nes: ninjaturdle.o $(LEVEL_OBJS) crt0.o
 	$(LD65) -C $(CFG) -o $@ -Ln ninjaturdle.lbl ninjaturdle.o $(LEVEL_OBJS) crt0.o $(RUNTIME)
 
 ##############################################################################
 # Cleanup
 ##############################################################################
 clean:
-	rm -f $(OBJS) ninjaturdle.s bank_swap.s BG/w1l1.s BG/w1l2.s BG/w1l3.s *.lbl ninjaturdle.nes
+	rm -f $(OBJS) ninjaturdle.s bank_swap.s map/w1l1.s map/w1l2.s map/w1l3.s *.lbl ninjaturdle.nes
