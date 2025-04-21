@@ -64,7 +64,7 @@ crt0.o: crt0.s ninjaturdle.chr ninjaturdle2.chr sound/TestMusic3.s sound/SoundFx
 ##############################################################################
 # Link
 ##############################################################################
-ninjaturdle.nes: ninjaturdle.o bank_swap.o $(LEVEL_OBJS) crt0.o
+ninjaturdle.nes: ninjaturdle.o $(LEVEL_OBJS) crt0.o
 	$(LD65) -C $(CFG) -o $@ -Ln ninjaturdle.lbl ninjaturdle.o $(LEVEL_OBJS) crt0.o $(RUNTIME)
 
 ##############################################################################
