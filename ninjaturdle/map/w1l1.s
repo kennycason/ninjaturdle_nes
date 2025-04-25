@@ -2008,6 +2008,10 @@ _w1l1_enemies:
 	.byte	$C0
 	.byte	$10
 	.byte	$C0
+	.byte	$00
+	.byte	$E0
+	.byte	$0B
+	.byte	$C0
 	.byte	$01
 	.byte	$E0
 	.byte	$0A

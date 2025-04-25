@@ -149,3 +149,35 @@ const unsigned char TurdLifeSpr[]={
     0, 0, 0x30, 1, 
     128
 };
+
+const unsigned char EnemyWormSprL1[]={
+    0xff, 0xff, 0x26, 3,  // Top-left tile
+    7,    0xff, 0x27, 3,  // Top-right tile
+    0xff, 7,    0x36, 3,  // Bottom-left tile
+    7,    7,    0x37, 3,  // Bottom-right tile
+    128
+};
+
+const unsigned char EnemyWormSprL2[]={
+    0xff, 0xff, 0x28, 3,  // Top-left tile
+    7,    0xff, 0x29, 3,  // Top-right tile
+    0xff, 7,    0x38, 3,  // Bottom-left tile
+    7,    7,    0x39, 3,  // Bottom-right tile
+    128
+};
+
+const unsigned char EnemyWormSprR1[]={
+    0xff, 0xff, 0x46, 3,  // Top-left tile
+    7,    0xff, 0x47, 3,  // Top-right tile
+    0xff, 7,    0x56, 3,  // Bottom-left tile
+    7,    7,    0x57, 3,  // Bottom-right tile
+    128
+};
+
+const unsigned char EnemyWormSprR2[]={
+    0xff, 0xff, 0x48, 3,  // Top-left tile
+    7,    0xff, 0x49, 3,  // Top-right tile
+    0xff, 7,    0x58, 3,  // Bottom-left tile
+    7,    7,    0x59, 3,  // Bottom-right tile
+    128
+};
