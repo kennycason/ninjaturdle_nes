@@ -917,33 +917,14 @@ void enemy_moves(void) {
 		}
 	}
 	else if (enemy_type[index] == ENEMY_WORM) {
-		static unsigned char worm_anim_counter = 0;
-		static unsigned char worm_frame = 0;
-		
-		// Set collision box for worm
+		//for bg collisions
 		ENTITY1.x = enemy_x[index];
 		ENTITY1.y = enemy_y[index];
 		ENTITY1.width = 13;
 		ENTITY1.height = 13;
 		
-		// Update animation every 16 frames
-		if (++worm_anim_counter >= 16) {
-			worm_anim_counter = 0;
-			worm_frame = !worm_frame;
-		}
+		if (enemy_frames & 1) return; // half speed
 		
-		// Check for ground collision and ledges
-		ENTITY1.y += 1;
-		if (!bg_coll_D()) {
-			// Change direction if there's no ground ahead
-			if (enemy_actual_x[index] & 0x80) { // Moving left
-				enemy_actual_x[index] &= 0x7F; // Clear direction bit
-			} else {
-				enemy_actual_x[index] |= 0x80; // Set direction bit
-			}
-		}
-		
-		// Move left/right
 		if (enemy_actual_x[index] & 0x80) { // Moving left
 			ENTITY1.x -= 1;
 			bg_collision_fast();
@@ -952,7 +933,7 @@ void enemy_moves(void) {
 			} else {
 				if (enemy_actual_x[index] == 0x80) --enemy_room[index];
 				--enemy_actual_x[index];
-				enemy_anim[index] = worm_frame ? EnemyWormSprL1 : EnemyWormSprL2;
+				enemy_anim[index] = EnemyWormSprL1;
 			}
 		} else { // Moving right
 			ENTITY1.x += 1;
@@ -962,7 +943,7 @@ void enemy_moves(void) {
 			} else {
 				++enemy_actual_x[index];
 				if (enemy_actual_x[index] == 0) ++enemy_room[index];
-				enemy_anim[index] = worm_frame ? EnemyWormSprR1 : EnemyWormSprR2;
+				enemy_anim[index] = EnemyWormSprR1;
 			}
 		}
 	}
