@@ -1998,11 +1998,7 @@ _w1l1_enemies:
 	.byte	$70
 	.byte	$02
 	.byte	$00
-	.byte	$0B
-	.byte	$80
-	.byte	$00
-	.byte	$70
-	.byte	$20
+	.byte	$09
 	.byte	$80
 	.byte	$00
 	.byte	$B0
@@ -2031,6 +2027,10 @@ _w1l1_enemies:
 	.byte	$02
 	.byte	$90
 	.byte	$0A
+	.byte	$C0
+	.byte	$04
+	.byte	$C0
+	.byte	$0B
 	.byte	$C0
 	.byte	$05
 	.byte	$90

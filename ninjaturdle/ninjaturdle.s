@@ -2803,20 +2803,20 @@ L001C:	adc     #<(_Levels_list)
 ; if (temp_x > 0xfc) temp_x = 1;
 ;
 	cmp     #$FD
-	bcc     L0035
+	bcc     L0034
 	lda     #$01
 	sta     _temp_x
 ;
 ; if (temp_x == 0) temp_x = 1;
 ;
-L0035:	lda     _temp_x
-	bne     L0036
+L0034:	lda     _temp_x
+	bne     L0035
 	lda     #$01
 	sta     _temp_x
 ;
 ; if (direction == LEFT) {
 ;
-L0036:	lda     _direction
+L0035:	lda     _direction
 	bne     L0004
 ;
 ; oam_meta_spr(temp_x, high_byte(NINJA.y), NinjaSprL);
@@ -2833,7 +2833,7 @@ L0036:	lda     _direction
 ;
 ; else {
 ;
-	jmp     L002F
+	jmp     L002E
 ;
 ; oam_meta_spr(temp_x, high_byte(NINJA.y), NinjaSprR);
 ;
@@ -2846,13 +2846,13 @@ L0004:	jsr     decsp2
 	sta     (sp),y
 	lda     #<(_NinjaSprR)
 	ldx     #>(_NinjaSprR)
-L002F:	jsr     _oam_meta_spr
+L002E:	jsr     _oam_meta_spr
 ;
 ; for (index = 0; index < MAX_COINS; ++index) {
 ;
 	lda     #$00
 	sta     _index
-L0037:	lda     _index
+L0036:	lda     _index
 	cmp     #$10
 	jcs     L0007
 ;
@@ -2865,13 +2865,13 @@ L0037:	lda     _index
 ; if (temp_y == TURN_OFF) continue;
 ;
 	cmp     #$FF
-	beq     L0038
+	beq     L0037
 ;
 ; if (!coin_active[index]) continue;
 ;
 	ldy     _index
 	lda     _coin_active,y
-	beq     L0038
+	beq     L0037
 ;
 ; temp_x = coin_x[index];
 ;
@@ -2882,7 +2882,7 @@ L0037:	lda     _index
 ; if (temp_x > 0xf0) continue;
 ;
 	cmp     #$F1
-	bcs     L0038
+	bcs     L0037
 ;
 ; temp1 = get_frame_count();
 ;
@@ -2911,7 +2911,7 @@ L0037:	lda     _index
 ; if (temp_y < 0xf0) {
 ;
 	cmp     #$F0
-	bcs     L0038
+	bcs     L0037
 ;
 ; if (coin_type[index] == COIN_REG) {
 ;
@@ -2934,7 +2934,7 @@ L0037:	lda     _index
 ;
 ; else {
 ;
-	jmp     L0030
+	jmp     L002F
 ;
 ; oam_meta_spr(temp_x, temp_y, BigCoinSpr);
 ;
@@ -2947,12 +2947,12 @@ L0012:	jsr     decsp2
 	sta     (sp),y
 	lda     #<(_BigCoinSpr)
 	ldx     #>(_BigCoinSpr)
-L0030:	jsr     _oam_meta_spr
+L002F:	jsr     _oam_meta_spr
 ;
 ; for (index = 0; index < MAX_COINS; ++index) {
 ;
-L0038:	inc     _index
-	jmp     L0037
+L0037:	inc     _index
+	jmp     L0036
 ;
 ; offset = get_frame_count() & 3;
 ;
@@ -2972,7 +2972,7 @@ L0007:	jsr     _get_frame_count
 ;
 	lda     #$00
 	sta     _index
-L0039:	lda     _index
+L0038:	lda     _index
 	cmp     #$10
 	jcs     L0016
 ;
@@ -2995,13 +2995,13 @@ L0039:	lda     _index
 ; if (temp_y == TURN_OFF) continue;
 ;
 	cmp     #$FF
-	beq     L003B
+	beq     L003A
 ;
 ; if (!enemy_active[index2]) continue;
 ;
 	ldy     _index2
 	lda     _enemy_active,y
-	beq     L003B
+	beq     L003A
 ;
 ; temp_x = enemy_x[index2];
 ;
@@ -3012,21 +3012,21 @@ L0039:	lda     _index
 ; if (temp_x == 0) temp_x = 1; // problems with x = 0
 ;
 	lda     _temp_x
-	bne     L003A
+	bne     L0039
 	lda     #$01
 	sta     _temp_x
 ;
 ; if (temp_x > 0xf0) continue;
 ;
-L003A:	lda     _temp_x
+L0039:	lda     _temp_x
 	cmp     #$F1
-	bcs     L003B
+	bcs     L003A
 ;
 ; if (temp_y < 0xf0) {
 ;
 	lda     _temp_y
 	cmp     #$F0
-	bcs     L003B
+	bcs     L003A
 ;
 ; if (enemy_type[index2] == ENEMY_BOSS2) {
 ;
@@ -3035,38 +3035,33 @@ L003A:	lda     _temp_x
 	cmp     #$20
 	bne     L0022
 ;
-; oam_meta_spr(temp_x - 8, temp_y - 8, enemy_anim[index2]);
+; oam_meta_spr(temp_x - 8, temp_y, enemy_anim[index2]);
 ;
 	jsr     decsp2
 	lda     _temp_x
 	sec
 	sbc     #$08
-	ldy     #$01
-	sta     (sp),y
-	lda     _temp_y
-	sec
-	sbc     #$08
 ;
 ; } else {
 ;
-	jmp     L004C
+	jmp     L004E
 ;
 ; oam_meta_spr(temp_x, temp_y, enemy_anim[index2]);
 ;
 L0022:	jsr     decsp2
 	lda     _temp_x
-	ldy     #$01
+L004E:	ldy     #$01
 	sta     (sp),y
 	lda     _temp_y
-L004C:	dey
+	dey
 	sta     (sp),y
 	ldx     #$00
 	lda     _index2
 	asl     a
-	bcc     L0034
+	bcc     L0033
 	inx
 	clc
-L0034:	adc     #<(_enemy_anim)
+L0033:	adc     #<(_enemy_anim)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_anim)
@@ -3080,8 +3075,8 @@ L0034:	adc     #<(_enemy_anim)
 ;
 ; for (index = 0; index < MAX_ENEMY; ++index) {
 ;
-L003B:	inc     _index
-	jmp     L0039
+L003A:	inc     _index
+	jmp     L0038
 ;
 ; draw_turds();
 ;
@@ -3157,7 +3152,7 @@ L0016:	jsr     _draw_turds
 ; if (corn_mode) {
 ;
 	lda     _corn_mode
-	beq     L0029
+	beq     L0028
 ;
 ; oam_meta_spr(0xDD, 0x10, CornSelectedSpr);
 ;
@@ -3173,11 +3168,11 @@ L0016:	jsr     _draw_turds
 ;
 ; else {
 ;
-	jmp     L0032
+	jmp     L0031
 ;
 ; oam_meta_spr(0xDD, 0x10, CoinSpr);
 ;
-L0029:	jsr     decsp2
+L0028:	jsr     decsp2
 	lda     #$DD
 	ldy     #$01
 	sta     (sp),y
@@ -3186,7 +3181,7 @@ L0029:	jsr     decsp2
 	sta     (sp),y
 	lda     #<(_CoinSpr)
 	ldx     #>(_CoinSpr)
-L0032:	jsr     _oam_meta_spr
+L0031:	jsr     _oam_meta_spr
 ;
 ; temp1 = (coins / 10) + 0xF0; // Convert to tile number
 ;

@@ -448,8 +448,8 @@ void draw_sprites(void) {
 		if (temp_x > 0xf0) continue;
 		if (temp_y < 0xf0) {
 			if (enemy_type[index2] == ENEMY_BOSS2) {
-				// Center the 3x3 boss sprite (48x48) on its position
-				oam_meta_spr(temp_x - 8, temp_y - 8, enemy_anim[index2]);
+				// Draw the 3x3 boss sprite so its feet are at the intended y
+				oam_meta_spr(temp_x - 8, temp_y, enemy_anim[index2]);
 			} else {
 				oam_meta_spr(temp_x, temp_y, enemy_anim[index2]);
 			}
