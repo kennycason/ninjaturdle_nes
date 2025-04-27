@@ -1296,6 +1296,45 @@ void sprite_collisions(void) {
         }
     }
     
+    // Check enemy collisions (player vs enemy/boss)
+    ENTITY1.x = high_byte(NINJA.x);
+    ENTITY1.y = high_byte(NINJA.y);
+    ENTITY1.width = HERO_WIDTH;
+    ENTITY1.height = HERO_HEIGHT;
+
+    for (index = 0; index < MAX_ENEMY; ++index) {
+        if (!enemy_active[index]) continue;
+
+        ENTITY2.x = enemy_x[index];
+        ENTITY2.y = enemy_y[index];
+
+        // Set collision box for boss or regular enemy
+        if (enemy_type[index] == ENEMY_BOSS1) {
+            ENTITY2.width = 28;  // 2x2 boss
+            ENTITY2.height = 28;
+        } else if (enemy_type[index] == ENEMY_BOSS2) {
+            ENTITY2.width = 40;  // 3x3 boss (48px - 8px for fairness)
+            ENTITY2.height = 40;
+        } else {
+            ENTITY2.width = ENEMY_WIDTH;
+            ENTITY2.height = ENEMY_HEIGHT;
+        }
+
+        if (check_collision(&ENTITY1, &ENTITY2)) {
+            // Only take damage if not in cooldown period
+            if (damage_cooldown == 0) {
+                player_health -= 2;
+                damage_cooldown = DAMAGE_COOLDOWN_TIME;
+                sfx_play(SFX_NOISE, 0);
+                if (player_health <= 0) {
+                    death = 1;
+                }
+            }
+            // Do NOT remove or damage the enemy/boss!
+            break; // Only one collision per frame
+        }
+    }
+    
     // Check enemy collisions
     ENTITY2.x = high_byte(NINJA.x);
     ENTITY2.y = high_byte(NINJA.y);
