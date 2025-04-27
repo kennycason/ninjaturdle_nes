@@ -20,6 +20,8 @@ unsigned char boss_health;
 unsigned char coyote_time;  // Frames of coyote time remaining
 unsigned char was_jumping;  // Whether we were jumping last frame
 	
+unsigned char enemy_dir[MAX_ENEMY]; // 0 = left, 1 = right
+
 void main(void) {
 	ppu_off(); // screen off
 	
@@ -917,34 +919,35 @@ void enemy_moves(void) {
 		}
 	}
 	else if (enemy_type[index] == ENEMY_WORM) {
-		//for bg collisions
+		// for bg collisions
 		ENTITY1.x = enemy_x[index];
 		ENTITY1.y = enemy_y[index];
 		ENTITY1.width = 13;
 		ENTITY1.height = 13;
-		
+
 		if (enemy_frames & 1) return; // half speed
-		
-		if (enemy_actual_x[index] & 0x80) { // Moving left
+		if (enemy_dir[index] == 0) { // Moving left
 			ENTITY1.x -= 1;
 			bg_collision_fast();
 			if (collision_L) {
-				enemy_actual_x[index] &= 0x7F; // Change direction
-			} else {
-				if (enemy_actual_x[index] == 0) --enemy_room[index];
-				--enemy_actual_x[index];
-				enemy_anim[index] = EnemyWormSprL1;
+				enemy_dir[index] = 1; // Turn around to right
+				enemy_anim[index] = EnemyWormSprR1;
+				return;
 			}
+			if (enemy_actual_x[index] == 0) --enemy_room[index];
+			--enemy_actual_x[index];
+			enemy_anim[index] = EnemyWormSprL1;
 		} else { // Moving right
 			ENTITY1.x += 1;
 			bg_collision_fast();
 			if (collision_R) {
-				enemy_actual_x[index] |= 0x80; // Change direction
-			} else {
-				++enemy_actual_x[index];
-				if (enemy_actual_x[index] == 0) ++enemy_room[index];
-				enemy_anim[index] = EnemyWormSprR1;
+				enemy_dir[index] = 0; // Turn around to left
+				enemy_anim[index] = EnemyWormSprL1;
+				return;
 			}
+			++enemy_actual_x[index];
+			if (enemy_actual_x[index] == 0) ++enemy_room[index];
+			enemy_anim[index] = EnemyWormSprR1;
 		}
 	}
 }
@@ -1375,6 +1378,20 @@ void sprite_obj_init(void) {
 	
 	for(++index;index < MAX_ENEMY; ++index) {
 		enemy_y[index] = TURN_OFF;
+	}
+
+	if (enemy_type[index] == ENEMY_WASP) {
+		enemy_anim[index] = EnemyWaspSprR;
+		enemy_dir[index] = 1;
+	} else if (enemy_type[index] == ENEMY_BOUNCE) {
+		enemy_anim[index] = EnemyBounceSpr;
+		enemy_dir[index] = 1;
+	} else if (enemy_type[index] == ENEMY_WORM) {
+		enemy_anim[index] = EnemyWormSprR1;
+		enemy_dir[index] = 1; // Start moving right
+	} else if (enemy_type[index] == ENEMY_BOSS1) {
+		enemy_anim[index] = Boss1SprR;
+		enemy_dir[index] = 1;
 	}
 }
 
