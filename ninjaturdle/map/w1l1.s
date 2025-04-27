@@ -1995,6 +1995,14 @@ _w1l1_enemies:
 	.byte	$04
 	.byte	$C0
 	.byte	$09
+	.byte	$70
+	.byte	$02
+	.byte	$00
+	.byte	$0B
+	.byte	$80
+	.byte	$00
+	.byte	$70
+	.byte	$20
 	.byte	$80
 	.byte	$00
 	.byte	$B0

@@ -12,6 +12,7 @@ TILE_CORN_UP = 0x02   # Second tile in top row (1,0)
 TILE_ENEMY_WASP = 0x09   # Flying wasp
 TILE_ENEMY_BOUNCE = 0x0A  # Bouncing enemy
 TILE_ENEMY_BOSS1 = 0x10   # Boss enemy
+TILE_ENEMY_BOSS2 = 0x20   # Boss2 enemy
 TILE_ENEMY_WORM = 0x0B   # Worm enemy
 
 # Sprite tileset GIDs (firstgid=129)
@@ -21,6 +22,7 @@ SPRITE_GID_WASP = 137       # 129 + 8
 SPRITE_GID_BOUNCE = 138     # 129 + 9
 SPRITE_GID_WORM = 139       # 129 + 10
 SPRITE_GID_BOSS = 144       # 129 + 15
+SPRITE_GID_BOSS2 = 152      # 129 + 8 + 15
 
 def extract_world_level(filename):
     """Extract world and level numbers from filename."""
@@ -112,6 +114,9 @@ def process_object_layer(root):
             elif gid == SPRITE_GID_BOSS:
                 print(f"Adding boss at ({x}, {y})")
                 enemy_data.append((x, y, TILE_ENEMY_BOSS1))
+            elif gid == SPRITE_GID_BOSS2:
+                print(f"Adding boss2 at ({x}, {y})")
+                enemy_data.append((x, y, TILE_ENEMY_BOSS2))
             else:
                 print(f"Unknown GID {gid} at ({x}, {y})")
             

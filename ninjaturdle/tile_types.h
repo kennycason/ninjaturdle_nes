@@ -10,6 +10,6 @@
 #define ENEMY_BOUNCE 0x0A  // Bouncing enemy 
 #define ENEMY_WORM 0x0B    // Worm enemy 
 #define ENEMY_BOSS1 0x10   // Boss enemy 
-
+#define ENEMY_BOSS2 0x20   // Boss2 enemy 
 
 #endif // TILE_TYPES_H 

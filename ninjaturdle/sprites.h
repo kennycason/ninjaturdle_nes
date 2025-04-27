@@ -134,6 +134,64 @@ const unsigned char Boss1SprR[]={
     128
 };
 
+const unsigned char BossMotherWormSprL[]={
+    // Top-left 16x16 block (0,0), (8,0), (0,8), (8,8)
+    0x00, 0x00, 0xAA, 1,  // Top-left tile
+    0x08, 0x00, 0xAB, 1,  // Top-right tile
+    0x00, 0x08, 0xBA, 1,  // Bottom-left tile
+    0x08, 0x08, 0xBB, 1,  // Bottom-right tile
+
+    // Top-middle 16x16 block (16,0), (24,0), (16,8), (24,8)
+    0x10, 0x00, 0xAC, 1,  // Top-left tile
+    0x18, 0x00, 0xAD, 1,  // Top-right tile
+    0x10, 0x08, 0xBC, 1,  // Bottom-left tile
+    0x18, 0x08, 0xBD, 1,  // Bottom-right tile
+
+    // Top-right 16x16 block (32,0), (40,0), (32,8), (40,8)
+    0x20, 0x00, 0xAE, 1,  // Top-left tile
+    0x28, 0x00, 0xAF, 1,  // Top-right tile
+    0x20, 0x08, 0xBE, 1,  // Bottom-left tile
+    0x28, 0x08, 0xBF, 1,  // Bottom-right tile
+
+    // Middle-left 16x16 block
+    0x00, 0x10, 0xCA, 1,   // Top-left tile
+    0x08, 0x10, 0xCB, 1,   // Top-right tile
+    0x00, 0x18, 0xDA, 1,   // Bottom-left tile
+    0x08, 0x18, 0xDB, 1,   // Bottom-right tile
+
+    // Middle-middle 16x16 block
+    0x10, 0x10, 0xCC, 1,   // Top-left tile
+    0x18, 0x10, 0xCD, 1,   // Top-right tile
+    0x10, 0x18, 0xDC, 1,   // Bottom-left tile
+    0x18, 0x18, 0xDD, 1,   // Bottom-right tile
+
+    // Middle-right 16x16 block
+    0x20, 0x10, 0xCE, 1,   // Top-left tile
+    0x28, 0x10, 0xCF, 1,   // Top-right tile
+    0x20, 0x18, 0xDE, 1,   // Bottom-left tile
+    0x28, 0x18, 0xDF, 1,   // Bottom-right tile
+
+    // Bottom-left 16x16 block
+    0x00, 0x20, 0xEA, 1,   // Top-left tile
+    0x08, 0x20, 0xEB, 1,   // Top-right tile
+    0x00, 0x28, 0xFA, 1,   // Bottom-left tile
+    0x08, 0x28, 0xFB, 1,   // Bottom-right tile
+
+    // Bottom-middle 16x16 block
+    0x10, 0x20, 0xEC, 1,   // Top-left tile
+    0x18, 0x20, 0xED, 1,   // Top-right tile
+    0x10, 0x28, 0xFC, 1,   // Bottom-left tile
+    0x18, 0x28, 0xFD, 1,   // Bottom-right tile
+
+    // Bottom-right 16x16 block
+    0x20, 0x20, 0xEE, 1,   // Top-left tile
+    0x28, 0x20, 0xEF, 1,   // Top-right tile
+    0x20, 0x28, 0xFE, 1,   // Bottom-left tile
+    0x28, 0x28, 0xFF, 1,   // Bottom-right tile
+
+    128
+};
+
 //enum{ANIM_CHASE1, ANIM_BOUNCE1, ANIM_BOUNCE2};
 //const unsigned char * const enemy_anim_list[]={
 //	EnemyChaseSpr, EnemyBounceSpr, EnemyBounceSpr2
