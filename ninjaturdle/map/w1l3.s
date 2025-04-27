@@ -1918,7 +1918,7 @@ _w1l3_main_7:
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$83
+	.byte	$00
 	.byte	$16
 	.byte	$16
 	.byte	$16
