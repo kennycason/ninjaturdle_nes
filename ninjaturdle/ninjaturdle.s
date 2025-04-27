@@ -5758,11 +5758,10 @@ L007B:	sta     ptr1
 ;
 	jmp     L00C9
 ;
-; if (enemy_actual_x[index] == 0x80) --enemy_room[index];
+; if (enemy_actual_x[index] == 0) --enemy_room[index];
 ;
 L007A:	ldy     _index
 	lda     _enemy_actual_x,y
-	cmp     #$80
 	bne     L007D
 	lda     #<(_enemy_room)
 	ldx     #>(_enemy_room)

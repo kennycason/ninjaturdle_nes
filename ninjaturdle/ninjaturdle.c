@@ -931,7 +931,7 @@ void enemy_moves(void) {
 			if (collision_L) {
 				enemy_actual_x[index] &= 0x7F; // Change direction
 			} else {
-				if (enemy_actual_x[index] == 0x80) --enemy_room[index];
+				if (enemy_actual_x[index] == 0) --enemy_room[index];
 				--enemy_actual_x[index];
 				enemy_anim[index] = EnemyWormSprL1;
 			}
