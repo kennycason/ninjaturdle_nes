@@ -312,10 +312,6 @@ _CornSelectedSpr:
 	.byte	$FF
 	.byte	$20
 	.byte	$02
-	.byte	$FF
-	.byte	$07
-	.byte	$30
-	.byte	$02
 	.byte	$80
 _BigCoinSpr:
 	.byte	$FF
