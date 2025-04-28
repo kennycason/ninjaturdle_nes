@@ -1323,6 +1323,9 @@ void sprite_collisions(void) {
         if (check_collision(&ENTITY1, &ENTITY2)) {
             // Only take damage if not in cooldown period
             if (damage_cooldown == 0) {
+                unsigned char damage = corn_mode ? (BOSS_DAMAGE_PER_HIT * CORN_DAMAGE_MULTIPLIER) : BOSS_DAMAGE_PER_HIT;
+                if (boss_health < damage) boss_health = 0;
+                else boss_health -= damage;
                 player_health -= 2;
                 damage_cooldown = DAMAGE_COOLDOWN_TIME;
                 sfx_play(SFX_NOISE, 0);
@@ -1353,13 +1356,9 @@ void sprite_collisions(void) {
                 
                 if (check_collision(&ENTITY1, &ENTITY2)) {
                     // Hit boss
-                    if (corn_mode) {
-                        // Increased damage in corn mode
-                        boss_health -= BOSS_DAMAGE_PER_HIT * CORN_DAMAGE_MULTIPLIER;
-                    } else {
-                        boss_health -= BOSS_DAMAGE_PER_HIT;
-                    }
-                    
+                    unsigned char damage = corn_mode ? (BOSS_DAMAGE_PER_HIT * CORN_DAMAGE_MULTIPLIER) : BOSS_DAMAGE_PER_HIT;
+                    if (boss_health < damage) boss_health = 0;
+                    else boss_health -= damage;
                     turd_active[index] = 0;
                     sfx_play(SFX_DING, 0); // Play hit sound
                     
@@ -1592,13 +1591,9 @@ void update_turds(void) {
                         
                         if (check_collision(&ENTITY1, &ENTITY2)) {
                             // Hit boss
-                            if (corn_mode) {
-                                // Increased damage in corn mode
-                                boss_health -= BOSS_DAMAGE_PER_HIT * CORN_DAMAGE_MULTIPLIER;
-                            } else {
-                                boss_health -= BOSS_DAMAGE_PER_HIT;
-                            }
-                            
+                            unsigned char damage = corn_mode ? (BOSS_DAMAGE_PER_HIT * CORN_DAMAGE_MULTIPLIER) : BOSS_DAMAGE_PER_HIT;
+                            if (boss_health < damage) boss_health = 0;
+                            else boss_health -= damage;
                             turd_active[index] = 0;
                             sfx_play(SFX_DING, 0); // Play hit sound
                             

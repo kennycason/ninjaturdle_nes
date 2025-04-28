@@ -6207,7 +6207,7 @@ L0092:	jmp     incsp2
 ; if (damage_cooldown > 0) {
 ;
 	lda     _damage_cooldown
-	beq     L003B
+	beq     L0042
 ;
 ; --damage_cooldown;
 ;
@@ -6215,7 +6215,7 @@ L0092:	jmp     incsp2
 ;
 ; ENTITY1.x = high_byte(NINJA.x);
 ;
-L003B:	lda     _NINJA+1
+L0042:	lda     _NINJA+1
 	sta     _ENTITY1
 ;
 ; ENTITY1.y = high_byte(NINJA.y);
@@ -6237,22 +6237,22 @@ L003B:	lda     _NINJA+1
 ;
 	lda     #$00
 	sta     _index
-L003C:	lda     _index
+L0043:	lda     _index
 	cmp     #$10
-	bcs     L003F
+	bcs     L0046
 ;
 ; if (coin_active[index]) {
 ;
 	ldy     _index
 	lda     _coin_active,y
-	beq     L003E
+	beq     L0045
 ;
 ; if (coin_type[index] == COIN_REG) {
 ;
 	ldy     _index
 	lda     _coin_type,y
 	cmp     #$02
-	bne     L003D
+	bne     L0044
 ;
 ; ENTITY2.width = COIN_WIDTH;
 ;
@@ -6265,16 +6265,16 @@ L003C:	lda     _index
 ;
 ; } else {
 ;
-	jmp     L0038
+	jmp     L003E
 ;
 ; ENTITY2.width = BIG_COIN;
 ;
-L003D:	lda     #$0D
+L0044:	lda     #$0D
 	sta     _ENTITY2+2
 ;
 ; ENTITY2.height = BIG_COIN;
 ;
-L0038:	sta     _ENTITY2+3
+L003E:	sta     _ENTITY2+3
 ;
 ; ENTITY2.x = coin_x[index];
 ;
@@ -6297,7 +6297,7 @@ L0038:	sta     _ENTITY2+3
 	ldx     #>(_ENTITY2)
 	jsr     _check_collision
 	tax
-	beq     L003E
+	beq     L0045
 ;
 ; coin_y[index] = TURN_OFF;
 ;
@@ -6327,17 +6327,17 @@ L0038:	sta     _ENTITY2+3
 	ldy     _index
 	lda     _coin_type,y
 	cmp     #$08
-	bne     L003E
+	bne     L0045
 	inc     _level_up
 ;
 ; for (index = 0; index < MAX_COINS; ++index) {
 ;
-L003E:	inc     _index
-	jmp     L003C
+L0045:	inc     _index
+	jmp     L0043
 ;
 ; ENTITY1.x = high_byte(NINJA.x);
 ;
-L003F:	lda     _NINJA+1
+L0046:	lda     _NINJA+1
 	sta     _ENTITY1
 ;
 ; ENTITY1.y = high_byte(NINJA.y);
@@ -6359,15 +6359,15 @@ L003F:	lda     _NINJA+1
 ;
 	lda     #$00
 	sta     _index
-L0040:	lda     _index
+L0047:	lda     _index
 	cmp     #$10
-	jcs     L0043
+	jcs     L004E
 ;
 ; if (!enemy_active[index]) continue;
 ;
 	ldy     _index
 	lda     _enemy_active,y
-	beq     L0042
+	jeq     L004D
 ;
 ; ENTITY2.x = enemy_x[index];
 ;
@@ -6394,11 +6394,11 @@ L0040:	lda     _index
 ;
 ; } else if (enemy_type[index] == ENEMY_BOSS2) {
 ;
-	jmp     L0047
+	jmp     L0055
 L001B:	ldy     _index
 	lda     _enemy_type,y
 	cmp     #$20
-	bne     L0041
+	bne     L0048
 ;
 ; ENTITY2.width = 40;  // 3x3 boss (48px - 8px for fairness)
 ;
@@ -6406,12 +6406,12 @@ L001B:	ldy     _index
 ;
 ; } else {
 ;
-	jmp     L0047
+	jmp     L0055
 ;
 ; ENTITY2.width = ENEMY_WIDTH;
 ;
-L0041:	lda     #$0D
-L0047:	sta     _ENTITY2+2
+L0048:	lda     #$0D
+L0055:	sta     _ENTITY2+2
 ;
 ; ENTITY2.height = ENEMY_HEIGHT;
 ;
@@ -6426,12 +6426,38 @@ L0047:	sta     _ENTITY2+2
 	ldx     #>(_ENTITY2)
 	jsr     _check_collision
 	tax
-	beq     L0042
+	beq     L004D
 ;
 ; if (damage_cooldown == 0) {
 ;
 	lda     _damage_cooldown
-	bne     L0043
+	bne     L004E
+;
+; unsigned char damage = corn_mode ? (BOSS_DAMAGE_PER_HIT * CORN_DAMAGE_MULTIPLIER) : BOSS_DAMAGE_PER_HIT;
+;
+	lda     _corn_mode
+	beq     L0049
+	lda     #$06
+	jmp     L004A
+L0049:	lda     #$02
+L004A:	jsr     pusha
+;
+; if (boss_health < damage) boss_health = 0;
+;
+	lda     _boss_health
+	ldy     #$00
+	cmp     (sp),y
+	bcs     L004C
+	tya
+;
+; else boss_health -= damage;
+;
+	jmp     L0040
+L004C:	lda     (sp),y
+	eor     #$FF
+	sec
+	adc     _boss_health
+L0040:	sta     _boss_health
 ;
 ; player_health -= 2;
 ;
@@ -6455,25 +6481,29 @@ L0047:	sta     _ENTITY2+2
 ; if (player_health <= 0) {
 ;
 	lda     _player_health
-	bne     L0043
+	bne     L0027
 ;
 ; death = 1;
 ;
 	lda     #$01
 	sta     _death
 ;
+; }
+;
+L0027:	jsr     incsp1
+;
 ; break; // Only one collision per frame
 ;
-	jmp     L0043
+	jmp     L004E
 ;
 ; for (index = 0; index < MAX_ENEMY; ++index) {
 ;
-L0042:	inc     _index
-	jmp     L0040
+L004D:	inc     _index
+	jmp     L0047
 ;
 ; ENTITY2.x = high_byte(NINJA.x);
 ;
-L0043:	lda     _NINJA+1
+L004E:	lda     _NINJA+1
 	sta     _ENTITY2
 ;
 ; ENTITY2.y = high_byte(NINJA.y);
@@ -6495,9 +6525,9 @@ L0043:	lda     _NINJA+1
 ;
 	lda     #$00
 	sta     _index
-L0044:	lda     _index
+L004F:	lda     _index
 	cmp     #$10
-	bcc     L0048
+	bcc     L0056
 ;
 ; }
 ;
@@ -6505,9 +6535,9 @@ L0044:	lda     _index
 ;
 ; if (enemy_active[index]) {
 ;
-L0048:	ldy     _index
+L0056:	ldy     _index
 	lda     _enemy_active,y
-	jeq     L0046
+	jeq     L0054
 ;
 ; ENTITY1.x = enemy_x[index];
 ;
@@ -6526,15 +6556,15 @@ L0048:	ldy     _index
 	ldy     _index
 	lda     _enemy_type,y
 	cmp     #$10
-	beq     L0045
+	beq     L0050
 	ldy     _index
 	lda     _enemy_type,y
 	cmp     #$20
-	bne     L0046
+	bne     L0054
 ;
 ; ENTITY2.width = 28;  // 32 pixels - 4 pixels for safety
 ;
-L0045:	lda     #$1C
+L0050:	lda     #$1C
 	sta     _ENTITY2+2
 ;
 ; ENTITY2.height = 28; // 32 pixels - 4 pixels for safety
@@ -6550,29 +6580,33 @@ L0045:	lda     #$1C
 	ldx     #>(_ENTITY2)
 	jsr     _check_collision
 	tax
-	beq     L0046
+	beq     L0054
 ;
-; if (corn_mode) {
+; unsigned char damage = corn_mode ? (BOSS_DAMAGE_PER_HIT * CORN_DAMAGE_MULTIPLIER) : BOSS_DAMAGE_PER_HIT;
 ;
 	lda     _corn_mode
-	beq     L0032
+	beq     L0036
+	lda     #$06
+	jmp     L0051
+L0036:	lda     #$02
+L0051:	jsr     pusha
 ;
-; boss_health -= BOSS_DAMAGE_PER_HIT * CORN_DAMAGE_MULTIPLIER;
+; if (boss_health < damage) boss_health = 0;
 ;
 	lda     _boss_health
+	ldy     #$00
+	cmp     (sp),y
+	bcs     L0053
+	tya
+;
+; else boss_health -= damage;
+;
+	jmp     L0041
+L0053:	lda     (sp),y
+	eor     #$FF
 	sec
-	sbc     #$06
-;
-; } else {
-;
-	jmp     L003A
-;
-; boss_health -= BOSS_DAMAGE_PER_HIT;
-;
-L0032:	lda     _boss_health
-	sec
-	sbc     #$02
-L003A:	sta     _boss_health
+	adc     _boss_health
+L0041:	sta     _boss_health
 ;
 ; turd_active[index] = 0;
 ;
@@ -6590,7 +6624,7 @@ L003A:	sta     _boss_health
 ; if (boss_health <= 0) {
 ;
 	lda     _boss_health
-	bne     L0025
+	bne     L003B
 ;
 ; enemy_y[index] = TURN_OFF;
 ;
@@ -6610,16 +6644,12 @@ L003A:	sta     _boss_health
 ;
 ; break;
 ;
-	rts
+L003B:	jmp     incsp1
 ;
 ; for (index = 0; index < MAX_ENEMY; ++index) {
 ;
-L0046:	inc     _index
-	jmp     L0044
-;
-; }
-;
-L0025:	rts
+L0054:	inc     _index
+	jmp     L004F
 
 .endproc
 
@@ -8190,9 +8220,9 @@ L0046:	inc     _index
 ;
 	lda     #$00
 	sta     _index
-L0039:	lda     _index
+L003B:	lda     _index
 	cmp     #$04
-	bcc     L0045
+	bcc     L004A
 ;
 ; }
 ;
@@ -8200,9 +8230,9 @@ L0039:	lda     _index
 ;
 ; if (turd_active[index]) {
 ;
-L0045:	ldy     _index
+L004A:	ldy     _index
 	lda     _turd_active,y
-	jeq     L0044
+	jeq     L0049
 ;
 ; turd_x[index] += turd_vel_x[index];
 ;
@@ -8223,9 +8253,9 @@ L0008:	sta     ptr2
 	ldx     #>(_turd_vel_x)
 	clc
 	adc     _index
-	bcc     L003A
+	bcc     L003C
 	inx
-L003A:	jsr     ldaidx
+L003C:	jsr     ldaidx
 	clc
 	adc     sreg
 	sta     (ptr2),y
@@ -8248,9 +8278,9 @@ L000A:	sta     ptr2
 	ldx     #>(_turd_vel_y)
 	clc
 	adc     _index
-	bcc     L003B
+	bcc     L003D
 	inx
-L003B:	jsr     ldaidx
+L003D:	jsr     ldaidx
 	clc
 	adc     sreg
 	sta     (ptr2),y
@@ -8276,9 +8306,9 @@ L000C:	sta     sreg
 	ldx     #>(_turd_vel_y)
 	clc
 	adc     _index
-	bcc     L003C
+	bcc     L003E
 	inx
-L003C:	jsr     ldaidx
+L003E:	jsr     ldaidx
 	sec
 	sbc     #$06
 	bvs     L000F
@@ -8296,15 +8326,15 @@ L000F:	bpl     L000D
 L000D:	ldy     _index
 	lda     _turd_x,y
 	cmp     #$FB
-	bcs     L003D
+	bcs     L003F
 	ldy     _index
 	lda     _turd_y,y
 	cmp     #$F1
-	bcs     L003D
+	bcs     L003F
 	ldy     _index
 	lda     _turd_x,y
 	cmp     #$05
-	bcc     L003D
+	bcc     L003F
 	ldy     _index
 	lda     _turd_y,y
 	cmp     #$05
@@ -8312,13 +8342,13 @@ L000D:	ldy     _index
 ;
 ; turd_active[index] = 0;
 ;
-L003D:	ldy     _index
+L003F:	ldy     _index
 	lda     #$00
 	sta     _turd_active,y
 ;
 ; continue;
 ;
-	jmp     L0044
+	jmp     L0049
 ;
 ; ENTITY1.x = turd_x[index];
 ;
@@ -8345,7 +8375,7 @@ L0011:	ldy     _index
 ;
 	jsr     _bg_coll_D
 	tax
-	beq     L003F
+	beq     L0041
 ;
 ; turd_active[index] = 0;
 ;
@@ -8355,20 +8385,20 @@ L0011:	ldy     _index
 ;
 ; continue;
 ;
-	jmp     L0044
+	jmp     L0049
 ;
 ; for (index2 = 0; index2 < MAX_ENEMY; ++index2) {
 ;
-L003F:	sta     _index2
-L0040:	lda     _index2
+L0041:	sta     _index2
+L0042:	lda     _index2
 	cmp     #$10
-	jcs     L0044
+	jcs     L0049
 ;
 ; if (enemy_active[index2]) {
 ;
 	ldy     _index2
 	lda     _enemy_active,y
-	jeq     L0043
+	jeq     L0048
 ;
 ; ENTITY2.x = enemy_x[index2];
 ;
@@ -8387,15 +8417,15 @@ L0040:	lda     _index2
 	ldy     _index2
 	lda     _enemy_type,y
 	cmp     #$10
-	beq     L0041
+	beq     L0043
 	ldy     _index2
 	lda     _enemy_type,y
 	cmp     #$20
-	bne     L0042
+	bne     L0047
 ;
 ; ENTITY2.width = 28;  // 32 pixels - 4 pixels for safety
 ;
-L0041:	lda     #$1C
+L0043:	lda     #$1C
 	sta     _ENTITY2+2
 ;
 ; ENTITY2.height = 28; // 32 pixels - 4 pixels for safety
@@ -8411,29 +8441,33 @@ L0041:	lda     #$1C
 	ldx     #>(_ENTITY2)
 	jsr     _check_collision
 	tax
-	jeq     L0043
+	jeq     L0048
 ;
-; if (corn_mode) {
+; unsigned char damage = corn_mode ? (BOSS_DAMAGE_PER_HIT * CORN_DAMAGE_MULTIPLIER) : BOSS_DAMAGE_PER_HIT;
 ;
 	lda     _corn_mode
 	beq     L002B
+	lda     #$06
+	jmp     L0044
+L002B:	lda     #$02
+L0044:	jsr     pusha
 ;
-; boss_health -= BOSS_DAMAGE_PER_HIT * CORN_DAMAGE_MULTIPLIER;
+; if (boss_health < damage) boss_health = 0;
 ;
 	lda     _boss_health
+	ldy     #$00
+	cmp     (sp),y
+	bcs     L0046
+	tya
+;
+; else boss_health -= damage;
+;
+	jmp     L003A
+L0046:	lda     (sp),y
+	eor     #$FF
 	sec
-	sbc     #$06
-;
-; } else {
-;
-	jmp     L0038
-;
-; boss_health -= BOSS_DAMAGE_PER_HIT;
-;
-L002B:	lda     _boss_health
-	sec
-	sbc     #$02
-L0038:	sta     _boss_health
+	adc     _boss_health
+L003A:	sta     _boss_health
 ;
 ; turd_active[index] = 0;
 ;
@@ -8451,7 +8485,7 @@ L0038:	sta     _boss_health
 ; if (boss_health <= 0) {
 ;
 	lda     _boss_health
-	bne     L0044
+	bne     L0030
 ;
 ; enemy_y[index2] = TURN_OFF;
 ;
@@ -8471,11 +8505,12 @@ L0038:	sta     _boss_health
 ;
 ; break;
 ;
-	jmp     L0044
+L0030:	jsr     incsp1
+	jmp     L0049
 ;
 ; ENTITY2.width = ENEMY_WIDTH;
 ;
-L0042:	lda     #$0D
+L0047:	lda     #$0D
 	sta     _ENTITY2+2
 ;
 ; ENTITY2.height = ENEMY_HEIGHT;
@@ -8491,7 +8526,7 @@ L0042:	lda     #$0D
 	ldx     #>(_ENTITY2)
 	jsr     _check_collision
 	tax
-	beq     L0043
+	beq     L0048
 ;
 ; enemy_y[index2] = TURN_OFF;
 ;
@@ -8519,17 +8554,17 @@ L0042:	lda     #$0D
 ;
 ; break;
 ;
-	jmp     L0044
+	jmp     L0049
 ;
 ; for (index2 = 0; index2 < MAX_ENEMY; ++index2) {
 ;
-L0043:	inc     _index2
-	jmp     L0040
+L0048:	inc     _index2
+	jmp     L0042
 ;
 ; for(index = 0; index < MAX_TURDS; ++index) {
 ;
-L0044:	inc     _index
-	jmp     L0039
+L0049:	inc     _index
+	jmp     L003B
 
 .endproc
 
