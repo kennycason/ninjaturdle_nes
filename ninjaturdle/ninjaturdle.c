@@ -20,6 +20,8 @@ unsigned char boss_health;
 unsigned char coyote_time;  // Frames of coyote time remaining
 unsigned char was_jumping;  // Whether we were jumping last frame
 	
+unsigned char enemy_dir[MAX_ENEMY]; // 0 = left, 1 = right
+
 void main(void) {
 	ppu_off(); // screen off
 	
@@ -445,7 +447,12 @@ void draw_sprites(void) {
 		if (temp_x == 0) temp_x = 1; // problems with x = 0
 		if (temp_x > 0xf0) continue;
 		if (temp_y < 0xf0) {
-			oam_meta_spr(temp_x, temp_y, enemy_anim[index2]);
+			if (enemy_type[index2] == ENEMY_BOSS2) {
+				// Draw the 3x3 boss sprite so its feet are at the intended y
+				oam_meta_spr(temp_x - 8, temp_y, enemy_anim[index2]);
+			} else {
+				oam_meta_spr(temp_x, temp_y, enemy_anim[index2]);
+			}
 		}
 	}
 	
@@ -851,6 +858,34 @@ void enemy_moves(void) {
 			if (enemy_actual_x[index] == 0) ++enemy_room[index];
 		}
 	}
+	else if (enemy_type[index] == ENEMY_BOSS2) {
+		// Set collision box to center-bottom of the boss
+		ENTITY1.x = enemy_x[index];
+		ENTITY1.y = enemy_y[index] + 28; // Bottom of the boss (32px height - 4px for safety)
+		ENTITY1.width = 28; 
+		ENTITY1.height = 4; // Just check the bottom 4 pixels for ground collision
+		
+		if (enemy_frames & 1) return; // half speed
+		
+		// Face the ninja
+		if (enemy_x[index] > ENTITY2.x) {
+			enemy_anim[index] = BossMotherWormSprL; // Use left-facing sprite
+		} else {
+			enemy_anim[index] = BossMotherWormSprL; // Use left-facing sprite for now
+		}
+		
+		// Shoot periodically
+		temp1 = enemy_frames + (index << 3);
+		temp1 &= 0x3f;
+		if (temp1 < 8 && enemy_bullet_cooldown[index] == 0) {
+			fire_enemy_bullet(index, BULLET_LINEAR);
+		}
+		
+		// Update bullet cooldown
+		if (enemy_bullet_cooldown[index] > 0) {
+			--enemy_bullet_cooldown[index];
+		}
+	}
 	else if (enemy_type[index] == ENEMY_WASP) {
 		//for bg collisions
 		ENTITY1.x = enemy_x[index];
@@ -916,7 +951,38 @@ void enemy_moves(void) {
 			}
 		}
 	}
+	else if (enemy_type[index] == ENEMY_WORM) {
+		// for bg collisions
+		ENTITY1.x = enemy_x[index];
+		ENTITY1.y = enemy_y[index];
+		ENTITY1.width = 13;
+		ENTITY1.height = 13;
 
+		if (enemy_frames & 1) return; // half speed
+		if (enemy_dir[index] == 0) { // Moving left
+			ENTITY1.x -= 1;
+			bg_collision_fast();
+			if (collision_L) {
+				enemy_dir[index] = 1; // Turn around to right
+				enemy_anim[index] = EnemyWormSprR1;
+				return;
+			}
+			if (enemy_actual_x[index] == 0) --enemy_room[index];
+			--enemy_actual_x[index];
+			enemy_anim[index] = EnemyWormSprL1;
+		} else { // Moving right
+			ENTITY1.x += 1;
+			bg_collision_fast();
+			if (collision_R) {
+				enemy_dir[index] = 0; // Turn around to left
+				enemy_anim[index] = EnemyWormSprL1;
+				return;
+			}
+			++enemy_actual_x[index];
+			if (enemy_actual_x[index] == 0) ++enemy_room[index];
+			enemy_anim[index] = EnemyWormSprR1;
+		}
+	}
 }
 
 
@@ -1230,6 +1296,48 @@ void sprite_collisions(void) {
         }
     }
     
+    // Check enemy collisions (player vs enemy/boss)
+    ENTITY1.x = high_byte(NINJA.x);
+    ENTITY1.y = high_byte(NINJA.y);
+    ENTITY1.width = HERO_WIDTH;
+    ENTITY1.height = HERO_HEIGHT;
+
+    for (index = 0; index < MAX_ENEMY; ++index) {
+        if (!enemy_active[index]) continue;
+
+        ENTITY2.x = enemy_x[index];
+        ENTITY2.y = enemy_y[index];
+
+        // Set collision box for boss or regular enemy
+        if (enemy_type[index] == ENEMY_BOSS1) {
+            ENTITY2.width = 28;  // 2x2 boss
+            ENTITY2.height = 28;
+        } else if (enemy_type[index] == ENEMY_BOSS2) {
+            ENTITY2.width = 40;  // 3x3 boss (48px - 8px for fairness)
+            ENTITY2.height = 40;
+        } else {
+            ENTITY2.width = ENEMY_WIDTH;
+            ENTITY2.height = ENEMY_HEIGHT;
+        }
+
+        if (check_collision(&ENTITY1, &ENTITY2)) {
+            // Only take damage if not in cooldown period
+            if (damage_cooldown == 0) {
+                unsigned char damage = corn_mode ? (BOSS_DAMAGE_PER_HIT * CORN_DAMAGE_MULTIPLIER) : BOSS_DAMAGE_PER_HIT;
+                if (boss_health < damage) boss_health = 0;
+                else boss_health -= damage;
+                player_health -= 2;
+                damage_cooldown = DAMAGE_COOLDOWN_TIME;
+                sfx_play(SFX_NOISE, 0);
+                if (player_health <= 0) {
+                    death = 1;
+                }
+            }
+            // Do NOT remove or damage the enemy/boss!
+            break; // Only one collision per frame
+        }
+    }
+    
     // Check enemy collisions
     ENTITY2.x = high_byte(NINJA.x);
     ENTITY2.y = high_byte(NINJA.y);
@@ -1242,28 +1350,25 @@ void sprite_collisions(void) {
             ENTITY1.y = enemy_y[index];
             
             // Use different collision box for boss
-            if (enemy_type[index] == ENEMY_BOSS1) {
-                ENTITY1.width = 28;  // 32 pixels - 4 pixels for safety
-                ENTITY1.height = 28; // 32 pixels - 4 pixels for safety
-            } else {
-                ENTITY1.width = ENEMY_WIDTH;
-                ENTITY1.height = ENEMY_HEIGHT;
-            }
-            
-            if (check_collision(&ENTITY1, &ENTITY2)) {
-                // Only take damage if not in cooldown period
-                if (damage_cooldown == 0) {
-                    player_health -= 2;
-                    damage_cooldown = DAMAGE_COOLDOWN_TIME;
+            if (enemy_type[index] == ENEMY_BOSS1 || enemy_type[index] == ENEMY_BOSS2) {
+                ENTITY2.width = 28;  // 32 pixels - 4 pixels for safety
+                ENTITY2.height = 28; // 32 pixels - 4 pixels for safety
+                
+                if (check_collision(&ENTITY1, &ENTITY2)) {
+                    // Hit boss
+                    unsigned char damage = corn_mode ? (BOSS_DAMAGE_PER_HIT * CORN_DAMAGE_MULTIPLIER) : BOSS_DAMAGE_PER_HIT;
+                    if (boss_health < damage) boss_health = 0;
+                    else boss_health -= damage;
+                    turd_active[index] = 0;
+                    sfx_play(SFX_DING, 0); // Play hit sound
                     
-                    // Play damage sound
-                    sfx_play(SFX_NOISE, 0);
-                    
-                    // Only set death flag if health is depleted
-                    if (player_health <= 0) {
-                        death = 1;
-                        break; // Exit the loop if dead
+                    // Check if boss is defeated
+                    if (boss_health <= 0) {
+                        enemy_y[index] = TURN_OFF;
+                        enemy_active[index] = 0;
+                        ++level_up; // Advance to next level
                     }
+                    break;
                 }
             }
         }
@@ -1345,6 +1450,23 @@ void sprite_obj_init(void) {
 	
 	for(++index;index < MAX_ENEMY; ++index) {
 		enemy_y[index] = TURN_OFF;
+	}
+
+	if (enemy_type[index] == ENEMY_WASP) {
+		enemy_anim[index] = EnemyWaspSprR;
+		enemy_dir[index] = 1;
+	} else if (enemy_type[index] == ENEMY_BOUNCE) {
+		enemy_anim[index] = EnemyBounceSpr;
+		enemy_dir[index] = 1;
+	} else if (enemy_type[index] == ENEMY_WORM) {
+		enemy_anim[index] = EnemyWormSprR1;
+		enemy_dir[index] = 1; // Start moving right
+	} else if (enemy_type[index] == ENEMY_BOSS1) {
+		enemy_anim[index] = Boss1SprR;
+		enemy_dir[index] = 1;
+	} else if (enemy_type[index] == ENEMY_BOSS2) {
+		enemy_anim[index] = BossMotherWormSprL;
+		enemy_dir[index] = 1;
 	}
 }
 
@@ -1463,19 +1585,15 @@ void update_turds(void) {
                     ENTITY2.y = enemy_y[index2];
                     
                     // Use different collision box for boss
-                    if (enemy_type[index2] == ENEMY_BOSS1) {
+                    if (enemy_type[index2] == ENEMY_BOSS1 || enemy_type[index2] == ENEMY_BOSS2) {
                         ENTITY2.width = 28;  // 32 pixels - 4 pixels for safety
                         ENTITY2.height = 28; // 32 pixels - 4 pixels for safety
                         
                         if (check_collision(&ENTITY1, &ENTITY2)) {
                             // Hit boss
-                            if (corn_mode) {
-                                // Increased damage in corn mode
-                                boss_health -= BOSS_DAMAGE_PER_HIT * CORN_DAMAGE_MULTIPLIER;
-                            } else {
-                                boss_health -= BOSS_DAMAGE_PER_HIT;
-                            }
-                            
+                            unsigned char damage = corn_mode ? (BOSS_DAMAGE_PER_HIT * CORN_DAMAGE_MULTIPLIER) : BOSS_DAMAGE_PER_HIT;
+                            if (boss_health < damage) boss_health = 0;
+                            else boss_health -= damage;
                             turd_active[index] = 0;
                             sfx_play(SFX_DING, 0); // Play hit sound
                             

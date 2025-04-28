@@ -2003,10 +2003,22 @@ _w1l2_coins:
 	.byte	$02
 	.byte	$FF
 _w1l2_enemies:
-	.byte	$B0
+	.byte	$A0
 	.byte	$07
 	.byte	$C0
+	.byte	$20
+	.byte	$C0
+	.byte	$02
 	.byte	$10
+	.byte	$0B
+	.byte	$C0
+	.byte	$04
+	.byte	$50
+	.byte	$0B
+	.byte	$C0
+	.byte	$06
+	.byte	$80
+	.byte	$0B
 	.byte	$FF
 _w1l2_main:
 	.addr	_w1l2_main_0
