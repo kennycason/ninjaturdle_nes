@@ -1,9 +1,9 @@
 ##############################################################################
 # Paths to cc65 tools
 ##############################################################################
-CC65 = ../tools/cc65/bin/cc65
-CA65 = ../tools/cc65/bin/ca65
-LD65 = ../tools/cc65/bin/ld65
+CC65 = tools/cc65/bin/cc65
+CA65 = tools/cc65/bin/ca65
+LD65 = tools/cc65/bin/ld65
 
 # Linker config (adjust if needed)
 CFG  = mmc1_32k.cfg
@@ -13,7 +13,7 @@ CFLAGS = -Oirs --add-source
 AFLAGS =
 
 # Runtime library path
-RUNTIME = ../tools/cc65/lib/nes.lib
+RUNTIME = tools/cc65/lib/nes.lib
 
 # Disable default .c/.o rules so it won't fall back to clang
 .SUFFIXES:
@@ -58,7 +58,7 @@ all: ninjaturdle.nes
 ##############################################################################
 # Special rule for crt0.s
 ##############################################################################
-crt0.o: crt0.s ninjaturdle.chr ninjaturdle2.chr sound/TestMusic3.s sound/SoundFx.s
+crt0.o: crt0.s ninjaturdle.chr ninjaturdle2.chr sound sound
 	$(CA65) $(AFLAGS) $< -o $@
 
 ##############################################################################
