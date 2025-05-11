@@ -1,3 +1,16 @@
+#ifndef SPRITES_H
+#define SPRITES_H
+
+#include <stdint.h>
+
+// Sprite tile structure - matches NES OAM format
+typedef struct {
+    int8_t y_offset;
+    uint8_t tile_index;
+    uint8_t attributes;
+    int8_t x_offset;
+} sprite_tile_t;
+
 // a 16x16 pixel metasprite
 
 const unsigned char NinjaSprL[]={
@@ -238,3 +251,5 @@ const unsigned char EnemyWormSprR2[]={
     7,    7,    0x59, 3,  // Bottom-right tile
     128
 };
+
+#endif // SPRITES_H
