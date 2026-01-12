@@ -94,18 +94,18 @@ const unsigned char EnemyBounceSpr2[]={
 
 // Thorns enemy (two states). Tiles are directly below wasp art.
 const unsigned char EnemyThornsOutSpr[]={
-      0xff, 0xff, 0x28, 2,  // Top-left tile
-      7,    0xff, 0x29, 2,  // Top-right tile
-      0xff, 7,    0x38, 2,  // Bottom-left tile
-      7,    7,    0x39, 2,  // Bottom-right tile
+      0xff, 0xff, 0x0c, 2,  // Top-left tile (thorns OUT, 2nd-to-last 16x16 block in row 1)
+      7,    0xff, 0x0d, 2,  // Top-right tile
+      0xff, 7,    0x1c, 2,  // Bottom-left tile
+      7,    7,    0x1d, 2,  // Bottom-right tile
     128
 };
 
 const unsigned char EnemyThornsInSpr[]={
-      0xff, 0xff, 0x2A, 2,  // Top-left tile (retracted)
-      7,    0xff, 0x2B, 2,  // Top-right tile
-      0xff, 7,    0x3A, 2,  // Bottom-left tile
-      7,    7,    0x3B, 2,  // Bottom-right tile
+      0xff, 0xff, 0x0e, 2,  // Top-left tile (thorns IN, last 16x16 block in row 1)
+      7,    0xff, 0x0f, 2,  // Top-right tile
+      0xff, 7,    0x1e, 2,  // Bottom-left tile
+      7,    7,    0x1f, 2,  // Bottom-right tile
     128
 };
 
@@ -238,34 +238,36 @@ const unsigned char TurdLifeSpr[]={
 };
 
 const unsigned char EnemyWormSprL1[]={
-    0xff, 0xff, 0x0E, 3,  // Top-left tile (new location, row 0 last two tiles)
-    7,    0xff, 0x0F, 3,  // Top-right tile
-    0xff, 7,    0x1E, 3,  // Bottom-left tile (row 1 same columns)
-    7,    7,    0x1F, 3,  // Bottom-right tile
+    // Worm facing LEFT, row directly below wasp = 16x16 row 2 (tiles 0x20/0x30)
+    0xff, 0xff, 0x28, 3,  // Top-left tile (frame 1)
+    7,    0xff, 0x29, 3,  // Top-right tile
+    0xff, 7,    0x38, 3,  // Bottom-left tile
+    7,    7,    0x39, 3,  // Bottom-right tile
     128
 };
 
 const unsigned char EnemyWormSprL2[]={
-    0xff, 0xff, 0x0E, 3,  // Top-left tile (shares moved art)
-    7,    0xff, 0x0F, 3,  // Top-right tile
-    0xff, 7,    0x1E, 3,  // Bottom-left tile
-    7,    7,    0x1F, 3,  // Bottom-right tile
+    0xff, 0xff, 0x2a, 3,  // Top-left tile (frame 2)
+    7,    0xff, 0x2b, 3,  // Top-right tile
+    0xff, 7,    0x3a, 3,  // Bottom-left tile
+    7,    7,    0x3b, 3,  // Bottom-right tile
     128
 };
 
 const unsigned char EnemyWormSprR1[]={
-    0xff, 0xff, 0x0E, 0x43,  // Top-left tile, h-flip
-    7,    0xff, 0x0F, 0x43,  // Top-right tile, h-flip
-    0xff, 7,    0x1E, 0x43,  // Bottom-left tile, h-flip
-    7,    7,    0x1F, 0x43,  // Bottom-right tile, h-flip
+    // Worm facing RIGHT is its own row below that = 16x16 row 3 (tiles 0x40/0x50)
+    0xff, 0xff, 0x48, 3,  // Top-left tile (frame 1)
+    7,    0xff, 0x49, 3,  // Top-right tile
+    0xff, 7,    0x58, 3,  // Bottom-left tile
+    7,    7,    0x59, 3,  // Bottom-right tile
     128
 };
 
 const unsigned char EnemyWormSprR2[]={
-    0xff, 0xff, 0x0E, 0x43,  // Top-left tile, h-flip
-    7,    0xff, 0x0F, 0x43,  // Top-right tile, h-flip
-    0xff, 7,    0x1E, 0x43,  // Bottom-left tile, h-flip
-    7,    7,    0x1F, 0x43,  // Bottom-right tile, h-flip
+    0xff, 0xff, 0x4a, 3,  // Top-left tile (frame 2)
+    7,    0xff, 0x4b, 3,  // Top-right tile
+    0xff, 7,    0x5a, 3,  // Bottom-left tile
+    7,    7,    0x5b, 3,  // Bottom-right tile
     128
 };
 

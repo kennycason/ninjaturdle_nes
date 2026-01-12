@@ -262,7 +262,7 @@ detectNTSC:
 .segment "RODATA"
 
 music_data:
-	.include "sound/TestMusic3.s"
+	.include "sound/TechnoHard.s"
 
 
 

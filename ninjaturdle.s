@@ -417,37 +417,37 @@ _EnemyBounceSpr2:
 _EnemyThornsOutSpr:
 	.byte	$FF
 	.byte	$FF
-	.byte	$28
+	.byte	$0C
 	.byte	$02
 	.byte	$07
 	.byte	$FF
-	.byte	$29
+	.byte	$0D
 	.byte	$02
 	.byte	$FF
 	.byte	$07
-	.byte	$38
+	.byte	$1C
 	.byte	$02
 	.byte	$07
 	.byte	$07
-	.byte	$39
+	.byte	$1D
 	.byte	$02
 	.byte	$80
 _EnemyThornsInSpr:
 	.byte	$FF
 	.byte	$FF
-	.byte	$2A
+	.byte	$0E
 	.byte	$02
 	.byte	$07
 	.byte	$FF
-	.byte	$2B
+	.byte	$0F
 	.byte	$02
 	.byte	$FF
 	.byte	$07
-	.byte	$3A
+	.byte	$1E
 	.byte	$02
 	.byte	$07
 	.byte	$07
-	.byte	$3B
+	.byte	$1F
 	.byte	$02
 	.byte	$80
 _Boss1SprL:
@@ -743,74 +743,74 @@ _TurdLifeSpr:
 _EnemyWormSprL1:
 	.byte	$FF
 	.byte	$FF
-	.byte	$0E
+	.byte	$28
 	.byte	$03
 	.byte	$07
 	.byte	$FF
-	.byte	$0F
+	.byte	$29
 	.byte	$03
 	.byte	$FF
 	.byte	$07
-	.byte	$1E
+	.byte	$38
 	.byte	$03
 	.byte	$07
 	.byte	$07
-	.byte	$1F
+	.byte	$39
 	.byte	$03
 	.byte	$80
 _EnemyWormSprL2:
 	.byte	$FF
 	.byte	$FF
-	.byte	$0E
+	.byte	$2A
 	.byte	$03
 	.byte	$07
 	.byte	$FF
-	.byte	$0F
+	.byte	$2B
 	.byte	$03
 	.byte	$FF
 	.byte	$07
-	.byte	$1E
+	.byte	$3A
 	.byte	$03
 	.byte	$07
 	.byte	$07
-	.byte	$1F
+	.byte	$3B
 	.byte	$03
 	.byte	$80
 _EnemyWormSprR1:
 	.byte	$FF
 	.byte	$FF
-	.byte	$0E
-	.byte	$43
+	.byte	$48
+	.byte	$03
 	.byte	$07
 	.byte	$FF
-	.byte	$0F
-	.byte	$43
+	.byte	$49
+	.byte	$03
 	.byte	$FF
 	.byte	$07
-	.byte	$1E
-	.byte	$43
+	.byte	$58
+	.byte	$03
 	.byte	$07
 	.byte	$07
-	.byte	$1F
-	.byte	$43
+	.byte	$59
+	.byte	$03
 	.byte	$80
 _EnemyWormSprR2:
 	.byte	$FF
 	.byte	$FF
-	.byte	$0E
-	.byte	$43
+	.byte	$4A
+	.byte	$03
 	.byte	$07
 	.byte	$FF
-	.byte	$0F
-	.byte	$43
+	.byte	$4B
+	.byte	$03
 	.byte	$FF
 	.byte	$07
-	.byte	$1E
-	.byte	$43
+	.byte	$5A
+	.byte	$03
 	.byte	$07
 	.byte	$07
-	.byte	$1F
-	.byte	$43
+	.byte	$5B
+	.byte	$03
 	.byte	$80
 _shuffle_array:
 	.byte	$00
