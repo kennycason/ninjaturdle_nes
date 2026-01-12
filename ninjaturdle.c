@@ -983,6 +983,23 @@ void enemy_moves(void) {
 			enemy_anim[index] = EnemyWormSprR1;
 		}
 	}
+	else if (enemy_type[index] == ENEMY_THORNS) {
+		// Stationary; toggle spikes based on timer
+		if (enemy_thorn_timer[index] > 0) {
+			--enemy_thorn_timer[index];
+		}
+		if (enemy_thorn_timer[index] == 0) {
+			if (enemy_thorn_out[index]) {
+				enemy_thorn_out[index] = 0;
+				enemy_thorn_timer[index] = enemy_thorn_delay[index] ? enemy_thorn_delay[index] : (4 * 60);
+				enemy_anim[index] = EnemyThornsInSpr;
+			} else {
+				enemy_thorn_out[index] = 1;
+				enemy_thorn_timer[index] = 120; // spikes stay out for ~2 seconds
+				enemy_anim[index] = EnemyThornsOutSpr;
+			}
+		}
+	}
 }
 
 
@@ -1305,6 +1322,8 @@ void sprite_collisions(void) {
     for (index = 0; index < MAX_ENEMY; ++index) {
         if (!enemy_active[index]) continue;
 
+		if (enemy_type[index] == ENEMY_THORNS && enemy_thorn_out[index] == 0) continue; // safe while retracted
+
         ENTITY2.x = enemy_x[index];
         ENTITY2.y = enemy_y[index];
 
@@ -1380,6 +1399,9 @@ void sprite_collisions(void) {
 // cc65 is very slow if 2 arrays/pointers are on the same line, so I
 // broke them into 2 separate lines with temp1 as a passing variable
 void sprite_obj_init(void) {
+	unsigned char enemy_stride;
+	unsigned char param;
+	unsigned int delay_frames;
 
 	pointer = Coins_list[level];
 	for(index = 0,index2 = 0;index < MAX_COINS; ++index) {
@@ -1419,6 +1441,11 @@ void sprite_obj_init(void) {
 	
 
 	pointer = Enemy_list[level];
+	// Detect stride (4 legacy bytes or 5 with param) by scanning to sentinel
+	for(index2 = 0; pointer[index2] != TURN_OFF; ++index2) { }
+	temp1 = index2; // bytes before sentinel
+	enemy_stride = (temp1 % 5 == 0) ? 5 : 4;
+
 	for(index = 0,index2 = 0;index < MAX_ENEMY; ++index) {
 		
 		enemy_x[index] = 0;
@@ -1444,29 +1471,53 @@ void sprite_obj_init(void) {
 		
 		temp1 = pointer[index2]; // get a byte of data
 		enemy_type[index] = temp1;
-		
 		++index2;
+
+		param = 0;
+		if (enemy_stride == 5) {
+			param = pointer[index2];
+			++index2;
+		} else {
+			param = 4; // default delay seconds for thorns in legacy data
+		}
+
+		// Per-type initialization
+		if (enemy_type[index] == ENEMY_WASP) {
+			enemy_anim[index] = EnemyWaspSprR;
+			enemy_dir[index] = 1;
+		} else if (enemy_type[index] == ENEMY_BOUNCE) {
+			enemy_anim[index] = EnemyBounceSpr;
+			enemy_dir[index] = 1;
+		} else if (enemy_type[index] == ENEMY_WORM) {
+			enemy_anim[index] = EnemyWormSprR1;
+			enemy_dir[index] = 1; // Start moving right
+		} else if (enemy_type[index] == ENEMY_BOSS1) {
+			enemy_anim[index] = Boss1SprR;
+			enemy_dir[index] = 1;
+		} else if (enemy_type[index] == ENEMY_BOSS2) {
+			enemy_anim[index] = BossMotherWormSprL;
+			enemy_dir[index] = 1;
+		} else if (enemy_type[index] == ENEMY_THORNS) {
+			delay_frames = (unsigned int)param * 60;
+			if (delay_frames == 0) delay_frames = 4 * 60;
+			enemy_thorn_delay[index] = delay_frames;
+			enemy_thorn_timer[index] = delay_frames;
+			enemy_thorn_out[index] = 0;
+			enemy_anim[index] = EnemyThornsInSpr;
+			enemy_dir[index] = 0;
+		} else {
+			enemy_thorn_delay[index] = 0;
+			enemy_thorn_timer[index] = 0;
+			enemy_thorn_out[index] = 0;
+		}
 	}
 	
 	for(++index;index < MAX_ENEMY; ++index) {
 		enemy_y[index] = TURN_OFF;
-	}
-
-	if (enemy_type[index] == ENEMY_WASP) {
-		enemy_anim[index] = EnemyWaspSprR;
-		enemy_dir[index] = 1;
-	} else if (enemy_type[index] == ENEMY_BOUNCE) {
-		enemy_anim[index] = EnemyBounceSpr;
-		enemy_dir[index] = 1;
-	} else if (enemy_type[index] == ENEMY_WORM) {
-		enemy_anim[index] = EnemyWormSprR1;
-		enemy_dir[index] = 1; // Start moving right
-	} else if (enemy_type[index] == ENEMY_BOSS1) {
-		enemy_anim[index] = Boss1SprR;
-		enemy_dir[index] = 1;
-	} else if (enemy_type[index] == ENEMY_BOSS2) {
-		enemy_anim[index] = BossMotherWormSprL;
-		enemy_dir[index] = 1;
+		enemy_active[index] = 0;
+		enemy_thorn_out[index] = 0;
+		enemy_thorn_timer[index] = 0;
+		enemy_thorn_delay[index] = 0;
 	}
 }
 
@@ -1609,7 +1660,12 @@ void update_turds(void) {
                         ENTITY2.width = ENEMY_WIDTH;
                         ENTITY2.height = ENEMY_HEIGHT;
                         
-                        if (check_collision(&ENTITY1, &ENTITY2)) {
+						if (enemy_type[index2] == ENEMY_THORNS) {
+							// Thorns are indestructible; skip collision handling for turds
+							continue;
+						}
+						
+						if (check_collision(&ENTITY1, &ENTITY2)) {
                             // Hit enemy
                             enemy_y[index2] = TURN_OFF;
                             enemy_active[index2] = 0;

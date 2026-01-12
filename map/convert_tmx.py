@@ -9,11 +9,12 @@ import argparse
 # Tile type constants - matching sprite sheet layout
 TILE_HP_UP = 0x01     # First tile in top row (0,0)
 TILE_CORN_UP = 0x02   # Second tile in top row (1,0)
-TILE_ENEMY_WASP = 0x09   # Flying wasp
+TILE_ENEMY_WASP = 0x09    # Flying wasp
 TILE_ENEMY_BOUNCE = 0x0A  # Bouncing enemy
+TILE_ENEMY_WORM = 0x0B    # Worm enemy
+TILE_ENEMY_THORNS = 0x0C  # Stationary thorns (toggle spikes)
 TILE_ENEMY_BOSS1 = 0x10   # Boss enemy
 TILE_ENEMY_BOSS2 = 0x20   # Boss2 enemy
-TILE_ENEMY_WORM = 0x0B   # Worm enemy
 
 # Sprite tileset GIDs (firstgid=129)
 SPRITE_GID_HP_UP = 129      # 129 + 0 (first tile at 0,0)
@@ -21,6 +22,7 @@ SPRITE_GID_CORN_UP = 130    # 129 + 1 (second tile at 1,0)
 SPRITE_GID_WASP = 137       # 129 + 8
 SPRITE_GID_BOUNCE = 138     # 129 + 9
 SPRITE_GID_WORM = 139       # 129 + 10
+SPRITE_GID_THORNS = 140     # 129 + 11 (tile after worm)
 SPRITE_GID_BOSS = 144       # 129 + 15
 SPRITE_GID_BOSS2 = 152      # 129 + 8 + 15
 
@@ -71,52 +73,98 @@ def process_object_layer(root):
     coin_data = []
     enemy_data = []
     
-    # Find the object layer
+    # Prefer an objectgroup named "object" with tile objects (supports per-object properties)
+    object_group = root.find(".//objectgroup[@name='object']")
+    if object_group is not None:
+        for obj in object_group.findall('object'):
+            gid = int(obj.get('gid', 0))
+            if gid == 0:
+                continue
+
+            # Tiled stores pixel positions; convert to tile units
+            x = int(float(obj.get('x', 0)) // 16)
+            y = int(float(obj.get('y', 0)) // 16)
+
+            delay_seconds = 4  # default to 4s when not provided
+            props = obj.find('properties')
+            if props is not None:
+                for prop in props.findall('property'):
+                    if prop.get('name') == 'delay':
+                        try:
+                            delay_seconds = int(float(prop.get('value', '0')))
+                        except ValueError:
+                            delay_seconds = 0
+
+            if gid == SPRITE_GID_CORN_UP:
+                print(f"Adding coin at ({x}, {y})")
+                coin_data.append((x, y))
+            elif gid == SPRITE_GID_WASP:
+                print(f"Adding wasp at ({x}, {y})")
+                enemy_data.append((x, y, TILE_ENEMY_WASP, 0))
+            elif gid == SPRITE_GID_BOUNCE:
+                print(f"Adding bounce enemy at ({x}, {y})")
+                enemy_data.append((x, y, TILE_ENEMY_BOUNCE, 0))
+            elif gid == SPRITE_GID_WORM:
+                print(f"Adding worm enemy at ({x}, {y})")
+                enemy_data.append((x, y, TILE_ENEMY_WORM, 0))
+            elif gid == SPRITE_GID_THORNS:
+                print(f"Adding thorns at ({x}, {y}) with delay {delay_seconds}s")
+                enemy_data.append((x, y, TILE_ENEMY_THORNS, delay_seconds))
+            elif gid == SPRITE_GID_BOSS:
+                print(f"Adding boss at ({x}, {y})")
+                enemy_data.append((x, y, TILE_ENEMY_BOSS1, 0))
+            elif gid == SPRITE_GID_BOSS2:
+                print(f"Adding boss2 at ({x}, {y})")
+                enemy_data.append((x, y, TILE_ENEMY_BOSS2, 0))
+            else:
+                print(f"Unknown GID {gid} at ({x}, {y})")
+
+        return coin_data, enemy_data
+
+    # Fallback: legacy tile layer named "object" with CSV data (no properties)
     object_layer = root.find(".//layer[@name='object']")
     if object_layer is None:
         print("No object layer found")
         return coin_data, enemy_data
         
-    # Get layer data
     data = object_layer.find('data')
     if data is None or data.get('encoding') != 'csv':
         print("Error: Object layer data not found or not in CSV format")
         return coin_data, enemy_data
         
-    # Parse CSV data into 2D array
     tile_data = parse_csv_data(data.text)
     height = len(tile_data)
     width = len(tile_data[0]) if height > 0 else 0
     
-    # Process each tile in the object layer
     for y in range(height):
         for x in range(width):
             gid = tile_data[y][x]
-            if gid == 0:  # Skip empty tiles
+            if gid == 0:
                 continue
                 
             print(f"Found object with GID {gid} at ({x}, {y})")
             
-            # Map GIDs to internal tile types - use exact matches
             if gid == SPRITE_GID_CORN_UP:
                 print(f"Adding coin at ({x}, {y})")
                 coin_data.append((x, y))
-            # Enemy GIDs are completely different values
             elif gid == SPRITE_GID_WASP:
                 print(f"Adding wasp at ({x}, {y})")
-                enemy_data.append((x, y, TILE_ENEMY_WASP))
+                enemy_data.append((x, y, TILE_ENEMY_WASP, 0))
             elif gid == SPRITE_GID_BOUNCE:
                 print(f"Adding bounce enemy at ({x}, {y})")
-                enemy_data.append((x, y, TILE_ENEMY_BOUNCE))
+                enemy_data.append((x, y, TILE_ENEMY_BOUNCE, 0))
             elif gid == SPRITE_GID_WORM:
                 print(f"Adding worm enemy at ({x}, {y})")
-                enemy_data.append((x, y, TILE_ENEMY_WORM))
+                enemy_data.append((x, y, TILE_ENEMY_WORM, 0))
+            elif gid == SPRITE_GID_THORNS:
+                print(f"Adding thorns at ({x}, {y})")
+                enemy_data.append((x, y, TILE_ENEMY_THORNS, 4))  # default 4s delay in legacy mode
             elif gid == SPRITE_GID_BOSS:
                 print(f"Adding boss at ({x}, {y})")
-                enemy_data.append((x, y, TILE_ENEMY_BOSS1))
+                enemy_data.append((x, y, TILE_ENEMY_BOSS1, 0))
             elif gid == SPRITE_GID_BOSS2:
                 print(f"Adding boss2 at ({x}, {y})")
-                enemy_data.append((x, y, TILE_ENEMY_BOSS2))
+                enemy_data.append((x, y, TILE_ENEMY_BOSS2, 0))
             else:
                 print(f"Unknown GID {gid} at ({x}, {y})")
             
@@ -209,10 +257,11 @@ def convert_tmx(tmx_file, output_file):
                 f.write(f'    0x{(y*16):02x}, {x//16}, 0x{(x%16)*16:02x}, 0x02,\n')  # 0x02 = COIN_REG
             f.write('    0xff  // End marker\n};\n\n')
             
-            # Write enemy data  
+            # Write enemy data (y, room, x, type, param)
             f.write(f'const uint8_t w{world}l{level}_enemies[] = {{\n')
-            for x, y, enemy_type in enemy_data:
-                f.write(f'    0x{(y*16):02x}, {x//16}, 0x{(x%16)*16:02x}, 0x{enemy_type:02x},\n')
+            for x, y, enemy_type, param in enemy_data:
+                param_byte = max(0, min(255, int(param)))
+                f.write(f'    0x{(y*16):02x}, {x//16}, 0x{(x%16)*16:02x}, 0x{enemy_type:02x}, 0x{param_byte:02x},\n')
             f.write('    0xff  // End marker\n};\n\n')
             
             # Write room pointers array

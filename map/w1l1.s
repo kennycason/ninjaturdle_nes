@@ -1995,46 +1995,72 @@ _w1l1_enemies:
 	.byte	$04
 	.byte	$C0
 	.byte	$09
+	.byte	$00
 	.byte	$70
 	.byte	$02
 	.byte	$00
 	.byte	$09
+	.byte	$00
 	.byte	$80
 	.byte	$00
 	.byte	$B0
 	.byte	$09
+	.byte	$00
+	.byte	$A0
+	.byte	$00
+	.byte	$70
+	.byte	$0C
+	.byte	$04
+	.byte	$A0
+	.byte	$00
+	.byte	$80
+	.byte	$0C
+	.byte	$04
+	.byte	$A0
+	.byte	$00
+	.byte	$90
+	.byte	$0C
+	.byte	$04
 	.byte	$A0
 	.byte	$04
 	.byte	$70
 	.byte	$09
+	.byte	$00
 	.byte	$B0
 	.byte	$07
 	.byte	$C0
 	.byte	$10
+	.byte	$00
 	.byte	$C0
 	.byte	$00
 	.byte	$E0
 	.byte	$0B
+	.byte	$00
 	.byte	$C0
 	.byte	$01
 	.byte	$E0
 	.byte	$0A
+	.byte	$00
 	.byte	$C0
 	.byte	$02
 	.byte	$30
 	.byte	$0A
+	.byte	$00
 	.byte	$C0
 	.byte	$02
 	.byte	$90
 	.byte	$0A
+	.byte	$00
 	.byte	$C0
 	.byte	$04
 	.byte	$C0
 	.byte	$0B
+	.byte	$00
 	.byte	$C0
 	.byte	$05
 	.byte	$90
 	.byte	$0A
+	.byte	$00
 	.byte	$FF
 _w1l1_main:
 	.addr	_w1l1_main_0

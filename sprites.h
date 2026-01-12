@@ -92,6 +92,23 @@ const unsigned char EnemyBounceSpr2[]={
 	128
 };
 
+// Thorns enemy (two states). Tiles are directly below wasp art.
+const unsigned char EnemyThornsOutSpr[]={
+      0xff, 0xff, 0x28, 2,  // Top-left tile
+      7,    0xff, 0x29, 2,  // Top-right tile
+      0xff, 7,    0x38, 2,  // Bottom-left tile
+      7,    7,    0x39, 2,  // Bottom-right tile
+    128
+};
+
+const unsigned char EnemyThornsInSpr[]={
+      0xff, 0xff, 0x2A, 2,  // Top-left tile (retracted)
+      7,    0xff, 0x2B, 2,  // Top-right tile
+      0xff, 7,    0x3A, 2,  // Bottom-left tile
+      7,    7,    0x3B, 2,  // Bottom-right tile
+    128
+};
+
 const unsigned char Boss1SprL[]={
     // Top-left 16x16 block
     0xff, 0xff, 0x2C, 1,  // Top-left tile

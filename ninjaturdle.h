@@ -173,6 +173,10 @@ unsigned char enemy_room[MAX_ENEMY];
 unsigned char enemy_actual_x[MAX_ENEMY];
 unsigned char enemy_type[MAX_ENEMY];
 const unsigned char * enemy_anim[MAX_ENEMY];
+// Thorns enemy state
+unsigned int enemy_thorn_delay[MAX_ENEMY]; // delay (frames) before spikes appear
+unsigned int enemy_thorn_timer[MAX_ENEMY]; // countdown timer
+unsigned char enemy_thorn_out[MAX_ENEMY];   // 1 when spikes are out
 
 #define ENEMY_WIDTH 13
 #define ENEMY_HEIGHT 13
