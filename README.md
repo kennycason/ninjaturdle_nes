@@ -11,7 +11,6 @@ make
 ## Build & Run Ninja Turdle
 
 ```bash
-cd ninjaturdle/
 make
 fceux ninjaturdle.nes
 ```

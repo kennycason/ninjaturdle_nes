@@ -221,34 +221,34 @@ const unsigned char TurdLifeSpr[]={
 };
 
 const unsigned char EnemyWormSprL1[]={
-    0xff, 0xff, 0x26, 3,  // Top-left tile
-    7,    0xff, 0x27, 3,  // Top-right tile
-    0xff, 7,    0x36, 3,  // Bottom-left tile
-    7,    7,    0x37, 3,  // Bottom-right tile
+    0xff, 0xff, 0x0E, 3,  // Top-left tile (new location, row 0 last two tiles)
+    7,    0xff, 0x0F, 3,  // Top-right tile
+    0xff, 7,    0x1E, 3,  // Bottom-left tile (row 1 same columns)
+    7,    7,    0x1F, 3,  // Bottom-right tile
     128
 };
 
 const unsigned char EnemyWormSprL2[]={
-    0xff, 0xff, 0x28, 3,  // Top-left tile
-    7,    0xff, 0x29, 3,  // Top-right tile
-    0xff, 7,    0x38, 3,  // Bottom-left tile
-    7,    7,    0x39, 3,  // Bottom-right tile
+    0xff, 0xff, 0x0E, 3,  // Top-left tile (shares moved art)
+    7,    0xff, 0x0F, 3,  // Top-right tile
+    0xff, 7,    0x1E, 3,  // Bottom-left tile
+    7,    7,    0x1F, 3,  // Bottom-right tile
     128
 };
 
 const unsigned char EnemyWormSprR1[]={
-    0xff, 0xff, 0x46, 3,  // Top-left tile
-    7,    0xff, 0x47, 3,  // Top-right tile
-    0xff, 7,    0x56, 3,  // Bottom-left tile
-    7,    7,    0x57, 3,  // Bottom-right tile
+    0xff, 0xff, 0x0E, 0x43,  // Top-left tile, h-flip
+    7,    0xff, 0x0F, 0x43,  // Top-right tile, h-flip
+    0xff, 7,    0x1E, 0x43,  // Bottom-left tile, h-flip
+    7,    7,    0x1F, 0x43,  // Bottom-right tile, h-flip
     128
 };
 
 const unsigned char EnemyWormSprR2[]={
-    0xff, 0xff, 0x48, 3,  // Top-left tile
-    7,    0xff, 0x49, 3,  // Top-right tile
-    0xff, 7,    0x58, 3,  // Bottom-left tile
-    7,    7,    0x59, 3,  // Bottom-right tile
+    0xff, 0xff, 0x0E, 0x43,  // Top-left tile, h-flip
+    7,    0xff, 0x0F, 0x43,  // Top-right tile, h-flip
+    0xff, 7,    0x1E, 0x43,  // Bottom-left tile, h-flip
+    7,    7,    0x1F, 0x43,  // Bottom-right tile, h-flip
     128
 };
 

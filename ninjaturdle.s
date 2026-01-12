@@ -702,74 +702,74 @@ _TurdLifeSpr:
 _EnemyWormSprL1:
 	.byte	$FF
 	.byte	$FF
-	.byte	$26
+	.byte	$0E
 	.byte	$03
 	.byte	$07
 	.byte	$FF
-	.byte	$27
+	.byte	$0F
 	.byte	$03
 	.byte	$FF
 	.byte	$07
-	.byte	$36
+	.byte	$1E
 	.byte	$03
 	.byte	$07
 	.byte	$07
-	.byte	$37
+	.byte	$1F
 	.byte	$03
 	.byte	$80
 _EnemyWormSprL2:
 	.byte	$FF
 	.byte	$FF
-	.byte	$28
+	.byte	$0E
 	.byte	$03
 	.byte	$07
 	.byte	$FF
-	.byte	$29
+	.byte	$0F
 	.byte	$03
 	.byte	$FF
 	.byte	$07
-	.byte	$38
+	.byte	$1E
 	.byte	$03
 	.byte	$07
 	.byte	$07
-	.byte	$39
+	.byte	$1F
 	.byte	$03
 	.byte	$80
 _EnemyWormSprR1:
 	.byte	$FF
 	.byte	$FF
-	.byte	$46
-	.byte	$03
+	.byte	$0E
+	.byte	$43
 	.byte	$07
 	.byte	$FF
-	.byte	$47
-	.byte	$03
+	.byte	$0F
+	.byte	$43
 	.byte	$FF
 	.byte	$07
-	.byte	$56
-	.byte	$03
+	.byte	$1E
+	.byte	$43
 	.byte	$07
 	.byte	$07
-	.byte	$57
-	.byte	$03
+	.byte	$1F
+	.byte	$43
 	.byte	$80
 _EnemyWormSprR2:
 	.byte	$FF
 	.byte	$FF
-	.byte	$48
-	.byte	$03
+	.byte	$0E
+	.byte	$43
 	.byte	$07
 	.byte	$FF
-	.byte	$49
-	.byte	$03
+	.byte	$0F
+	.byte	$43
 	.byte	$FF
 	.byte	$07
-	.byte	$58
-	.byte	$03
+	.byte	$1E
+	.byte	$43
 	.byte	$07
 	.byte	$07
-	.byte	$59
-	.byte	$03
+	.byte	$1F
+	.byte	$43
 	.byte	$80
 _shuffle_array:
 	.byte	$00
