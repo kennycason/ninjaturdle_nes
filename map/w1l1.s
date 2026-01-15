@@ -134,17 +134,17 @@ _w1l1_main_0:
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
+	.byte	$23
+	.byte	$28
+	.byte	$29
 	.byte	$1E
 	.byte	$00
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
+	.byte	$24
+	.byte	$25
+	.byte	$2D
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -172,9 +172,9 @@ _w1l1_main_0:
 	.byte	$1E
 	.byte	$00
 	.byte	$00
-	.byte	$00
-	.byte	$00
-	.byte	$00
+	.byte	$2C
+	.byte	$2C
+	.byte	$2C
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -197,7 +197,7 @@ _w1l1_main_0:
 	.byte	$00
 	.byte	$11
 	.byte	$1B
-	.byte	$00
+	.byte	$22
 	.byte	$0A
 	.byte	$09
 	.byte	$09
@@ -363,7 +363,7 @@ _w1l1_main_1:
 	.byte	$00
 	.byte	$00
 	.byte	$1B
-	.byte	$00
+	.byte	$2A
 	.byte	$00
 	.byte	$00
 	.byte	$00

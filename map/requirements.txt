@@ -1,0 +1,7 @@
+# `convert_tmx.py` currently uses only the Python standard library (no pip deps).
+#
+# Optional (not required): faster/more robust XML parsing if you choose to switch
+# from `xml.etree.ElementTree` to `lxml` later.
+# lxml>=5.0.0
+
+

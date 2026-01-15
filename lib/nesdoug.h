@@ -1,6 +1,14 @@
 // Written by Doug Fraker
 // version 1.3, 10/31/2022
 
+// Editor/tooling compatibility:
+// cc65 defines `__fastcall__`, but typical C/C++ tooling does not.
+#ifndef __CC65__
+#ifndef __fastcall__
+#define __fastcall__
+#endif
+#endif
+
 // Why am I doing so much with a vram_buffer? This is an automated system, which
 // works when the screen is on. You can write to the buffer at any time. 
 // During NMI / v-blank, it automatically writes to the PPU. 

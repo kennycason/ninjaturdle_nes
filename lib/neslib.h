@@ -1,5 +1,13 @@
-//NES hardware-dependent functions by Shiru (shiru@mail.ru)
-//Feel free to do anything you want with this code, consider it Public Domain
+// NES hardware-dependent functions by Shiru (shiru@mail.ru)
+// Feel free to do anything you want with this code, consider it Public Domain
+
+// Editor/tooling compatibility:
+// cc65 defines `__fastcall__`, but typical C/C++ tooling does not.
+#ifndef __CC65__
+#ifndef __fastcall__
+#define __fastcall__
+#endif
+#endif
 
 // for nesdoug version 1.2, 1/1/2022
 // changes, removed sprid from oam functions, oam_spr 11% faster, meta 5% faster
