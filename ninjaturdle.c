@@ -44,6 +44,7 @@ void main(void) {
 	has_turd_power = 1; // Default to having turd power
 	turd_cooldown = 0;
 	player_health = MAX_HEALTH; // Initialize player health
+	restart_level = 0;
 	damage_cooldown = 0;
 	boss_health = BOSS_MAX_HEALTH; // Initialize boss health
 	corn_mode = 0; // Initialize to turd mode
@@ -87,6 +88,7 @@ void main(void) {
 				bank_spr(1);
 				
 				// level = 2;  // TESTING: Skip to end screen
+				restart_level = 0;
 				load_room();
 				game_mode = MODE_GAME;
 				pal_bg(palette_bg);
@@ -139,6 +141,19 @@ void main(void) {
 			pad1_new = get_pad_new(0);
 			
 			movement();
+
+			// Fell off the bottom of the screen -> lose 2 HP and restart the level (or game over).
+			if (high_byte(NINJA.y) >= 0xF0) {
+				if (player_health <= 2) player_health = 0;
+				else player_health -= 2;
+
+				if (player_health == 0) {
+					death = 1;
+				} else {
+					game_mode = MODE_RESTART;
+					break;
+				}
+			}
 			
 			check_spr_objects(); // see which objects are on screen
 			
@@ -229,6 +244,31 @@ void main(void) {
 					pal_bright(4); // back to normal brighness
 				}
 			}
+		}
+
+		// Restart current room without refilling HP (used when falling offscreen).
+		while (game_mode == MODE_RESTART) {
+			ppu_wait_nmi();
+			ppu_off();
+			oam_clear();
+
+			scroll_x = 0;
+			scroll_y = 0;
+			set_scroll_x(scroll_x);
+			set_scroll_y(scroll_y);
+
+			// Clear any pending transitions so we truly restart the current level.
+			level_up = 0;
+			death = 0;
+
+			restart_level = 1;
+			load_room();
+			restart_level = 0;
+
+			pal_bg(palette_bg);
+			ppu_on_all();
+			pal_bright(4);
+			game_mode = MODE_GAME;
 		}
 		
 		
@@ -384,8 +424,8 @@ void load_room(void) {
 	
 	map_loaded = 0;
 	
-	// Reset player health when starting a new level
-	player_health = MAX_HEALTH;
+	// Reset player health when starting a new level (but not when restarting after a fall/death)
+	if (!restart_level) player_health = MAX_HEALTH;
 	damage_cooldown = 0;
 	
 	// Reset boss health when starting a new level

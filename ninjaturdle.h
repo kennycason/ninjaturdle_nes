@@ -98,6 +98,7 @@ enum {
 	MODE_SWITCH, 
 	MODE_END, 
 	MODE_GAME_OVER, 
+	MODE_RESTART,
 	MODE_RESET
 };
 
@@ -331,6 +332,9 @@ unsigned char damage_cooldown; // Invincibility frames after taking damage
 #define BOSS_MAX_HEALTH 20
 #define BOSS_DAMAGE_PER_HIT 2
 unsigned char boss_health;
+
+// When set, reloading a room should not refill player health (used for level restarts after dying/falling).
+unsigned char restart_level;
 
 // Collision type checks
 #define IS_BACKGROUND(tile) ((tile & 0x07) < 0x04)  // Columns 0-3

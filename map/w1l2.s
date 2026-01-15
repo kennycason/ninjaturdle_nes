@@ -2007,18 +2007,22 @@ _w1l2_enemies:
 	.byte	$07
 	.byte	$C0
 	.byte	$20
+	.byte	$00
 	.byte	$C0
 	.byte	$02
 	.byte	$10
 	.byte	$0B
+	.byte	$00
 	.byte	$C0
 	.byte	$04
 	.byte	$50
 	.byte	$0B
+	.byte	$00
 	.byte	$C0
 	.byte	$06
 	.byte	$80
 	.byte	$0B
+	.byte	$00
 	.byte	$FF
 _w1l2_main:
 	.addr	_w1l2_main_0
