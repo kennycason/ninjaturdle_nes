@@ -458,17 +458,25 @@ void draw_sprites(void) {
 		temp_x = coin_x[index];
 		if (temp_x > 0xf0) continue;
 		
-		// bounce the coin
-		temp1 = get_frame_count();
-		temp1 = (temp1 >> 2) & 7;
-		temp1 = bounce[temp1];
-		temp_y += temp1;
-		
 		if (temp_y < 0xf0) {
 			if (coin_type[index] == COIN_REG) {
+				// bounce the corn
+				temp1 = get_frame_count();
+				temp1 = (temp1 >> 2) & 7;
+				temp1 = bounce[temp1];
+				temp_y += temp1;
 				oam_meta_spr(temp_x, temp_y, CoinSpr);
 			}
+			else if (coin_type[index] == COIN_END) {
+				// Level exit marker (no bounce)
+				oam_meta_spr(temp_x, temp_y, ExitSpr);
+			}
 			else {
+				// bounce other coin-like objects
+				temp1 = get_frame_count();
+				temp1 = (temp1 >> 2) & 7;
+				temp1 = bounce[temp1];
+				temp_y += temp1;
 				oam_meta_spr(temp_x, temp_y, BigCoinSpr);
 			}
 		}
@@ -1344,11 +1352,14 @@ void sprite_collisions(void) {
             if (check_collision(&ENTITY1, &ENTITY2)) {
                 coin_y[index] = TURN_OFF;
                 coin_active[index] = 0;
-                ++coins;
-                sfx_play(SFX_DING, 0);
-                
-                // Add this line to trigger level transition for big coins
-                if (coin_type[index] == COIN_END) ++level_up;
+				if (coin_type[index] == COIN_END) {
+					// Exit marker: advance level, no coin reward.
+					++level_up;
+					sfx_play(SFX_DING, 0);
+				} else {
+					++coins;
+					sfx_play(SFX_DING, 0);
+				}
             }
         }
     }

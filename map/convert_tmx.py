@@ -19,6 +19,7 @@ TILE_ENEMY_BOSS2 = 0x20   # Boss2 enemy
 # Sprite tileset GIDs (firstgid=129)
 SPRITE_GID_HP_UP = 129      # 129 + 0 (first tile at 0,0)
 SPRITE_GID_CORN_UP = 130    # 129 + 1 (second tile at 1,0)
+SPRITE_GID_EXIT = 136       # 129 + 7 (last tile in top row = level exit)
 SPRITE_GID_WASP = 137       # 129 + 8
 SPRITE_GID_BOUNCE = 138     # 129 + 9
 SPRITE_GID_WORM = 139       # 129 + 10
@@ -97,7 +98,10 @@ def process_object_layer(root):
 
             if gid == SPRITE_GID_CORN_UP:
                 print(f"Adding coin at ({x}, {y})")
-                coin_data.append((x, y))
+                coin_data.append((x, y, 0x02))  # COIN_REG
+            elif gid == SPRITE_GID_EXIT:
+                print(f"Adding exit at ({x}, {y})")
+                coin_data.append((x, y, 0x08))  # COIN_END
             elif gid == SPRITE_GID_WASP:
                 print(f"Adding wasp at ({x}, {y})")
                 enemy_data.append((x, y, TILE_ENEMY_WASP, 0))
@@ -146,7 +150,10 @@ def process_object_layer(root):
             
             if gid == SPRITE_GID_CORN_UP:
                 print(f"Adding coin at ({x}, {y})")
-                coin_data.append((x, y))
+                coin_data.append((x, y, 0x02))  # COIN_REG
+            elif gid == SPRITE_GID_EXIT:
+                print(f"Adding exit at ({x}, {y})")
+                coin_data.append((x, y, 0x08))  # COIN_END
             elif gid == SPRITE_GID_WASP:
                 print(f"Adding wasp at ({x}, {y})")
                 enemy_data.append((x, y, TILE_ENEMY_WASP, 0))
@@ -253,8 +260,8 @@ def convert_tmx(tmx_file, output_file):
                 
             # Write coin data
             f.write(f'const uint8_t w{world}l{level}_coins[] = {{\n')
-            for x, y in coin_data:
-                f.write(f'    0x{(y*16):02x}, {x//16}, 0x{(x%16)*16:02x}, 0x02,\n')  # 0x02 = COIN_REG
+            for x, y, coin_type in coin_data:
+                f.write(f'    0x{(y*16):02x}, {x//16}, 0x{(x%16)*16:02x}, 0x{coin_type:02x},\n')
             f.write('    0xff  // End marker\n};\n\n')
             
             # Write enemy data (y, room, x, type, param)

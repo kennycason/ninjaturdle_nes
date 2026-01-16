@@ -1794,9 +1794,9 @@ _w1l1_main_7:
 	.byte	$1E
 	.byte	$1E
 	.byte	$00
-	.byte	$21
 	.byte	$00
-	.byte	$21
+	.byte	$00
+	.byte	$00
 	.byte	$00
 	.byte	$00
 	.byte	$00
@@ -1835,8 +1835,8 @@ _w1l1_main_7:
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$12
-	.byte	$00
+	.byte	$21
+	.byte	$11
 	.byte	$21
 	.byte	$21
 	.byte	$1E
@@ -1969,6 +1969,10 @@ _w1l1_coins:
 	.byte	$06
 	.byte	$80
 	.byte	$02
+	.byte	$50
+	.byte	$07
+	.byte	$30
+	.byte	$08
 	.byte	$60
 	.byte	$02
 	.byte	$90

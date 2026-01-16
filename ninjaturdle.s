@@ -76,6 +76,7 @@
 	.export		_BossMotherWormSprL
 	.export		_TurdSpr
 	.export		_TurdLifeSpr
+	.export		_ExitSpr
 	.export		_EnemyWormSprL1
 	.export		_EnemyWormSprL2
 	.export		_EnemyWormSprR1
@@ -740,6 +741,24 @@ _TurdLifeSpr:
 	.byte	$00
 	.byte	$30
 	.byte	$01
+	.byte	$80
+_ExitSpr:
+	.byte	$FF
+	.byte	$FF
+	.byte	$21
+	.byte	$03
+	.byte	$07
+	.byte	$FF
+	.byte	$22
+	.byte	$03
+	.byte	$FF
+	.byte	$07
+	.byte	$31
+	.byte	$03
+	.byte	$07
+	.byte	$07
+	.byte	$32
+	.byte	$03
 	.byte	$80
 _EnemyWormSprL1:
 	.byte	$FF
@@ -2851,20 +2870,20 @@ L0021:	lda     #$00
 ; if (temp_x > 0xfc) temp_x = 1;
 ;
 	cmp     #$FD
-	bcc     L0034
+	bcc     L0038
 	lda     #$01
 	sta     _temp_x
 ;
 ; if (temp_x == 0) temp_x = 1;
 ;
-L0034:	lda     _temp_x
-	bne     L0035
+L0038:	lda     _temp_x
+	bne     L0039
 	lda     #$01
 	sta     _temp_x
 ;
 ; if (direction == LEFT) {
 ;
-L0035:	lda     _direction
+L0039:	lda     _direction
 	bne     L0004
 ;
 ; oam_meta_spr(temp_x, high_byte(NINJA.y), NinjaSprL);
@@ -2881,7 +2900,7 @@ L0035:	lda     _direction
 ;
 ; else {
 ;
-	jmp     L002E
+	jmp     L0032
 ;
 ; oam_meta_spr(temp_x, high_byte(NINJA.y), NinjaSprR);
 ;
@@ -2894,13 +2913,13 @@ L0004:	jsr     decsp2
 	sta     (sp),y
 	lda     #<(_NinjaSprR)
 	ldx     #>(_NinjaSprR)
-L002E:	jsr     _oam_meta_spr
+L0032:	jsr     _oam_meta_spr
 ;
 ; for (index = 0; index < MAX_COINS; ++index) {
 ;
 	lda     #$00
 	sta     _index
-L0036:	lda     _index
+L003A:	lda     _index
 	cmp     #$10
 	jcs     L0007
 ;
@@ -2913,13 +2932,13 @@ L0036:	lda     _index
 ; if (temp_y == TURN_OFF) continue;
 ;
 	cmp     #$FF
-	beq     L0037
+	jeq     L003B
 ;
 ; if (!coin_active[index]) continue;
 ;
 	ldy     _index
 	lda     _coin_active,y
-	beq     L0037
+	jeq     L003B
 ;
 ; temp_x = coin_x[index];
 ;
@@ -2930,7 +2949,20 @@ L0036:	lda     _index
 ; if (temp_x > 0xf0) continue;
 ;
 	cmp     #$F1
-	bcs     L0037
+	jcs     L003B
+;
+; if (temp_y < 0xf0) {
+;
+	lda     _temp_y
+	cmp     #$F0
+	jcs     L003B
+;
+; if (coin_type[index] == COIN_REG) {
+;
+	ldy     _index
+	lda     _coin_type,y
+	cmp     #$02
+	bne     L0011
 ;
 ; temp1 = get_frame_count();
 ;
@@ -2956,18 +2988,6 @@ L0036:	lda     _index
 	adc     _temp_y
 	sta     _temp_y
 ;
-; if (temp_y < 0xf0) {
-;
-	cmp     #$F0
-	bcs     L0037
-;
-; if (coin_type[index] == COIN_REG) {
-;
-	ldy     _index
-	lda     _coin_type,y
-	cmp     #$02
-	bne     L0012
-;
 ; oam_meta_spr(temp_x, temp_y, CoinSpr);
 ;
 	jsr     decsp2
@@ -2980,13 +3000,57 @@ L0036:	lda     _index
 	lda     #<(_CoinSpr)
 	ldx     #>(_CoinSpr)
 ;
+; else if (coin_type[index] == COIN_END) {
+;
+	jmp     L0033
+L0011:	ldy     _index
+	lda     _coin_type,y
+	cmp     #$08
+	bne     L0015
+;
+; oam_meta_spr(temp_x, temp_y, ExitSpr);
+;
+	jsr     decsp2
+	lda     _temp_x
+	ldy     #$01
+	sta     (sp),y
+	lda     _temp_y
+	dey
+	sta     (sp),y
+	lda     #<(_ExitSpr)
+	ldx     #>(_ExitSpr)
+;
 ; else {
 ;
-	jmp     L002F
+	jmp     L0033
+;
+; temp1 = get_frame_count();
+;
+L0015:	jsr     _get_frame_count
+	sta     _temp1
+;
+; temp1 = (temp1 >> 2) & 7;
+;
+	lsr     a
+	lsr     a
+	and     #$07
+	sta     _temp1
+;
+; temp1 = bounce[temp1];
+;
+	ldy     _temp1
+	lda     _bounce,y
+	sta     _temp1
+;
+; temp_y += temp1;
+;
+	clc
+	adc     _temp_y
+	sta     _temp_y
 ;
 ; oam_meta_spr(temp_x, temp_y, BigCoinSpr);
 ;
-L0012:	jsr     decsp2
+	jsr     decsp2
 	lda     _temp_x
 	ldy     #$01
 	sta     (sp),y
@@ -2995,12 +3059,12 @@ L0012:	jsr     decsp2
 	sta     (sp),y
 	lda     #<(_BigCoinSpr)
 	ldx     #>(_BigCoinSpr)
-L002F:	jsr     _oam_meta_spr
+L0033:	jsr     _oam_meta_spr
 ;
 ; for (index = 0; index < MAX_COINS; ++index) {
 ;
-L0037:	inc     _index
-	jmp     L0036
+L003B:	inc     _index
+	jmp     L003A
 ;
 ; offset = get_frame_count() & 3;
 ;
@@ -3020,9 +3084,9 @@ L0007:	jsr     _get_frame_count
 ;
 	lda     #$00
 	sta     _index
-L0038:	lda     _index
+L003C:	lda     _index
 	cmp     #$10
-	jcs     L0016
+	jcs     L001A
 ;
 ; index2 = shuffle_array[offset];
 ;
@@ -3043,13 +3107,13 @@ L0038:	lda     _index
 ; if (temp_y == TURN_OFF) continue;
 ;
 	cmp     #$FF
-	beq     L003A
+	beq     L003E
 ;
 ; if (!enemy_active[index2]) continue;
 ;
 	ldy     _index2
 	lda     _enemy_active,y
-	beq     L003A
+	beq     L003E
 ;
 ; temp_x = enemy_x[index2];
 ;
@@ -3060,28 +3124,28 @@ L0038:	lda     _index
 ; if (temp_x == 0) temp_x = 1; // problems with x = 0
 ;
 	lda     _temp_x
-	bne     L0039
+	bne     L003D
 	lda     #$01
 	sta     _temp_x
 ;
 ; if (temp_x > 0xf0) continue;
 ;
-L0039:	lda     _temp_x
+L003D:	lda     _temp_x
 	cmp     #$F1
-	bcs     L003A
+	bcs     L003E
 ;
 ; if (temp_y < 0xf0) {
 ;
 	lda     _temp_y
 	cmp     #$F0
-	bcs     L003A
+	bcs     L003E
 ;
 ; if (enemy_type[index2] == ENEMY_BOSS2) {
 ;
 	ldy     _index2
 	lda     _enemy_type,y
 	cmp     #$20
-	bne     L0022
+	bne     L0026
 ;
 ; oam_meta_spr(temp_x - 8, temp_y, enemy_anim[index2]);
 ;
@@ -3092,13 +3156,13 @@ L0039:	lda     _temp_x
 ;
 ; } else {
 ;
-	jmp     L004E
+	jmp     L0052
 ;
 ; oam_meta_spr(temp_x, temp_y, enemy_anim[index2]);
 ;
-L0022:	jsr     decsp2
+L0026:	jsr     decsp2
 	lda     _temp_x
-L004E:	ldy     #$01
+L0052:	ldy     #$01
 	sta     (sp),y
 	lda     _temp_y
 	dey
@@ -3106,10 +3170,10 @@ L004E:	ldy     #$01
 	ldx     #$00
 	lda     _index2
 	asl     a
-	bcc     L0033
+	bcc     L0037
 	inx
 	clc
-L0033:	adc     #<(_enemy_anim)
+L0037:	adc     #<(_enemy_anim)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_anim)
@@ -3123,12 +3187,12 @@ L0033:	adc     #<(_enemy_anim)
 ;
 ; for (index = 0; index < MAX_ENEMY; ++index) {
 ;
-L003A:	inc     _index
-	jmp     L0038
+L003E:	inc     _index
+	jmp     L003C
 ;
 ; draw_turds();
 ;
-L0016:	jsr     _draw_turds
+L001A:	jsr     _draw_turds
 ;
 ; draw_enemy_bullets();
 ;
@@ -3200,7 +3264,7 @@ L0016:	jsr     _draw_turds
 ; if (corn_mode) {
 ;
 	lda     _corn_mode
-	beq     L0028
+	beq     L002C
 ;
 ; oam_meta_spr(0xDD, 0x10, CornSelectedSpr);
 ;
@@ -3216,11 +3280,11 @@ L0016:	jsr     _draw_turds
 ;
 ; else {
 ;
-	jmp     L0031
+	jmp     L0035
 ;
 ; oam_meta_spr(0xDD, 0x10, CoinSpr);
 ;
-L0028:	jsr     decsp2
+L002C:	jsr     decsp2
 	lda     #$DD
 	ldy     #$01
 	sta     (sp),y
@@ -3229,7 +3293,7 @@ L0028:	jsr     decsp2
 	sta     (sp),y
 	lda     #<(_CoinSpr)
 	ldx     #>(_CoinSpr)
-L0031:	jsr     _oam_meta_spr
+L0035:	jsr     _oam_meta_spr
 ;
 ; temp1 = (coins / 10) + 0xF0; // Convert to tile number
 ;
@@ -6491,7 +6555,7 @@ L00A6:	jmp     incsp2
 ; if (damage_cooldown > 0) {
 ;
 	lda     _damage_cooldown
-	beq     L0048
+	beq     L004A
 ;
 ; --damage_cooldown;
 ;
@@ -6499,7 +6563,7 @@ L00A6:	jmp     incsp2
 ;
 ; ENTITY1.x = high_byte(NINJA.x);
 ;
-L0048:	lda     _NINJA+1
+L004A:	lda     _NINJA+1
 	sta     _ENTITY1
 ;
 ; ENTITY1.y = high_byte(NINJA.y);
@@ -6521,22 +6585,22 @@ L0048:	lda     _NINJA+1
 ;
 	lda     #$00
 	sta     _index
-L0049:	lda     _index
+L004B:	lda     _index
 	cmp     #$10
-	bcs     L004C
+	bcs     L004F
 ;
 ; if (coin_active[index]) {
 ;
 	ldy     _index
 	lda     _coin_active,y
-	beq     L004B
+	beq     L004E
 ;
 ; if (coin_type[index] == COIN_REG) {
 ;
 	ldy     _index
 	lda     _coin_type,y
 	cmp     #$02
-	bne     L004A
+	bne     L004C
 ;
 ; ENTITY2.width = COIN_WIDTH;
 ;
@@ -6549,16 +6613,16 @@ L0049:	lda     _index
 ;
 ; } else {
 ;
-	jmp     L0044
+	jmp     L0045
 ;
 ; ENTITY2.width = BIG_COIN;
 ;
-L004A:	lda     #$0D
+L004C:	lda     #$0D
 	sta     _ENTITY2+2
 ;
 ; ENTITY2.height = BIG_COIN;
 ;
-L0044:	sta     _ENTITY2+3
+L0045:	sta     _ENTITY2+3
 ;
 ; ENTITY2.x = coin_x[index];
 ;
@@ -6581,7 +6645,7 @@ L0044:	sta     _ENTITY2+3
 	ldx     #>(_ENTITY2)
 	jsr     _check_collision
 	tax
-	beq     L004B
+	beq     L004E
 ;
 ; coin_y[index] = TURN_OFF;
 ;
@@ -6595,33 +6659,40 @@ L0044:	sta     _ENTITY2+3
 	lda     #$00
 	sta     _coin_active,y
 ;
-; ++coins;
-;
-	inc     _coins
-;
-; sfx_play(SFX_DING, 0);
-;
-	lda     #$01
-	jsr     pusha
-	lda     #$00
-	jsr     _sfx_play
-;
-; if (coin_type[index] == COIN_END) ++level_up;
+; if (coin_type[index] == COIN_END) {
 ;
 	ldy     _index
 	lda     _coin_type,y
 	cmp     #$08
-	bne     L004B
+	bne     L004D
+;
+; ++level_up;
+;
 	inc     _level_up
+;
+; } else {
+;
+	jmp     L0063
+;
+; ++coins;
+;
+L004D:	inc     _coins
+;
+; sfx_play(SFX_DING, 0);
+;
+L0063:	lda     #$01
+	jsr     pusha
+	lda     #$00
+	jsr     _sfx_play
 ;
 ; for (index = 0; index < MAX_COINS; ++index) {
 ;
-L004B:	inc     _index
-	jmp     L0049
+L004E:	inc     _index
+	jmp     L004B
 ;
 ; ENTITY1.x = high_byte(NINJA.x);
 ;
-L004C:	lda     _NINJA+1
+L004F:	lda     _NINJA+1
 	sta     _ENTITY1
 ;
 ; ENTITY1.y = high_byte(NINJA.y);
@@ -6643,29 +6714,29 @@ L004C:	lda     _NINJA+1
 ;
 	lda     #$00
 	sta     _index
-L004D:	lda     _index
+L0050:	lda     _index
 	cmp     #$10
-	jcs     L0056
+	jcs     L0059
 ;
 ; if (!enemy_active[index]) continue;
 ;
 	ldy     _index
 	lda     _enemy_active,y
-	jeq     L0055
+	jeq     L0058
 ;
 ; if (enemy_type[index] == ENEMY_THORNS && enemy_thorn_out[index] == 0) continue; // safe while retracted
 ;
 	ldy     _index
 	lda     _enemy_type,y
 	cmp     #$0C
-	bne     L0019
+	bne     L001A
 	ldy     _index
 	lda     _enemy_thorn_out,y
-	jeq     L0055
+	jeq     L0058
 ;
 ; ENTITY2.x = enemy_x[index];
 ;
-L0019:	ldy     _index
+L001A:	ldy     _index
 	lda     _enemy_x,y
 	sta     _ENTITY2
 ;
@@ -6680,7 +6751,7 @@ L0019:	ldy     _index
 	ldy     _index
 	lda     _enemy_type,y
 	cmp     #$10
-	bne     L0021
+	bne     L0022
 ;
 ; ENTITY2.width = 28;  // 2x2 boss
 ;
@@ -6688,11 +6759,11 @@ L0019:	ldy     _index
 ;
 ; } else if (enemy_type[index] == ENEMY_BOSS2) {
 ;
-	jmp     L005D
-L0021:	ldy     _index
+	jmp     L0061
+L0022:	ldy     _index
 	lda     _enemy_type,y
 	cmp     #$20
-	bne     L0050
+	bne     L0053
 ;
 ; ENTITY2.width = 40;  // 3x3 boss (48px - 8px for fairness)
 ;
@@ -6700,12 +6771,12 @@ L0021:	ldy     _index
 ;
 ; } else {
 ;
-	jmp     L005D
+	jmp     L0061
 ;
 ; ENTITY2.width = ENEMY_WIDTH;
 ;
-L0050:	lda     #$0D
-L005D:	sta     _ENTITY2+2
+L0053:	lda     #$0D
+L0061:	sta     _ENTITY2+2
 ;
 ; ENTITY2.height = ENEMY_HEIGHT;
 ;
@@ -6720,38 +6791,38 @@ L005D:	sta     _ENTITY2+2
 	ldx     #>(_ENTITY2)
 	jsr     _check_collision
 	tax
-	beq     L0055
+	beq     L0058
 ;
 ; if (damage_cooldown == 0) {
 ;
 	lda     _damage_cooldown
-	bne     L0056
+	bne     L0059
 ;
 ; unsigned char damage = corn_mode ? (BOSS_DAMAGE_PER_HIT * CORN_DAMAGE_MULTIPLIER) : BOSS_DAMAGE_PER_HIT;
 ;
 	lda     _corn_mode
-	beq     L0051
+	beq     L0054
 	lda     #$06
-	jmp     L0052
-L0051:	lda     #$02
-L0052:	jsr     pusha
+	jmp     L0055
+L0054:	lda     #$02
+L0055:	jsr     pusha
 ;
 ; if (boss_health < damage) boss_health = 0;
 ;
 	lda     _boss_health
 	ldy     #$00
 	cmp     (sp),y
-	bcs     L0054
+	bcs     L0057
 	tya
 ;
 ; else boss_health -= damage;
 ;
-	jmp     L0046
-L0054:	lda     (sp),y
+	jmp     L0048
+L0057:	lda     (sp),y
 	eor     #$FF
 	sec
 	adc     _boss_health
-L0046:	sta     _boss_health
+L0048:	sta     _boss_health
 ;
 ; player_health -= 2;
 ;
@@ -6775,7 +6846,7 @@ L0046:	sta     _boss_health
 ; if (player_health <= 0) {
 ;
 	lda     _player_health
-	bne     L002D
+	bne     L002E
 ;
 ; death = 1;
 ;
@@ -6784,20 +6855,20 @@ L0046:	sta     _boss_health
 ;
 ; }
 ;
-L002D:	jsr     incsp1
+L002E:	jsr     incsp1
 ;
 ; break; // Only one collision per frame
 ;
-	jmp     L0056
+	jmp     L0059
 ;
 ; for (index = 0; index < MAX_ENEMY; ++index) {
 ;
-L0055:	inc     _index
-	jmp     L004D
+L0058:	inc     _index
+	jmp     L0050
 ;
 ; ENTITY2.x = high_byte(NINJA.x);
 ;
-L0056:	lda     _NINJA+1
+L0059:	lda     _NINJA+1
 	sta     _ENTITY2
 ;
 ; ENTITY2.y = high_byte(NINJA.y);
@@ -6819,9 +6890,9 @@ L0056:	lda     _NINJA+1
 ;
 	lda     #$00
 	sta     _index
-L0057:	lda     _index
+L005A:	lda     _index
 	cmp     #$10
-	bcc     L005E
+	bcc     L0064
 ;
 ; }
 ;
@@ -6829,9 +6900,9 @@ L0057:	lda     _index
 ;
 ; if (enemy_active[index]) {
 ;
-L005E:	ldy     _index
+L0064:	ldy     _index
 	lda     _enemy_active,y
-	jeq     L005C
+	jeq     L005F
 ;
 ; ENTITY1.x = enemy_x[index];
 ;
@@ -6850,15 +6921,15 @@ L005E:	ldy     _index
 	ldy     _index
 	lda     _enemy_type,y
 	cmp     #$10
-	beq     L0058
+	beq     L005B
 	ldy     _index
 	lda     _enemy_type,y
 	cmp     #$20
-	bne     L005C
+	bne     L005F
 ;
 ; ENTITY2.width = 28;  // 32 pixels - 4 pixels for safety
 ;
-L0058:	lda     #$1C
+L005B:	lda     #$1C
 	sta     _ENTITY2+2
 ;
 ; ENTITY2.height = 28; // 32 pixels - 4 pixels for safety
@@ -6874,33 +6945,33 @@ L0058:	lda     #$1C
 	ldx     #>(_ENTITY2)
 	jsr     _check_collision
 	tax
-	beq     L005C
+	beq     L005F
 ;
 ; unsigned char damage = corn_mode ? (BOSS_DAMAGE_PER_HIT * CORN_DAMAGE_MULTIPLIER) : BOSS_DAMAGE_PER_HIT;
 ;
 	lda     _corn_mode
-	beq     L003C
+	beq     L003D
 	lda     #$06
-	jmp     L0059
-L003C:	lda     #$02
-L0059:	jsr     pusha
+	jmp     L005C
+L003D:	lda     #$02
+L005C:	jsr     pusha
 ;
 ; if (boss_health < damage) boss_health = 0;
 ;
 	lda     _boss_health
 	ldy     #$00
 	cmp     (sp),y
-	bcs     L005B
+	bcs     L005E
 	tya
 ;
 ; else boss_health -= damage;
 ;
-	jmp     L0047
-L005B:	lda     (sp),y
+	jmp     L0049
+L005E:	lda     (sp),y
 	eor     #$FF
 	sec
 	adc     _boss_health
-L0047:	sta     _boss_health
+L0049:	sta     _boss_health
 ;
 ; turd_active[index] = 0;
 ;
@@ -6918,7 +6989,7 @@ L0047:	sta     _boss_health
 ; if (boss_health <= 0) {
 ;
 	lda     _boss_health
-	bne     L0041
+	bne     L0042
 ;
 ; enemy_y[index] = TURN_OFF;
 ;
@@ -6938,12 +7009,12 @@ L0047:	sta     _boss_health
 ;
 ; break;
 ;
-L0041:	jmp     incsp1
+L0042:	jmp     incsp1
 ;
 ; for (index = 0; index < MAX_ENEMY; ++index) {
 ;
-L005C:	inc     _index
-	jmp     L0057
+L005F:	inc     _index
+	jmp     L005A
 
 .endproc
 

@@ -237,6 +237,15 @@ const unsigned char TurdLifeSpr[]={
     128
 };
 
+// Level exit marker (16x16). Art is placed 16px
+const unsigned char ExitSpr[]={
+    0xff, 0xff, 0x21, 3,
+    7,    0xff, 0x22, 3,
+    0xff, 7,    0x31, 3,
+    7,    7,    0x32, 3,
+    128
+};
+
 const unsigned char EnemyWormSprL1[]={
     // Worm facing LEFT, row directly below wasp = 16x16 row 2 (tiles 0x20/0x30)
     0xff, 0xff, 0x28, 3,  // Top-left tile (frame 1)
