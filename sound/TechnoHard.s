@@ -40,57 +40,97 @@ TechnoHard_music_data:
 	.byte $32,$85,$32,$85,$32,$85,$32,$85
 	.byte $ff,$08
 	.word @ref2
+	.byte $ff,$08
+	.word @ref2
+	.byte $ff,$09
+	.word @ref1
+	.byte $ff,$08
+	.word @ref2
+	.byte $ff,$08
+	.word @ref2
 	.byte $fd
 	.word @song0ch0loop
 
 @song0ch1:
 @song0ch1loop:
-@ref4:
+@ref8:
 	.byte $01,$01,$01,$01,$82,$59,$01,$01,$00,$81
-@ref5:
+@ref9:
 	.byte $59,$01,$01,$59,$01,$01,$01,$58,$81
-@ref6:
+@ref10:
 	.byte $01,$01,$59,$01,$01,$01,$59,$00,$81
-@ref7:
+@ref11:
 	.byte $59,$01,$01,$01,$59,$01,$01,$00,$81
+@ref12:
+	.byte $01,$01,$01,$01,$59,$01,$01,$00,$81
+	.byte $ff,$09
+	.word @ref9
+	.byte $ff,$09
+	.word @ref10
+	.byte $ff,$09
+	.word @ref11
 	.byte $fd
 	.word @song0ch1loop
 
 @song0ch2:
 @song0ch2loop:
-@ref8:
+@ref16:
 	.byte $80,$1b,$1b,$1b,$1b,$1b,$1b,$1b,$1a,$81
-@ref9:
+@ref17:
 	.byte $1b,$1b,$1b,$1b,$1b,$1b,$1b,$1a,$81
 	.byte $ff,$09
-	.word @ref9
+	.word @ref17
 	.byte $ff,$09
-	.word @ref9
+	.word @ref17
+	.byte $ff,$09
+	.word @ref17
+	.byte $ff,$09
+	.word @ref17
+	.byte $ff,$09
+	.word @ref17
+@ref23:
+	.byte $29,$29,$17,$17,$1f,$25,$29,$28,$81
 	.byte $fd
 	.word @song0ch2loop
 
 @song0ch3:
 @song0ch3loop:
-@ref12:
+@ref24:
 	.byte $84,$19,$1f,$19,$1f,$19,$1f,$19,$1e,$81
-@ref13:
+@ref25:
 	.byte $19,$1f,$19,$19,$1f,$19,$1f,$18,$81
-@ref14:
+@ref26:
 	.byte $19,$1f,$19,$1f,$19,$1f,$19,$1e,$81
 	.byte $ff,$09
-	.word @ref14
+	.word @ref26
+@ref28:
+	.byte $19,$1f,$19,$1f,$19,$1f,$19,$1e,$18
+@ref29:
+	.byte $19,$1f,$19,$19,$1f,$19,$1f,$18,$1e
+	.byte $ff,$09
+	.word @ref26
+	.byte $ff,$09
+	.word @ref28
 	.byte $fd
 	.word @song0ch3loop
 
 @song0ch4:
 @song0ch4loop:
-@ref16:
+@ref32:
 	.byte $9f
-@ref17:
+@ref33:
 	.byte $9f
-@ref18:
+@ref34:
 	.byte $9f
-@ref19:
+@ref35:
+	.byte $9f
+@ref36:
+	.byte $9f
+@ref37:
+	.byte $9f
+@ref38:
+	.byte $9f
+@ref39:
 	.byte $9f
 	.byte $fd
 	.word @song0ch4loop
@@ -99,46 +139,46 @@ TechnoHard_music_data:
 @song1ch0:
 	.byte $fb,$06
 @song1ch0loop:
-@ref20:
+@ref40:
 	.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 	.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 	.byte $ff,$20
-	.word @ref20
+	.word @ref40
 	.byte $fd
 	.word @song1ch0loop
 
 @song1ch1:
 @song1ch1loop:
 	.byte $ff,$20
-	.word @ref20
+	.word @ref40
 	.byte $ff,$20
-	.word @ref20
+	.word @ref40
 	.byte $fd
 	.word @song1ch1loop
 
 @song1ch2:
 @song1ch2loop:
 	.byte $ff,$20
-	.word @ref20
+	.word @ref40
 	.byte $ff,$20
-	.word @ref20
+	.word @ref40
 	.byte $fd
 	.word @song1ch2loop
 
 @song1ch3:
 @song1ch3loop:
 	.byte $ff,$20
-	.word @ref20
+	.word @ref40
 	.byte $ff,$20
-	.word @ref20
+	.word @ref40
 	.byte $fd
 	.word @song1ch3loop
 
 @song1ch4:
 @song1ch4loop:
-@ref28:
+@ref48:
 	.byte $bf
-@ref29:
+@ref49:
 	.byte $bf
 	.byte $fd
 	.word @song1ch4loop
