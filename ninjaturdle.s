@@ -745,19 +745,19 @@ _TurdLifeSpr:
 _ExitSpr:
 	.byte	$FF
 	.byte	$FF
-	.byte	$21
+	.byte	$40
 	.byte	$03
 	.byte	$07
 	.byte	$FF
-	.byte	$22
+	.byte	$41
 	.byte	$03
 	.byte	$FF
 	.byte	$07
-	.byte	$31
+	.byte	$50
 	.byte	$03
 	.byte	$07
 	.byte	$07
-	.byte	$32
+	.byte	$51
 	.byte	$03
 	.byte	$80
 _EnemyWormSprL1:

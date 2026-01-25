@@ -239,10 +239,10 @@ const unsigned char TurdLifeSpr[]={
 
 // Level exit marker (16x16). Art is placed 16px
 const unsigned char ExitSpr[]={
-    0xff, 0xff, 0x21, 3,
-    7,    0xff, 0x22, 3,
-    0xff, 7,    0x31, 3,
-    7,    7,    0x32, 3,
+    0xff, 0xff, 0x40, 3,
+    7,    0xff, 0x41, 3,
+    0xff, 7,    0x50, 3,
+    7,    7,    0x51, 3,
     128
 };
 
