@@ -10,21 +10,21 @@
 	.importzp	sp, sreg, regsave, regbank
 	.importzp	tmp1, tmp2, tmp3, tmp4, ptr1, ptr2, ptr3, ptr4
 	.macpack	longbranch
-	.export		_w1l1_main_0
-	.export		_w1l1_main_1
-	.export		_w1l1_main_2
-	.export		_w1l1_main_3
-	.export		_w1l1_main_4
-	.export		_w1l1_main_5
-	.export		_w1l1_main_6
-	.export		_w1l1_main_7
-	.export		_w1l1_coins
-	.export		_w1l1_enemies
-	.export		_w1l1_main
+	.export		_level1_main_0
+	.export		_level1_main_1
+	.export		_level1_main_2
+	.export		_level1_main_3
+	.export		_level1_main_4
+	.export		_level1_main_5
+	.export		_level1_main_6
+	.export		_level1_main_7
+	.export		_level1_coins
+	.export		_level1_enemies
+	.export		_level1_main
 
 .segment	"RODATA"
 
-_w1l1_main_0:
+_level1_main_0:
 	.byte	$1E
 	.byte	$1E
 	.byte	$1E
@@ -265,7 +265,7 @@ _w1l1_main_0:
 	.byte	$17
 	.byte	$17
 	.byte	$17
-_w1l1_main_1:
+_level1_main_1:
 	.byte	$1E
 	.byte	$1E
 	.byte	$1E
@@ -506,7 +506,7 @@ _w1l1_main_1:
 	.byte	$17
 	.byte	$17
 	.byte	$17
-_w1l1_main_2:
+_level1_main_2:
 	.byte	$1E
 	.byte	$1E
 	.byte	$1E
@@ -747,7 +747,7 @@ _w1l1_main_2:
 	.byte	$17
 	.byte	$17
 	.byte	$17
-_w1l1_main_3:
+_level1_main_3:
 	.byte	$1E
 	.byte	$1E
 	.byte	$1E
@@ -988,7 +988,7 @@ _w1l1_main_3:
 	.byte	$17
 	.byte	$17
 	.byte	$17
-_w1l1_main_4:
+_level1_main_4:
 	.byte	$1E
 	.byte	$1E
 	.byte	$1E
@@ -1229,7 +1229,7 @@ _w1l1_main_4:
 	.byte	$17
 	.byte	$17
 	.byte	$17
-_w1l1_main_5:
+_level1_main_5:
 	.byte	$1E
 	.byte	$1E
 	.byte	$1E
@@ -1470,7 +1470,7 @@ _w1l1_main_5:
 	.byte	$17
 	.byte	$17
 	.byte	$17
-_w1l1_main_6:
+_level1_main_6:
 	.byte	$1E
 	.byte	$1E
 	.byte	$1E
@@ -1711,7 +1711,7 @@ _w1l1_main_6:
 	.byte	$17
 	.byte	$17
 	.byte	$17
-_w1l1_main_7:
+_level1_main_7:
 	.byte	$1E
 	.byte	$1E
 	.byte	$1E
@@ -1952,7 +1952,7 @@ _w1l1_main_7:
 	.byte	$17
 	.byte	$17
 	.byte	$17
-_w1l1_coins:
+_level1_coins:
 	.byte	$40
 	.byte	$00
 	.byte	$E0
@@ -1994,7 +1994,7 @@ _w1l1_coins:
 	.byte	$00
 	.byte	$02
 	.byte	$FF
-_w1l1_enemies:
+_level1_enemies:
 	.byte	$40
 	.byte	$04
 	.byte	$C0
@@ -2041,13 +2041,13 @@ _w1l1_enemies:
 	.byte	$0A
 	.byte	$00
 	.byte	$FF
-_w1l1_main:
-	.addr	_w1l1_main_0
-	.addr	_w1l1_main_1
-	.addr	_w1l1_main_2
-	.addr	_w1l1_main_3
-	.addr	_w1l1_main_4
-	.addr	_w1l1_main_5
-	.addr	_w1l1_main_6
-	.addr	_w1l1_main_7
+_level1_main:
+	.addr	_level1_main_0
+	.addr	_level1_main_1
+	.addr	_level1_main_2
+	.addr	_level1_main_3
+	.addr	_level1_main_4
+	.addr	_level1_main_5
+	.addr	_level1_main_6
+	.addr	_level1_main_7
 

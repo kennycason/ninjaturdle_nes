@@ -27,12 +27,12 @@ SPRITE_GID_THORNS = 140     # 129 + 11 (tile after worm)
 SPRITE_GID_BOSS = 144       # 129 + 15
 SPRITE_GID_BOSS2 = 152      # 129 + 8 + 15
 
-def extract_world_level(filename):
-    """Extract world and level numbers from filename."""
-    match = re.match(r'w(\d+)l(\d+)', os.path.basename(filename))
+def extract_level_num(filename):
+    """Extract level number from filename (levelN.tmx)."""
+    match = re.match(r'level(\d+)', os.path.basename(filename))
     if match:
-        return match.group(1), match.group(2)
-    return None, None
+        return match.group(1)
+    return None
 
 def parse_csv_data(csv_text):
     """Parse CSV data from TMX file into a 2D list of integers."""
@@ -237,10 +237,10 @@ def convert_tmx(tmx_file, output_file):
         # Process object layer for coins and enemies
         coin_data, enemy_data = process_object_layer(tmx_data.root)
         
-        # Get world and level from filename
-        world, level = extract_world_level(tmx_file)
-        if not world or not level:
-            print("Error: Could not extract world and level from filename")
+        # Get level number from filename
+        level = extract_level_num(tmx_file)
+        if not level:
+            print("Error: Could not extract level number from filename (expected levelN.tmx)")
             return False
             
         # Generate output file
@@ -250,7 +250,7 @@ def convert_tmx(tmx_file, output_file):
             
             # Write room data
             for i, room in enumerate(rooms):
-                f.write(f'const uint8_t w{world}l{level}_main_{i}[] = {{\n')
+                f.write(f'const uint8_t level{level}_main_{i}[] = {{\n')
                 # Write room data in rows of 16
                 for row in range(15):
                     start = row * 16
@@ -259,22 +259,22 @@ def convert_tmx(tmx_file, output_file):
                 f.write('};\n\n')
                 
             # Write coin data
-            f.write(f'const uint8_t w{world}l{level}_coins[] = {{\n')
+            f.write(f'const uint8_t level{level}_coins[] = {{\n')
             for x, y, coin_type in coin_data:
                 f.write(f'    0x{(y*16):02x}, {x//16}, 0x{(x%16)*16:02x}, 0x{coin_type:02x},\n')
             f.write('    0xff  // End marker\n};\n\n')
             
             # Write enemy data (y, room, x, type, param)
-            f.write(f'const uint8_t w{world}l{level}_enemies[] = {{\n')
+            f.write(f'const uint8_t level{level}_enemies[] = {{\n')
             for x, y, enemy_type, param in enemy_data:
                 param_byte = max(0, min(255, int(param)))
                 f.write(f'    0x{(y*16):02x}, {x//16}, 0x{(x%16)*16:02x}, 0x{enemy_type:02x}, 0x{param_byte:02x},\n')
             f.write('    0xff  // End marker\n};\n\n')
             
             # Write room pointers array
-            f.write(f'const uint8_t* const w{world}l{level}_main[] = {{\n')
+            f.write(f'const uint8_t* const level{level}_main[] = {{\n')
             for i in range(len(rooms)):
-                f.write(f'    w{world}l{level}_main_{i},\n')
+                f.write(f'    level{level}_main_{i},\n')
             f.write('};\n')
             
         print(f"Successfully converted {tmx_file} to {output_file}")
@@ -285,13 +285,12 @@ def convert_tmx(tmx_file, output_file):
         return False
 
 def main():
-    if len(sys.argv) != 3:
-        print("Usage: python convert_tmx.py <world> <level>")
+    if len(sys.argv) != 2:
+        print("Usage: python3 convert_tmx.py <level_number>")
         sys.exit(1)
-    
-    world = int(sys.argv[1])
-    level = int(sys.argv[2])
-    convert_tmx(f"w{world}l{level}.tmx", f"w{world}l{level}.c")
+
+    level = int(sys.argv[1])
+    convert_tmx(f"level{level}.tmx", f"level{level}.c")
 
 if __name__ == "__main__":
     main() 

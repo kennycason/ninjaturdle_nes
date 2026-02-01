@@ -212,43 +212,17 @@
 	.export		_Coins_list
 	.export		_Enemy_list
 	.export		_level_main_data
-	.import		_w1l1_main
-	.import		_w1l2_main
-	.import		_w1l3_main
-	.import		_w1l1_coins
-	.import		_w1l2_coins
-	.import		_w1l3_coins
-	.import		_w1l1_enemies
-	.import		_w1l2_enemies
-	.import		_w1l3_enemies
-	.import		_w1l1_main_0
-	.import		_w1l1_main_1
-	.import		_w1l1_main_2
-	.import		_w1l1_main_3
-	.import		_w1l1_main_4
-	.import		_w1l1_main_5
-	.import		_w1l1_main_6
-	.import		_w1l1_main_7
-	.import		_w1l2_main_0
-	.import		_w1l2_main_1
-	.import		_w1l2_main_2
-	.import		_w1l2_main_3
-	.import		_w1l2_main_4
-	.import		_w1l2_main_5
-	.import		_w1l2_main_6
-	.import		_w1l2_main_7
-	.import		_w1l3_main_0
-	.import		_w1l3_main_1
-	.import		_w1l3_main_2
-	.import		_w1l3_main_3
-	.import		_w1l3_main_4
-	.import		_w1l3_main_5
-	.import		_w1l3_main_6
-	.import		_w1l3_main_7
+	.import		_level1_main
+	.import		_level2_main
+	.import		_level3_main
+	.import		_level1_coins
+	.import		_level2_coins
+	.import		_level3_coins
+	.import		_level1_enemies
+	.import		_level2_enemies
+	.import		_level3_enemies
 	.export		_metatiles1
 	.export		_metatiles_pal1
-	.export		_Levels_list
-	.export		_Level_offsets
 	.export		_max_rooms
 	.export		_scroll_limits
 	.export		_bounce
@@ -1171,17 +1145,17 @@ _title:
 	.byte	$01
 	.byte	$00
 _level_main_data:
-	.addr	_w1l1_main
-	.addr	_w1l2_main
-	.addr	_w1l3_main
+	.addr	_level1_main
+	.addr	_level2_main
+	.addr	_level3_main
 _Coins_list:
-	.addr	_w1l1_coins
-	.addr	_w1l2_coins
-	.addr	_w1l3_coins
+	.addr	_level1_coins
+	.addr	_level2_coins
+	.addr	_level3_coins
 _Enemy_list:
-	.addr	_w1l1_enemies
-	.addr	_w1l2_enemies
-	.addr	_w1l3_enemies
+	.addr	_level1_enemies
+	.addr	_level2_enemies
+	.addr	_level3_enemies
 _metatiles1:
 	.byte	$00
 	.byte	$01
@@ -1568,35 +1542,6 @@ _metatiles_pal1:
 	.byte	$01
 	.byte	$02
 	.byte	$02
-_Levels_list:
-	.addr	_w1l1_main_0
-	.addr	_w1l1_main_1
-	.addr	_w1l1_main_2
-	.addr	_w1l1_main_3
-	.addr	_w1l1_main_4
-	.addr	_w1l1_main_5
-	.addr	_w1l1_main_6
-	.addr	_w1l1_main_7
-	.addr	_w1l2_main_0
-	.addr	_w1l2_main_1
-	.addr	_w1l2_main_2
-	.addr	_w1l2_main_3
-	.addr	_w1l2_main_4
-	.addr	_w1l2_main_5
-	.addr	_w1l2_main_6
-	.addr	_w1l2_main_7
-	.addr	_w1l3_main_0
-	.addr	_w1l3_main_1
-	.addr	_w1l3_main_2
-	.addr	_w1l3_main_3
-	.addr	_w1l3_main_4
-	.addr	_w1l3_main_5
-	.addr	_w1l3_main_6
-	.addr	_w1l3_main_7
-_Level_offsets:
-	.byte	$00
-	.byte	$08
-	.byte	$10
 _max_rooms:
 	.byte	$08
 	.byte	$08
@@ -2559,26 +2504,27 @@ L0003:	jmp     incsp6
 	lda     #$01
 	jsr     _bank_spr
 ;
-; offset = Level_offsets[level];
-;
-	ldy     _level
-	lda     _Level_offsets,y
-	sta     _offset
-;
-; set_data_pointer(Levels_list[offset]);
+; set_data_pointer(level_main_data[level][0]);
 ;
 	ldx     #$00
-	lda     _offset
+	lda     _level
 	asl     a
 	bcc     L001B
 	inx
 	clc
-L001B:	adc     #<(_Levels_list)
+L001B:	adc     #<(_level_main_data)
 	sta     ptr1
 	txa
-	adc     #>(_Levels_list)
+	adc     #>(_level_main_data)
 	sta     ptr1+1
 	ldy     #$01
+	lda     (ptr1),y
+	tax
+	dey
+	lda     (ptr1),y
+	sta     ptr1
+	stx     ptr1+1
+	iny
 	lda     (ptr1),y
 	tax
 	dey
@@ -2643,6 +2589,7 @@ L0018:	sta     _x
 ;
 ; if (x == 0xe0) break;
 ;
+	ldx     #$00
 	lda     _x
 	cmp     #$E0
 	beq     L001E
@@ -2667,24 +2614,30 @@ L001E:	lda     _y
 	adc     _y
 	jmp     L0019
 ;
-; ++offset;
+; set_data_pointer(level_main_data[level][1]);
 ;
-L001F:	inc     _offset
-;
-; set_data_pointer(Levels_list[offset]);
-;
-	ldx     #$00
-	lda     _offset
+L001F:	lda     _level
 	asl     a
 	bcc     L001C
 	inx
 	clc
-L001C:	adc     #<(_Levels_list)
+L001C:	adc     #<(_level_main_data)
 	sta     ptr1
 	txa
-	adc     #>(_Levels_list)
+	adc     #>(_level_main_data)
 	sta     ptr1+1
 	ldy     #$01
+	lda     (ptr1),y
+	tax
+	dey
+	lda     (ptr1),y
+	clc
+	adc     #$02
+	bcc     L000C
+	inx
+L000C:	sta     ptr1
+	stx     ptr1+1
+	iny
 	lda     (ptr1),y
 	tax
 	dey
@@ -2745,7 +2698,7 @@ L001A:	sta     _y
 ;
 	lda     _y
 	cmp     #$E0
-	beq     L0020
+	beq     L000E
 ;
 ; for(y=0; ;y+=0x20) { 
 ;
@@ -2754,27 +2707,30 @@ L001A:	sta     _y
 	adc     _y
 	jmp     L001A
 ;
-; --offset;
+; memcpy (c_map, level_main_data[level][0], 240);
 ;
-L0020:	dec     _offset
-;
-; memcpy (c_map, Levels_list[offset], 240);
-;
-	lda     #<(_c_map)
+L000E:	lda     #<(_c_map)
 	ldx     #>(_c_map)
 	jsr     pushax
 	ldx     #$00
-	lda     _offset
+	lda     _level
 	asl     a
 	bcc     L001D
 	inx
 	clc
-L001D:	adc     #<(_Levels_list)
+L001D:	adc     #<(_level_main_data)
 	sta     ptr1
 	txa
-	adc     #>(_Levels_list)
+	adc     #>(_level_main_data)
 	sta     ptr1+1
 	ldy     #$01
+	lda     (ptr1),y
+	tax
+	dey
+	lda     (ptr1),y
+	sta     ptr1
+	stx     ptr1+1
+	iny
 	lda     (ptr1),y
 	tax
 	dey
@@ -2818,13 +2774,13 @@ L001D:	adc     #<(_Levels_list)
 ; if (!restart_level) player_health = MAX_HEALTH;
 ;
 	lda     _restart_level
-	bne     L0021
+	bne     L0020
 	lda     #$0A
 	sta     _player_health
 ;
 ; damage_cooldown = 0;
 ;
-L0021:	lda     #$00
+L0020:	lda     #$00
 	sta     _damage_cooldown
 ;
 ; boss_health = BOSS_MAX_HEALTH;
@@ -4114,33 +4070,38 @@ L0002:	inx
 	lda     _pseudo_scroll_x+1
 	sta     _temp1
 ;
-; offset = Level_offsets[level];
-;
-	ldy     _level
-	lda     _Level_offsets,y
-	sta     _offset
-;
-; offset += temp1;
-;
-	lda     _temp1
-	clc
-	adc     _offset
-	sta     _offset
-;
-; set_data_pointer(Levels_list[offset]);
+; set_data_pointer(level_main_data[level][temp1]);
 ;
 	ldx     #$00
-	lda     _offset
+	lda     _level
 	asl     a
 	bcc     L0013
 	inx
 	clc
-L0013:	adc     #<(_Levels_list)
+L0013:	adc     #<(_level_main_data)
 	sta     ptr1
 	txa
-	adc     #>(_Levels_list)
+	adc     #>(_level_main_data)
 	sta     ptr1+1
 	ldy     #$01
+	lda     (ptr1),y
+	tax
+	dey
+	lda     (ptr1),y
+	sta     ptr1
+	stx     ptr1+1
+	ldx     #$00
+	lda     _temp1
+	asl     a
+	bcc     L0014
+	inx
+	clc
+L0014:	adc     ptr1
+	sta     ptr1
+	txa
+	adc     ptr1+1
+	sta     ptr1+1
+	iny
 	lda     (ptr1),y
 	tax
 	dey
@@ -4164,16 +4125,16 @@ L0013:	adc     #<(_Levels_list)
 ;
 ; }
 ;
-	beq     L0006
+	beq     L0005
 	cmp     #$01
-	beq     L0008
+	beq     L0007
 	cmp     #$02
-	jeq     L000B
-	jmp     L000E
+	jeq     L000A
+	jmp     L000D
 ;
 ; address = get_ppu_addr(nt, x, 0);
 ;
-L0006:	jsr     decsp2
+L0005:	jsr     decsp2
 	lda     _nt
 	ldy     #$01
 	sta     (sp),y
@@ -4228,11 +4189,11 @@ L0006:	jsr     decsp2
 ;
 ; break;
 ;
-	jmp     L0018
+	jmp     L0019
 ;
 ; address = get_ppu_addr(nt, x, 0x40);
 ;
-L0008:	jsr     decsp2
+L0007:	jsr     decsp2
 	lda     _nt
 	ldy     #$01
 	sta     (sp),y
@@ -4289,11 +4250,11 @@ L0008:	jsr     decsp2
 ;
 ; break;
 ;
-	jmp     L0018
+	jmp     L0019
 ;
 ; address = get_ppu_addr(nt, x, 0x80);
 ;
-L000B:	jsr     decsp2
+L000A:	jsr     decsp2
 	lda     _nt
 	ldy     #$01
 	sta     (sp),y
@@ -4350,11 +4311,11 @@ L000B:	jsr     decsp2
 ;
 ; break;
 ;
-	jmp     L0018
+	jmp     L0019
 ;
 ; address = get_ppu_addr(nt, x, 0xc0);
 ;
-L000E:	jsr     decsp2
+L000D:	jsr     decsp2
 	lda     _nt
 	ldy     #$01
 	sta     (sp),y
@@ -4408,7 +4369,7 @@ L000E:	jsr     decsp2
 	lsr     a
 	clc
 	adc     #$E0
-L0018:	sta     _index
+L0019:	sta     _index
 ;
 ; buffer_4_mt(address, index); // ppu_address, index to the data
 ;
@@ -4452,56 +4413,62 @@ L0018:	sta     _index
 	adc     #$01
 	sta     _room
 ;
-; offset = Level_offsets[level];
+; if (room >= 8) room = 7;
 ;
-	ldy     _level
-	lda     _Level_offsets,y
-	sta     _offset
-;
-; offset += room;
-;
-	lda     _room
-	clc
-	adc     _offset
-	sta     _offset
+	cmp     #$08
+	bcc     L000F
+	lda     #$07
+	sta     _room
 ;
 ; map = room & 1; //even or odd?
 ;
-	lda     _room
+L000F:	lda     _room
 	and     #$01
 	sta     _map
 ;
-; if (!map) {
+; if (!map) memcpy (c_map, level_main_data[level][room], 240);
 ;
 	lda     _map
 	bne     L0004
-;
-; memcpy (c_map, Levels_list[offset], 240);
-;
 	lda     #<(_c_map)
 	ldx     #>(_c_map)
 ;
-; else {
+; else      memcpy (c_map2, level_main_data[level][room], 240);
 ;
-	jmp     L001D
-;
-; memcpy (c_map2, Levels_list[offset], 240);
-;
+	jmp     L0033
 L0004:	lda     #<(_c_map2)
 	ldx     #>(_c_map2)
-L001D:	jsr     pushax
+L0033:	jsr     pushax
 	ldx     #$00
-	lda     _offset
+	lda     _level
 	asl     a
-	bcc     L000A
+	bcc     L000D
 	inx
 	clc
-L000A:	adc     #<(_Levels_list)
+L000D:	adc     #<(_level_main_data)
 	sta     ptr1
 	txa
-	adc     #>(_Levels_list)
+	adc     #>(_level_main_data)
 	sta     ptr1+1
 	ldy     #$01
+	lda     (ptr1),y
+	tax
+	dey
+	lda     (ptr1),y
+	sta     ptr1
+	stx     ptr1+1
+	ldx     #$00
+	lda     _room
+	asl     a
+	bcc     L000E
+	inx
+	clc
+L000E:	adc     ptr1
+	sta     ptr1
+	txa
+	adc     ptr1+1
+	sta     ptr1+1
+	iny
 	lda     (ptr1),y
 	tax
 	dey

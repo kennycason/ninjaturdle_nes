@@ -22,23 +22,23 @@ Each level consists of two layers:
 The workflow for creating and processing level data is simple:
 
 1. Design levels in Tiled map editor:
-   - Save as `.tmx` files with naming format `w{world}l{level}.tmx` (e.g., `w1l1.tmx`)
+   - Save as `.tmx` files with naming format `level{n}.tmx` (e.g., `level1.tmx`)
    - Use the correct firstgid values in tilesets
    - Ensure the level width is a multiple of 16 (for room divisions)
 
 2. Convert TMX directly to C code using the Python script:
    ```bash
-   python3 convert_tmx.py <world> <level>
+   python3 convert_tmx.py <level_number>
    ```
    Example:
    ```bash
-   python3 convert_tmx.py 1 1  # Converts w1l1.tmx
+   python3 convert_tmx.py 1  # Converts level1.tmx
    ```
 
 ## File Types
 
 ### TMX Files
-- `w{world}l{level}.tmx` (e.g., `w1l1.tmx`)
+- `level{n}.tmx` (e.g., `level1.tmx`)
 - These are Tiled Map Editor files containing the complete level designs
 - They define both the main layer (tiles) and object layer (sprites)
 
@@ -55,10 +55,10 @@ The workflow for creating and processing level data is simple:
 ### Main Layer Format
 The main layer C files contain arrays of tile indices divided into 16-tile wide rooms:
 ```c
-const unsigned char w1l1_main_0[] = { /* First room data */ };
-const unsigned char w1l1_main_1[] = { /* Second room data */ };
+const unsigned char level1_main_0[] = { /* First room data */ };
+const unsigned char level1_main_1[] = { /* Second room data */ };
 // ... more rooms ...
-const unsigned char * const w1l1_main_list[] = { /* Room pointer list */ };
+const unsigned char * const level1_main[] = { /* Room pointer list */ };
 ```
 
 ### Object Layer Format

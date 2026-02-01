@@ -5,63 +5,35 @@
 #include <stdint.h>
 
 // External declarations for level data arrays
-extern const uint8_t* const w1l1_main[];
-extern const uint8_t* const w1l2_main[];
-extern const uint8_t* const w1l3_main[];
-extern const uint8_t w1l1_coins[];
-extern const uint8_t w1l2_coins[];
-extern const uint8_t w1l3_coins[];
-extern const uint8_t w1l1_enemies[];
-extern const uint8_t w1l2_enemies[];
-extern const uint8_t w1l3_enemies[];
-
-// External declarations for individual room arrays
-extern const uint8_t w1l1_main_0[];
-extern const uint8_t w1l1_main_1[];
-extern const uint8_t w1l1_main_2[];
-extern const uint8_t w1l1_main_3[];
-extern const uint8_t w1l1_main_4[];
-extern const uint8_t w1l1_main_5[];
-extern const uint8_t w1l1_main_6[];
-extern const uint8_t w1l1_main_7[];
-
-extern const uint8_t w1l2_main_0[];
-extern const uint8_t w1l2_main_1[];
-extern const uint8_t w1l2_main_2[];
-extern const uint8_t w1l2_main_3[];
-extern const uint8_t w1l2_main_4[];
-extern const uint8_t w1l2_main_5[];
-extern const uint8_t w1l2_main_6[];
-extern const uint8_t w1l2_main_7[];
-
-extern const uint8_t w1l3_main_0[];
-extern const uint8_t w1l3_main_1[];
-extern const uint8_t w1l3_main_2[];
-extern const uint8_t w1l3_main_3[];
-extern const uint8_t w1l3_main_4[];
-extern const uint8_t w1l3_main_5[];
-extern const uint8_t w1l3_main_6[];
-extern const uint8_t w1l3_main_7[];
+extern const uint8_t* const level1_main[];
+extern const uint8_t* const level2_main[];
+extern const uint8_t* const level3_main[];
+extern const uint8_t level1_coins[];
+extern const uint8_t level2_coins[];
+extern const uint8_t level3_coins[];
+extern const uint8_t level1_enemies[];
+extern const uint8_t level2_enemies[];
+extern const uint8_t level3_enemies[];
 
 // Main level data arrays - each level has an array of room pointers
 const uint8_t* const* const level_main_data[] = {
-    w1l1_main,  // This is an array of room pointers
-    w1l2_main,
-    w1l3_main
+    level1_main,  // This is an array of room pointers
+    level2_main,
+    level3_main
 };
 
 // Coin/item data arrays
 const uint8_t* const Coins_list[] = {
-    w1l1_coins,
-    w1l2_coins,
-    w1l3_coins
+    level1_coins,
+    level2_coins,
+    level3_coins
 };
 
 // Enemy data arrays
 const uint8_t* const Enemy_list[] = {
-    w1l1_enemies,
-    w1l2_enemies,
-    w1l3_enemies
+    level1_enemies,
+    level2_enemies,
+    level3_enemies
 };
 
 // Metatile definitions (64 metatiles, 0x00-0x3F)
@@ -357,17 +329,6 @@ const unsigned char metatiles_pal1[]={
     1,  // ID 3D - Platform style 2
     2,  // ID 3E - Solid block 1
     2,  // ID 3F - Solid block 2
-};
-
-// Room data list
-const unsigned char * const Levels_list[] = {
-    w1l1_main_0, w1l1_main_1, w1l1_main_2, w1l1_main_3, w1l1_main_4, w1l1_main_5, w1l1_main_6, w1l1_main_7,
-    w1l2_main_0, w1l2_main_1, w1l2_main_2, w1l2_main_3, w1l2_main_4, w1l2_main_5, w1l2_main_6, w1l2_main_7,
-    w1l3_main_0, w1l3_main_1, w1l3_main_2, w1l3_main_3, w1l3_main_4, w1l3_main_5, w1l3_main_6, w1l3_main_7
-};
-
-const unsigned char Level_offsets[] = {
-    0, 8, 16
 };
 
 // Maximum rooms and scroll limits

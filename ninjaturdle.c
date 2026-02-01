@@ -379,10 +379,9 @@ void load_room(void) {
 	
 	// Ensure sprite pattern table is set to 1
 	bank_spr(1);
-	
-	offset = Level_offsets[level];
-	
-	set_data_pointer(Levels_list[offset]);
+
+	// Level data is an array-of-room-pointers per level.
+	set_data_pointer(level_main_data[level][0]);
 	set_mt_pointer(metatiles1);
 	for(y=0; ;y+=0x20) { 
 		for(x=0; ;x+=0x20) {
@@ -396,10 +395,8 @@ void load_room(void) {
 	}
 	
 	
-	++offset;
-	
 	// a little bit in the next room
-	set_data_pointer(Levels_list[offset]);
+	set_data_pointer(level_main_data[level][1]);
 	for(y=0; ;y+=0x20) { 
 		x = 0;
 		address = get_ppu_addr(1, x, y);
@@ -410,10 +407,9 @@ void load_room(void) {
 		if (y == 0xe0) break;
 	}
 	
-	--offset;
 	// copy the room to the collision map
 	// the second one should auto-load with the scrolling code
-	memcpy (c_map, Levels_list[offset], 240);
+	memcpy (c_map, level_main_data[level][0], 240);
 	
 	
 	sprite_obj_init();
@@ -1252,11 +1248,9 @@ void draw_screen_R(void) {
 	pseudo_scroll_x = scroll_x + 0x120;
 	
 	temp1 = pseudo_scroll_x >> 8;
-	
-	offset = Level_offsets[level];
-	offset += temp1;
-	
-	set_data_pointer(Levels_list[offset]);
+
+	// temp1 is the room index within the level.
+	set_data_pointer(level_main_data[level][temp1]);
 	nt = temp1 & 1;
 	x = pseudo_scroll_x & 0xff;
 	
@@ -1312,16 +1306,13 @@ void draw_screen_R(void) {
 void new_cmap(void) {
 	// copy a new collision map to one of the 2 c_map arrays
 	room = ((scroll_x >> 8) +1); //high byte = room, one to the right
-	offset = Level_offsets[level];
-	offset += room;
-	
+
+	// Clamp in case room points past the end.
+	if (room >= 8) room = 7;
+
 	map = room & 1; //even or odd?
-	if (!map) {
-		memcpy (c_map, Levels_list[offset], 240);
-	}
-	else {
-		memcpy (c_map2, Levels_list[offset], 240);
-	}
+	if (!map) memcpy (c_map, level_main_data[level][room], 240);
+	else      memcpy (c_map2, level_main_data[level][room], 240);
 }
 
 

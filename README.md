@@ -32,17 +32,17 @@ make clean && make
 
 ## Maps workflow (TMX -> C)
 
-Levels live in `map/w1l1.tmx`, `map/w1l2.tmx`, etc. The converter produces C data used by the game.
+Levels live in `map/level1.tmx`, `map/level2.tmx`, etc. The converter produces C data used by the game.
 
 - **Convert a TMX**:
 
 ```bash
 cd map
 source venv/bin/activate
-python convert_tmx.py 1 1
+python3 map/convert_tmx.py 1
 ```
 
-This overwrites `map/w1l1.c` (and similarly for other levels).
+This overwrites `map/level1.c` (and similarly for other levels).
 
 - **What gets generated**:
 - `wXlY_main_*[]`: background metatile indices (16x15 per room)

@@ -27,9 +27,9 @@ CSRC = \
 
 # Level files to compile
 LEVEL_FILES = \
-  map/w1l1.c \
-  map/w1l2.c \
-  map/w1l3.c
+  map/level1.c \
+  map/level2.c \
+  map/level3.c
 
 # Object files from level files
 LEVEL_OBJS = $(LEVEL_FILES:.c=.o)
@@ -71,4 +71,4 @@ ninjaturdle.nes: ninjaturdle.o $(LEVEL_OBJS) crt0.o
 # Cleanup
 ##############################################################################
 clean:
-	rm -f $(OBJS) ninjaturdle.s bank_swap.s map/w1l1.s map/w1l2.s map/w1l3.s *.lbl ninjaturdle.nes
+	rm -f $(OBJS) ninjaturdle.s bank_swap.s map/level1.s map/level2.s map/level3.s *.lbl ninjaturdle.nes
