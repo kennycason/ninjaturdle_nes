@@ -1770,8 +1770,8 @@ _level1_main_7:
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$00
 	.byte	$0D
+	.byte	$04
 	.byte	$04
 	.byte	$05
 	.byte	$00
@@ -1786,8 +1786,8 @@ _level1_main_7:
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$00
 	.byte	$02
+	.byte	$09
 	.byte	$09
 	.byte	$03
 	.byte	$00
@@ -1802,8 +1802,8 @@ _level1_main_7:
 	.byte	$00
 	.byte	$00
 	.byte	$00
-	.byte	$00
 	.byte	$02
+	.byte	$09
 	.byte	$09
 	.byte	$03
 	.byte	$00
@@ -1818,8 +1818,8 @@ _level1_main_7:
 	.byte	$00
 	.byte	$00
 	.byte	$18
-	.byte	$00
 	.byte	$02
+	.byte	$09
 	.byte	$09
 	.byte	$03
 	.byte	$00
@@ -1830,12 +1830,12 @@ _level1_main_7:
 	.byte	$09
 	.byte	$09
 	.byte	$03
-	.byte	$00
 	.byte	$00
 	.byte	$00
 	.byte	$00
 	.byte	$00
 	.byte	$0A
+	.byte	$13
 	.byte	$13
 	.byte	$0B
 	.byte	$1A
