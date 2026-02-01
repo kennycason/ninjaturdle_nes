@@ -2074,11 +2074,6 @@ _level3_enemies:
 	.byte	$E0
 	.byte	$0C
 	.byte	$04
-	.byte	$60
-	.byte	$01
-	.byte	$00
-	.byte	$0C
-	.byte	$04
 	.byte	$80
 	.byte	$03
 	.byte	$C0
@@ -2091,11 +2086,6 @@ _level3_enemies:
 	.byte	$00
 	.byte	$A0
 	.byte	$00
-	.byte	$80
-	.byte	$0C
-	.byte	$04
-	.byte	$A0
-	.byte	$00
 	.byte	$A0
 	.byte	$0C
 	.byte	$04
@@ -2110,11 +2100,6 @@ _level3_enemies:
 	.byte	$09
 	.byte	$00
 	.byte	$C0
-	.byte	$01
-	.byte	$F0
-	.byte	$0C
-	.byte	$04
-	.byte	$C0
 	.byte	$02
 	.byte	$00
 	.byte	$0C
@@ -2125,23 +2110,8 @@ _level3_enemies:
 	.byte	$0C
 	.byte	$04
 	.byte	$C0
-	.byte	$02
-	.byte	$40
-	.byte	$0C
-	.byte	$04
-	.byte	$C0
 	.byte	$06
 	.byte	$60
-	.byte	$0C
-	.byte	$04
-	.byte	$C0
-	.byte	$06
-	.byte	$F0
-	.byte	$0C
-	.byte	$04
-	.byte	$C0
-	.byte	$07
-	.byte	$00
 	.byte	$0C
 	.byte	$04
 	.byte	$FF

@@ -22,6 +22,10 @@ unsigned char was_jumping;  // Whether we were jumping last frame
 	
 unsigned char enemy_dir[MAX_ENEMY]; // 0 = left, 1 = right
 
+// Forward declarations (cc65 defaults to C89 rules; functions must be declared before use).
+static char bg_collision_sub_any_ground(void);
+static char has_ground_ahead(unsigned char dir);
+
 void main(void) {
 	ppu_off(); // screen off
 	
@@ -1004,6 +1008,12 @@ void enemy_moves(void) {
 
 		if (enemy_frames & 1) return; // half speed
 		if (enemy_dir[index] == 0) { // Moving left
+			// Turn around at ledges (no ground ahead).
+			if (!has_ground_ahead(0)) {
+				enemy_dir[index] = 1;
+				enemy_anim[index] = EnemyWormSprR1;
+				return;
+			}
 			ENTITY1.x -= 1;
 			bg_collision_fast();
 			if (collision_L) {
@@ -1015,6 +1025,12 @@ void enemy_moves(void) {
 			--enemy_actual_x[index];
 			enemy_anim[index] = EnemyWormSprL1;
 		} else { // Moving right
+			// Turn around at ledges (no ground ahead).
+			if (!has_ground_ahead(1)) {
+				enemy_dir[index] = 0;
+				enemy_anim[index] = EnemyWormSprL1;
+				return;
+			}
 			ENTITY1.x += 1;
 			bg_collision_fast();
 			if (collision_R) {
@@ -1239,6 +1255,44 @@ char bg_collision_sub(void) {
     }
     
     return 0;  // No collision with background tiles
+}
+
+// Background collision check that treats SOLID and PLATFORM as ground for *any* entity type.
+// Used by enemies for ledge detection (they should turn around instead of walking off).
+static char bg_collision_sub_any_ground(void) {
+	if (temp_y >= 0xf0) return 0;
+
+	coordinates = (temp_x >> 4) + (temp_y & 0xf0);
+	map = temp_room & 1;
+	if (!map) temp1 = c_map[coordinates];
+	else      temp1 = c_map2[coordinates];
+
+	if (IS_SOLID(temp1) || IS_PLATFORM(temp1)) return 1;
+	return 0;
+}
+
+// Check whether there is ground directly below the "front foot" of the current ENTITY1.
+// dir: 0 = left, 1 = right. Returns 1 if ground exists, 0 if ledge.
+static char has_ground_ahead(unsigned char dir) {
+	unsigned int wx;
+	unsigned char probe_x;
+	unsigned char probe_y;
+
+	// Probe one pixel beyond the leading edge.
+	if (dir == 0) probe_x = ENTITY1.x - 1;
+	else          probe_x = ENTITY1.x + ENTITY1.width + 1;
+
+	// Probe a few pixels below the bottom so we land inside the tile row underneath.
+	// (Enemy Y from Tiled is often 16-aligned, while ENTITY1.height is smaller than 16.)
+	probe_y = ENTITY1.y + ENTITY1.height + 4;
+	if (probe_y >= 0xf0) return 0;
+
+	wx = (unsigned int)probe_x + scroll_x;
+	temp_x = (unsigned char)wx;
+	temp_room = wx >> 8;
+	temp_y = probe_y;
+
+	return bg_collision_sub_any_ground();
 }
 
 
