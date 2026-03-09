@@ -9,21 +9,25 @@ extern const uint8_t* const level1_main[];
 extern const uint8_t* const level2_main[];
 extern const uint8_t* const level3_main[];
 extern const uint8_t* const level4_main[];
+extern const uint8_t* const level5_main[];
 extern const uint8_t level1_coins[];
 extern const uint8_t level2_coins[];
 extern const uint8_t level3_coins[];
 extern const uint8_t level4_coins[];
+extern const uint8_t level5_coins[];
 extern const uint8_t level1_enemies[];
 extern const uint8_t level2_enemies[];
 extern const uint8_t level3_enemies[];
 extern const uint8_t level4_enemies[];
+extern const uint8_t level5_enemies[];
 
 // Main level data arrays - each level has an array of room pointers
 const uint8_t* const* const level_main_data[] = {
     level1_main,  // This is an array of room pointers
     level2_main,
     level3_main,
-    level4_main
+    level4_main,
+    level5_main
 };
 
 // Coin/item data arrays
@@ -31,7 +35,8 @@ const uint8_t* const Coins_list[] = {
     level1_coins,
     level2_coins,
     level3_coins,
-    level4_coins
+    level4_coins,
+    level5_coins
 };
 
 // Enemy data arrays
@@ -39,7 +44,8 @@ const uint8_t* const Enemy_list[] = {
     level1_enemies,
     level2_enemies,
     level3_enemies,
-    level4_enemies
+    level4_enemies,
+    level5_enemies
 };
 
 // Metatile definitions (64 metatiles, 0x00-0x3F)
@@ -338,8 +344,8 @@ const unsigned char metatiles_pal1[]={
 };
 
 // Maximum rooms and scroll limits
-const uint8_t max_rooms[] = {8, 8, 8, 8};  // Each level has 8 rooms
-const uint8_t scroll_limits[] = {7, 7, 7, 7};  // Each level has 7 scroll limits
+const uint8_t max_rooms[] = {8, 8, 8, 8, 8};  // Each level has 8 rooms
+const uint8_t scroll_limits[] = {7, 7, 7, 7, 7};  // Each level has 7 scroll limits
 
 #define MAX_ROOMS (8-1)
 #define MAX_SCROLL (MAX_ROOMS*0x100)-1
