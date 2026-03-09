@@ -43,7 +43,7 @@ void main(void) {
 	
 	scroll_x = 0;
 	set_scroll_x(scroll_x);
-	//level = 2; // debugging, start on level...
+	level = 3; // debugging, start on level 4 (0-indexed)
 	
 	has_turd_power = 1; // Default to having turd power
 	turd_cooldown = 0;
@@ -234,7 +234,7 @@ void main(void) {
 				oam_clear();
 				scroll_x = 0;
 				set_scroll_x(scroll_x);
-				if (level < 3) {
+				if (level < 4) {
 					load_room();
 					game_mode = MODE_GAME;
 					ppu_on_all();

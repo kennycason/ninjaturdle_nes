@@ -215,12 +215,15 @@
 	.import		_level1_main
 	.import		_level2_main
 	.import		_level3_main
+	.import		_level4_main
 	.import		_level1_coins
 	.import		_level2_coins
 	.import		_level3_coins
+	.import		_level4_coins
 	.import		_level1_enemies
 	.import		_level2_enemies
 	.import		_level3_enemies
+	.import		_level4_enemies
 	.export		_metatiles1
 	.export		_metatiles_pal1
 	.export		_max_rooms
@@ -1148,14 +1151,17 @@ _level_main_data:
 	.addr	_level1_main
 	.addr	_level2_main
 	.addr	_level3_main
+	.addr	_level4_main
 _Coins_list:
 	.addr	_level1_coins
 	.addr	_level2_coins
 	.addr	_level3_coins
+	.addr	_level4_coins
 _Enemy_list:
 	.addr	_level1_enemies
 	.addr	_level2_enemies
 	.addr	_level3_enemies
+	.addr	_level4_enemies
 _metatiles1:
 	.byte	$00
 	.byte	$01
@@ -1546,7 +1552,9 @@ _max_rooms:
 	.byte	$08
 	.byte	$08
 	.byte	$08
+	.byte	$08
 _scroll_limits:
+	.byte	$07
 	.byte	$07
 	.byte	$07
 	.byte	$07
@@ -10135,6 +10143,11 @@ L0007:	iny
 ;
 	jsr     _set_scroll_x
 ;
+; level = 3; // debugging, start on level 4 (0-indexed)
+;
+	lda     #$03
+	sta     _level
+;
 ; has_turd_power = 1; // Default to having turd power
 ;
 	lda     #$01
@@ -10742,10 +10755,10 @@ L0029:	lda     _scroll_x
 ;
 	jsr     _set_scroll_x
 ;
-; if (level < 3) {
+; if (level < 4) {
 ;
 	lda     _level
-	cmp     #$03
+	cmp     #$04
 	bcs     L004F
 ;
 ; load_room();

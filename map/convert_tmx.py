@@ -36,8 +36,8 @@ def extract_level_num(filename):
 
 def parse_csv_data(csv_text):
     """Parse CSV data from TMX file into a 2D list of integers."""
-    rows = [row.strip() for row in csv_text.strip().split('\n')]
-    return [[int(cell) for cell in row.split(',') if cell.strip()] for row in rows]
+    rows = [row.strip() for row in csv_text.strip().split('\n') if row.strip()]
+    return [[int(cell) for cell in row.split(',') if cell.strip()] for row in rows if row]
 
 def process_layer(layer, room_num):
     """Process a single layer for a specific room"""
