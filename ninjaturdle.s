@@ -32,7 +32,6 @@
 	.import		_vram_put
 	.import		_vram_fill
 	.import		_vram_unrle
-	.import		_memcpy
 	.import		_delay
 	.import		_set_vram_buffer
 	.import		_one_vram_buffer
@@ -217,16 +216,31 @@
 	.import		_level3_main
 	.import		_level4_main
 	.import		_level5_main
+	.import		_level6_main
+	.import		_level7_main
+	.import		_level8_main
+	.import		_level9_main
+	.import		_level10_main
 	.import		_level1_coins
 	.import		_level2_coins
 	.import		_level3_coins
 	.import		_level4_coins
 	.import		_level5_coins
+	.import		_level6_coins
+	.import		_level7_coins
+	.import		_level8_coins
+	.import		_level9_coins
+	.import		_level10_coins
 	.import		_level1_enemies
 	.import		_level2_enemies
 	.import		_level3_enemies
 	.import		_level4_enemies
 	.import		_level5_enemies
+	.import		_level6_enemies
+	.import		_level7_enemies
+	.import		_level8_enemies
+	.import		_level9_enemies
+	.import		_level10_enemies
 	.export		_metatiles1
 	.export		_metatiles_pal1
 	.export		_max_rooms
@@ -235,6 +249,7 @@
 	.export		_coyote_time
 	.export		_was_jumping
 	.export		_enemy_dir
+	.export		_decompress_room
 	.export		_main
 	.export		_digit_to_font_tile
 
@@ -1156,18 +1171,33 @@ _level_main_data:
 	.addr	_level3_main
 	.addr	_level4_main
 	.addr	_level5_main
+	.addr	_level6_main
+	.addr	_level7_main
+	.addr	_level8_main
+	.addr	_level9_main
+	.addr	_level10_main
 _Coins_list:
 	.addr	_level1_coins
 	.addr	_level2_coins
 	.addr	_level3_coins
 	.addr	_level4_coins
 	.addr	_level5_coins
+	.addr	_level6_coins
+	.addr	_level7_coins
+	.addr	_level8_coins
+	.addr	_level9_coins
+	.addr	_level10_coins
 _Enemy_list:
 	.addr	_level1_enemies
 	.addr	_level2_enemies
 	.addr	_level3_enemies
 	.addr	_level4_enemies
 	.addr	_level5_enemies
+	.addr	_level6_enemies
+	.addr	_level7_enemies
+	.addr	_level8_enemies
+	.addr	_level9_enemies
+	.addr	_level10_enemies
 _metatiles1:
 	.byte	$00
 	.byte	$01
@@ -1560,7 +1590,17 @@ _max_rooms:
 	.byte	$08
 	.byte	$08
 	.byte	$08
+	.byte	$08
+	.byte	$08
+	.byte	$08
+	.byte	$08
+	.byte	$08
 _scroll_limits:
+	.byte	$07
+	.byte	$07
+	.byte	$07
+	.byte	$07
+	.byte	$07
 	.byte	$07
 	.byte	$07
 	.byte	$07
@@ -2520,15 +2560,18 @@ L0003:	jmp     incsp6
 	lda     #$01
 	jsr     _bank_spr
 ;
-; set_data_pointer(level_main_data[level][0]);
+; decompress_room(c_map, level_main_data[level][0]);
 ;
+	lda     #<(_c_map)
+	ldx     #>(_c_map)
+	jsr     pushax
 	ldx     #$00
 	lda     _level
 	asl     a
-	bcc     L001B
+	bcc     L001A
 	inx
 	clc
-L001B:	adc     #<(_level_main_data)
+L001A:	adc     #<(_level_main_data)
 	sta     ptr1
 	txa
 	adc     #>(_level_main_data)
@@ -2545,6 +2588,12 @@ L001B:	adc     #<(_level_main_data)
 	tax
 	dey
 	lda     (ptr1),y
+	jsr     _decompress_room
+;
+; set_data_pointer(c_map);
+;
+	lda     #<(_c_map)
+	ldx     #>(_c_map)
 	jsr     _set_data_pointer
 ;
 ; set_mt_pointer(metatiles1);
@@ -2553,15 +2602,15 @@ L001B:	adc     #<(_level_main_data)
 	ldx     #>(_metatiles1)
 	jsr     _set_mt_pointer
 ;
-; for(y=0; ;y+=0x20) { 
+; for(y=0; ;y+=0x20) {
 ;
 	lda     #$00
-L0019:	sta     _y
+L0018:	sta     _y
 ;
 ; for(x=0; ;x+=0x20) {
 ;
 	lda     #$00
-L0018:	sta     _x
+L0017:	sta     _x
 ;
 ; address = get_ppu_addr(0, x, y);
 ;
@@ -2605,39 +2654,42 @@ L0018:	sta     _x
 ;
 ; if (x == 0xe0) break;
 ;
-	ldx     #$00
 	lda     _x
 	cmp     #$E0
-	beq     L001E
+	beq     L001C
 ;
 ; for(x=0; ;x+=0x20) {
 ;
 	lda     #$20
 	clc
 	adc     _x
-	jmp     L0018
+	jmp     L0017
 ;
 ; if (y == 0xe0) break;
 ;
-L001E:	lda     _y
+L001C:	lda     _y
 	cmp     #$E0
-	beq     L001F
+	beq     L0003
 ;
-; for(y=0; ;y+=0x20) { 
+; for(y=0; ;y+=0x20) {
 ;
 	lda     #$20
 	clc
 	adc     _y
-	jmp     L0019
+	jmp     L0018
 ;
-; set_data_pointer(level_main_data[level][1]);
+; decompress_room(c_map2, level_main_data[level][1]);
 ;
-L001F:	lda     _level
+L0003:	lda     #<(_c_map2)
+	ldx     #>(_c_map2)
+	jsr     pushax
+	ldx     #$00
+	lda     _level
 	asl     a
-	bcc     L001C
+	bcc     L001B
 	inx
 	clc
-L001C:	adc     #<(_level_main_data)
+L001B:	adc     #<(_level_main_data)
 	sta     ptr1
 	txa
 	adc     #>(_level_main_data)
@@ -2658,12 +2710,18 @@ L000C:	sta     ptr1
 	tax
 	dey
 	lda     (ptr1),y
+	jsr     _decompress_room
+;
+; set_data_pointer(c_map2);
+;
+	lda     #<(_c_map2)
+	ldx     #>(_c_map2)
 	jsr     _set_data_pointer
 ;
-; for(y=0; ;y+=0x20) { 
+; for(y=0; ;y+=0x20) {
 ;
 	lda     #$00
-L001A:	sta     _y
+L0019:	sta     _y
 ;
 ; x = 0;
 ;
@@ -2716,49 +2774,16 @@ L001A:	sta     _y
 	cmp     #$E0
 	beq     L000E
 ;
-; for(y=0; ;y+=0x20) { 
+; for(y=0; ;y+=0x20) {
 ;
 	lda     #$20
 	clc
 	adc     _y
-	jmp     L001A
-;
-; memcpy (c_map, level_main_data[level][0], 240);
-;
-L000E:	lda     #<(_c_map)
-	ldx     #>(_c_map)
-	jsr     pushax
-	ldx     #$00
-	lda     _level
-	asl     a
-	bcc     L001D
-	inx
-	clc
-L001D:	adc     #<(_level_main_data)
-	sta     ptr1
-	txa
-	adc     #>(_level_main_data)
-	sta     ptr1+1
-	ldy     #$01
-	lda     (ptr1),y
-	tax
-	dey
-	lda     (ptr1),y
-	sta     ptr1
-	stx     ptr1+1
-	iny
-	lda     (ptr1),y
-	tax
-	dey
-	lda     (ptr1),y
-	jsr     pushax
-	ldx     #$00
-	lda     #$F0
-	jsr     _memcpy
+	jmp     L0019
 ;
 ; sprite_obj_init();
 ;
-	jsr     _sprite_obj_init
+L000E:	jsr     _sprite_obj_init
 ;
 ; NINJA.x = 0x4000;
 ;
@@ -2790,13 +2815,13 @@ L001D:	adc     #<(_level_main_data)
 ; if (!restart_level) player_health = MAX_HEALTH;
 ;
 	lda     _restart_level
-	bne     L0020
+	bne     L001D
 	lda     #$0A
 	sta     _player_health
 ;
 ; damage_cooldown = 0;
 ;
-L0020:	lda     #$00
+L001D:	lda     #$00
 	sta     _damage_cooldown
 ;
 ; boss_health = BOSS_MAX_HEALTH;
@@ -3342,7 +3367,7 @@ L0035:	jsr     _oam_meta_spr
 ;
 	lda     _pad1
 	and     #$02
-	beq     L005F
+	beq     L0064
 ;
 ; if (!(pad1 & PAD_B)) {
 ;
@@ -3391,7 +3416,7 @@ L0009:	bpl     L0008
 ;
 ; else {
 ;
-	jmp     L0061
+	jmp     L0066
 ;
 ; NINJA.vel_x -= ACCEL;
 ;
@@ -3416,8 +3441,8 @@ L000D:	jpl     L0022
 ;
 ; else if (pad1 & PAD_RIGHT) {
 ;
-	jmp     L0061
-L005F:	lda     _pad1
+	jmp     L0066
+L0064:	lda     _pad1
 	and     #$01
 	beq     L000F
 ;
@@ -3465,7 +3490,7 @@ L0011:	ldx     _NINJA+4+1
 ;
 ; else {
 ;
-	jmp     L0061
+	jmp     L0066
 ;
 ; NINJA.vel_x += ACCEL;
 ;
@@ -3490,7 +3515,7 @@ L0019:	bpl     L0022
 ;
 ; else { // nothing pressed
 ;
-	jmp     L0061
+	jmp     L0066
 ;
 ; if (NINJA.vel_x >= ACCEL) NINJA.vel_x -= ACCEL;
 ;
@@ -3520,7 +3545,7 @@ L001B:	lda     _NINJA+4
 L0020:	asl     a
 	lda     #$00
 	tax
-	bcc     L0061
+	bcc     L0066
 	lda     #$1E
 	clc
 	adc     _NINJA+4
@@ -3531,7 +3556,7 @@ L0020:	asl     a
 ; else NINJA.vel_x = 0;
 ;
 	jmp     L0022
-L0061:	sta     _NINJA+4
+L0066:	sta     _NINJA+4
 	stx     _NINJA+4+1
 ;
 ; NINJA.x += NINJA.vel_x;
@@ -3550,7 +3575,7 @@ L0022:	lda     _NINJA+4
 	cmp     #$01
 	lda     _NINJA+1
 	sbc     #$F0
-	bcc     L0064
+	bcc     L0069
 ;
 ; if (old_x >= 0x8000) {
 ;
@@ -3564,7 +3589,7 @@ L0022:	lda     _NINJA+4
 	sbc     #$80
 	lda     #$00
 	tax
-	bcc     L0063
+	bcc     L0068
 ;
 ; NINJA.x = 0xf000; // max right
 ;
@@ -3572,7 +3597,7 @@ L0022:	lda     _NINJA+4
 ;
 ; NINJA.x = 0x0000; // max left
 ;
-L0063:	sta     _NINJA
+L0068:	sta     _NINJA
 	stx     _NINJA+1
 ;
 ; NINJA.vel_x = 0;
@@ -3582,7 +3607,7 @@ L0063:	sta     _NINJA
 ;
 ; ENTITY1.x = high_byte(NINJA.x); // this is much faster than passing a pointer to NINJA
 ;
-L0064:	lda     _NINJA+1
+L0069:	lda     _NINJA+1
 	sta     _ENTITY1
 ;
 ; ENTITY1.y = high_byte(NINJA.y);
@@ -3639,7 +3664,7 @@ L0064:	lda     _NINJA+1
 ;
 ; else if (NINJA.vel_x > 0) {
 ;
-	jmp     L007A
+	jmp     L0083
 L0026:	lda     _NINJA+4
 	cmp     #$01
 	lda     _NINJA+4+1
@@ -3678,7 +3703,7 @@ L002B:	bpl     L002D
 ; NINJA.x = 0x0000;
 ;
 	ldx     #$00
-L007A:	lda     #$00
+L0083:	lda     #$00
 	sta     _NINJA
 	stx     _NINJA+1
 ;
@@ -3764,7 +3789,7 @@ L0033:	bpl     L0032
 ;
 ; else if (NINJA.vel_y < 0) {
 ;
-	jmp     L0078
+	jmp     L0081
 L0032:	ldx     _NINJA+6+1
 	cpx     #$80
 	bcc     L0037
@@ -3785,7 +3810,7 @@ L0032:	ldx     _NINJA+6+1
 ; NINJA.vel_y = 0;
 ;
 	lda     #$00
-L0078:	sta     _NINJA+6
+L0081:	sta     _NINJA+6
 	sta     _NINJA+6+1
 ;
 ; can_jump = bg_coll_D2();
@@ -3805,9 +3830,9 @@ L0037:	jsr     _bg_coll_D2
 ;
 ; } else if (coyote_time > 0) {
 ;
-	jmp     L0065
+	jmp     L006A
 L0038:	lda     _coyote_time
-	beq     L0065
+	beq     L006A
 ;
 ; --coyote_time;
 ;
@@ -3820,9 +3845,9 @@ L0038:	lda     _coyote_time
 ;
 ; if (pad1 & PAD_A) {
 ;
-L0065:	lda     _pad1
+L006A:	lda     _pad1
 	and     #$80
-	beq     L006A
+	beq     L006F
 ;
 ; if (can_jump && !was_jumping) {
 ;
@@ -3848,13 +3873,13 @@ L0065:	lda     _pad1
 ;
 ; was_jumping = 0;
 ;
-L006A:	sta     _was_jumping
+L006F:	sta     _was_jumping
 ;
 ; if ((scroll_x & 0xff) < 4) {
 ;
 L0040:	lda     _scroll_x
 	cmp     #$04
-	bcs     L006B
+	bcs     L0070
 ;
 ; if (!map_loaded) {
 ;
@@ -3871,12 +3896,12 @@ L0040:	lda     _scroll_x
 ;
 ; else {
 ;
-	jmp     L005D
+	jmp     L0062
 ;
 ; map_loaded = 0;
 ;
-L006B:	lda     #$00
-L005D:	sta     _map_loaded
+L0070:	lda     #$00
+L0062:	sta     _map_loaded
 ;
 ; temp5 = NINJA.x;
 ;
@@ -3904,13 +3929,13 @@ L0044:	lda     _NINJA
 ; if (temp1 > 3) temp1 = 3; // max scroll change
 ;
 	cmp     #$04
-	bcc     L006D
+	bcc     L0072
 	lda     #$03
 	sta     (sp),y
 ;
 ; scroll_x += temp1;
 ;
-L006D:	lda     (sp),y
+L0072:	lda     (sp),y
 	clc
 	adc     _scroll_x
 	sta     _scroll_x
@@ -3931,7 +3956,7 @@ L0045:	lda     _scroll_x
 	cmp     #$FF
 	lda     _scroll_x+1
 	sbc     #$06
-	bcc     L006E
+	bcc     L0073
 ;
 ; scroll_x = MAX_SCROLL; // stop scrolling right, end of level
 ;
@@ -3953,7 +3978,7 @@ L0045:	lda     _scroll_x
 ;
 	lda     _NINJA+1
 	cmp     #$F1
-	bcc     L006E
+	bcc     L0073
 ;
 ; NINJA.x = 0xf100;
 ;
@@ -3964,18 +3989,47 @@ L0045:	lda     _scroll_x
 ;
 ; if (turd_cooldown > 0) {
 ;
-L006E:	lda     _turd_cooldown
-	beq     L006F
+L0073:	lda     _turd_cooldown
+	beq     L0074
 ;
 ; --turd_cooldown;
 ;
 	dec     _turd_cooldown
 ;
-; if (pad1_new & PAD_SELECT) {
+; if ((pad1_new & PAD_SELECT) && (pad1 & PAD_START)) {
 ;
-L006F:	lda     _pad1_new
+L0074:	lda     _pad1_new
 	and     #$20
-	beq     L004A
+	beq     L0078
+	lda     _pad1
+	and     #$10
+	beq     L0078
+;
+; ++level;
+;
+	inc     _level
+;
+; game_mode = MODE_SWITCH;
+;
+	lda     #$03
+	sta     _game_mode
+;
+; bright = 4;
+;
+	lda     #$04
+	sta     _bright
+;
+; bright_count = 0;
+;
+	lda     #$00
+	sta     _bright_count
+;
+; else if (pad1_new & PAD_SELECT) {
+;
+	jmp     L004F
+L0078:	lda     _pad1_new
+	and     #$20
+	beq     L004F
 ;
 ; corn_mode = !corn_mode; // Toggle between 0 and 1
 ;
@@ -3992,10 +4046,10 @@ L006F:	lda     _pad1_new
 ;
 ; if (corn_mode && coins == 0) {
 ;
-L004A:	lda     _corn_mode
-	beq     L004B
+L004F:	lda     _corn_mode
+	beq     L0050
 	lda     _coins
-	bne     L004B
+	bne     L0050
 ;
 ; corn_mode = 0;
 ;
@@ -4010,20 +4064,20 @@ L004A:	lda     _corn_mode
 ;
 ; if (has_turd_power && (pad1 & PAD_B) && turd_cooldown == 0) {
 ;
-L004B:	lda     _has_turd_power
-	beq     L0058
+L0050:	lda     _has_turd_power
+	beq     L005D
 	lda     _pad1
 	and     #$40
-	beq     L0058
+	beq     L005D
 	lda     _turd_cooldown
-	bne     L0058
+	bne     L005D
 ;
 ; if (corn_mode && coins > 0) {
 ;
 	lda     _corn_mode
-	beq     L0053
+	beq     L0058
 	lda     _coins
-	beq     L0053
+	beq     L0058
 ;
 ; fire_turd();
 ;
@@ -4035,9 +4089,9 @@ L004B:	lda     _has_turd_power
 ;
 ; } else if (!corn_mode) {
 ;
-	jmp     L0079
-L0053:	lda     _corn_mode
-	bne     L0058
+	jmp     L0082
+L0058:	lda     _corn_mode
+	bne     L005D
 ;
 ; fire_turd();
 ;
@@ -4045,12 +4099,12 @@ L0053:	lda     _corn_mode
 ;
 ; turd_cooldown = TURD_COOLDOWN;
 ;
-L0079:	lda     #$14
+L0082:	lda     #$14
 	sta     _turd_cooldown
 ;
 ; update_turds();
 ;
-L0058:	jsr     _update_turds
+L005D:	jsr     _update_turds
 ;
 ; } 
 ;
@@ -4086,43 +4140,19 @@ L0002:	inx
 	lda     _pseudo_scroll_x+1
 	sta     _temp1
 ;
-; set_data_pointer(level_main_data[level][temp1]);
+; if (temp1 & 1) set_data_pointer(c_map2);
 ;
-	ldx     #$00
-	lda     _level
-	asl     a
-	bcc     L0013
-	inx
-	clc
-L0013:	adc     #<(_level_main_data)
-	sta     ptr1
-	txa
-	adc     #>(_level_main_data)
-	sta     ptr1+1
-	ldy     #$01
-	lda     (ptr1),y
-	tax
-	dey
-	lda     (ptr1),y
-	sta     ptr1
-	stx     ptr1+1
-	ldx     #$00
-	lda     _temp1
-	asl     a
-	bcc     L0014
-	inx
-	clc
-L0014:	adc     ptr1
-	sta     ptr1
-	txa
-	adc     ptr1+1
-	sta     ptr1+1
-	iny
-	lda     (ptr1),y
-	tax
-	dey
-	lda     (ptr1),y
-	jsr     _set_data_pointer
+	and     #$01
+	beq     L0003
+	lda     #<(_c_map2)
+	ldx     #>(_c_map2)
+;
+; else           set_data_pointer(c_map);
+;
+	jmp     L0012
+L0003:	lda     #<(_c_map)
+	ldx     #>(_c_map)
+L0012:	jsr     _set_data_pointer
 ;
 ; nt = temp1 & 1;
 ;
@@ -4141,16 +4171,16 @@ L0014:	adc     ptr1
 ;
 ; }
 ;
-	beq     L0005
-	cmp     #$01
 	beq     L0007
+	cmp     #$01
+	beq     L0009
 	cmp     #$02
-	jeq     L000A
-	jmp     L000D
+	jeq     L000C
+	jmp     L000F
 ;
 ; address = get_ppu_addr(nt, x, 0);
 ;
-L0005:	jsr     decsp2
+L0007:	jsr     decsp2
 	lda     _nt
 	ldy     #$01
 	sta     (sp),y
@@ -4205,11 +4235,11 @@ L0005:	jsr     decsp2
 ;
 ; break;
 ;
-	jmp     L0019
+	jmp     L0018
 ;
 ; address = get_ppu_addr(nt, x, 0x40);
 ;
-L0007:	jsr     decsp2
+L0009:	jsr     decsp2
 	lda     _nt
 	ldy     #$01
 	sta     (sp),y
@@ -4266,11 +4296,11 @@ L0007:	jsr     decsp2
 ;
 ; break;
 ;
-	jmp     L0019
+	jmp     L0018
 ;
 ; address = get_ppu_addr(nt, x, 0x80);
 ;
-L000A:	jsr     decsp2
+L000C:	jsr     decsp2
 	lda     _nt
 	ldy     #$01
 	sta     (sp),y
@@ -4327,11 +4357,11 @@ L000A:	jsr     decsp2
 ;
 ; break;
 ;
-	jmp     L0019
+	jmp     L0018
 ;
 ; address = get_ppu_addr(nt, x, 0xc0);
 ;
-L000D:	jsr     decsp2
+L000F:	jsr     decsp2
 	lda     _nt
 	ldy     #$01
 	sta     (sp),y
@@ -4385,7 +4415,7 @@ L000D:	jsr     decsp2
 	lsr     a
 	clc
 	adc     #$E0
-L0019:	sta     _index
+L0018:	sta     _index
 ;
 ; buffer_4_mt(address, index); // ppu_address, index to the data
 ;
@@ -4442,19 +4472,19 @@ L000F:	lda     _room
 	and     #$01
 	sta     _map
 ;
-; if (!map) memcpy (c_map, level_main_data[level][room], 240);
+; if (!map) decompress_room(c_map, level_main_data[level][room]);
 ;
 	lda     _map
 	bne     L0004
 	lda     #<(_c_map)
 	ldx     #>(_c_map)
 ;
-; else      memcpy (c_map2, level_main_data[level][room], 240);
+; else      decompress_room(c_map2, level_main_data[level][room]);
 ;
-	jmp     L0033
+	jmp     L0030
 L0004:	lda     #<(_c_map2)
 	ldx     #>(_c_map2)
-L0033:	jsr     pushax
+L0030:	jsr     pushax
 	ldx     #$00
 	lda     _level
 	asl     a
@@ -4489,10 +4519,7 @@ L000E:	adc     ptr1
 	tax
 	dey
 	lda     (ptr1),y
-	jsr     pushax
-	ldx     #$00
-	lda     #$F0
-	jmp     _memcpy
+	jmp     _decompress_room
 
 .endproc
 
@@ -9915,6 +9942,114 @@ L0003:	rts
 .endproc
 
 ; ---------------------------------------------------------------
+; void __near__ decompress_room (unsigned char *dest, const unsigned char *src)
+; ---------------------------------------------------------------
+
+.segment	"CODE"
+
+.proc	_decompress_room: near
+
+.segment	"CODE"
+
+;
+; void decompress_room(unsigned char *dest, const unsigned char *src) {
+;
+	jsr     pushax
+;
+; unsigned char i = 0;
+;
+	lda     #$00
+	jsr     pusha
+;
+; while (i < 240) {
+;
+	jsr     decsp2
+	jmp     L0006
+;
+; count = *src++;
+;
+L0002:	ldy     #$04
+	lda     (sp),y
+	sta     ptr1+1
+	dey
+	lda     (sp),y
+	sta     ptr1
+	ldy     #$00
+	lda     (ptr1),y
+	iny
+	sta     (sp),y
+	ldy     #$03
+	ldx     #$00
+	lda     #$01
+	jsr     addeqysp
+;
+; val = *src++;
+;
+	ldy     #$04
+	lda     (sp),y
+	sta     ptr1+1
+	dey
+	lda     (sp),y
+	sta     ptr1
+	ldy     #$00
+	lda     (ptr1),y
+	sta     (sp),y
+	ldy     #$03
+	ldx     #$00
+	lda     #$01
+	jsr     addeqysp
+;
+; while (count--) {
+;
+	jmp     L0007
+;
+; dest[i++] = val;
+;
+L0005:	ldy     #$02
+	lda     (sp),y
+	clc
+	ldy     #$05
+	adc     (sp),y
+	sta     ptr1
+	lda     #$00
+	iny
+	adc     (sp),y
+	sta     ptr1+1
+	ldy     #$00
+	lda     (sp),y
+	sta     (ptr1),y
+	ldy     #$02
+	clc
+	lda     #$01
+	adc     (sp),y
+	sta     (sp),y
+;
+; while (count--) {
+;
+L0007:	ldy     #$01
+	lda     (sp),y
+	php
+	lda     (sp),y
+	sec
+	sbc     #$01
+	sta     (sp),y
+	plp
+	bne     L0005
+;
+; while (i < 240) {
+;
+L0006:	ldy     #$02
+	lda     (sp),y
+	cmp     #$F0
+	bcc     L0002
+;
+; }
+;
+	jmp     incsp7
+
+.endproc
+
+; ---------------------------------------------------------------
 ; char __near__ bg_collision_sub_any_ground (void)
 ; ---------------------------------------------------------------
 
@@ -10758,10 +10893,10 @@ L0029:	lda     _scroll_x
 ;
 	jsr     _set_scroll_x
 ;
-; if (level < 5) {
+; if (level < 10) {
 ;
 	lda     _level
-	cmp     #$05
+	cmp     #$0A
 	bcs     L004F
 ;
 ; load_room();

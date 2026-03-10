@@ -22,6 +22,19 @@ unsigned char was_jumping;  // Whether we were jumping last frame
 	
 unsigned char enemy_dir[MAX_ENEMY]; // 0 = left, 1 = right
 
+// Decompress RLE room data: (count, value) pairs into 240-byte dest
+void decompress_room(unsigned char *dest, const unsigned char *src) {
+	unsigned char i = 0;
+	unsigned char count, val;
+	while (i < 240) {
+		count = *src++;
+		val = *src++;
+		while (count--) {
+			dest[i++] = val;
+		}
+	}
+}
+
 // Forward declarations (cc65 defaults to C89 rules; functions must be declared before use).
 static char bg_collision_sub_any_ground(void);
 static char has_ground_ahead(unsigned char dir);
@@ -234,7 +247,7 @@ void main(void) {
 				oam_clear();
 				scroll_x = 0;
 				set_scroll_x(scroll_x);
-				if (level < 5) {
+				if (level < 10) {
 					load_room();
 					game_mode = MODE_GAME;
 					ppu_on_all();
@@ -384,10 +397,11 @@ void load_room(void) {
 	// Ensure sprite pattern table is set to 1
 	bank_spr(1);
 
-	// Level data is an array-of-room-pointers per level.
-	set_data_pointer(level_main_data[level][0]);
+	// Level data is RLE compressed - decompress room 0 into c_map
+	decompress_room(c_map, level_main_data[level][0]);
+	set_data_pointer(c_map);
 	set_mt_pointer(metatiles1);
-	for(y=0; ;y+=0x20) { 
+	for(y=0; ;y+=0x20) {
 		for(x=0; ;x+=0x20) {
 			address = get_ppu_addr(0, x, y);
 			index = (y & 0xf0) + (x >> 4);
@@ -397,23 +411,19 @@ void load_room(void) {
 		}
 		if (y == 0xe0) break;
 	}
-	
-	
-	// a little bit in the next room
-	set_data_pointer(level_main_data[level][1]);
-	for(y=0; ;y+=0x20) { 
+
+
+	// a little bit in the next room - decompress into c_map2
+	decompress_room(c_map2, level_main_data[level][1]);
+	set_data_pointer(c_map2);
+	for(y=0; ;y+=0x20) {
 		x = 0;
 		address = get_ppu_addr(1, x, y);
-		// index = (y & 0xf0);
 		index = (y & 0xf0) + (x >> 4);
 		buffer_4_mt(address, index); // ppu_address, index to the data
 		flush_vram_update2();
 		if (y == 0xe0) break;
 	}
-	
-	// copy the room to the collision map
-	// the second one should auto-load with the scrolling code
-	memcpy (c_map, level_main_data[level][0], 240);
 	
 	
 	sprite_obj_init();
@@ -718,8 +728,15 @@ void movement(void) {
 		--turd_cooldown;
 	}
 	
-	// Toggle corn mode with Select button
-	if (pad1_new & PAD_SELECT) {
+	// Debug: SELECT+START = skip to next level
+	if ((pad1_new & PAD_SELECT) && (pad1 & PAD_START)) {
+		++level;
+		game_mode = MODE_SWITCH;
+		bright = 4;
+		bright_count = 0;
+	}
+	// Toggle corn mode with Select button (only if START not held)
+	else if (pad1_new & PAD_SELECT) {
 		corn_mode = !corn_mode; // Toggle between 0 and 1
 		sfx_play(SFX_DING, 0); // Play a sound to indicate mode change
 	}
@@ -1304,7 +1321,9 @@ void draw_screen_R(void) {
 	temp1 = pseudo_scroll_x >> 8;
 
 	// temp1 is the room index within the level.
-	set_data_pointer(level_main_data[level][temp1]);
+	// Room data already decompressed in c_map (even rooms) or c_map2 (odd rooms)
+	if (temp1 & 1) set_data_pointer(c_map2);
+	else           set_data_pointer(c_map);
 	nt = temp1 & 1;
 	x = pseudo_scroll_x & 0xff;
 	
@@ -1365,8 +1384,8 @@ void new_cmap(void) {
 	if (room >= 8) room = 7;
 
 	map = room & 1; //even or odd?
-	if (!map) memcpy (c_map, level_main_data[level][room], 240);
-	else      memcpy (c_map2, level_main_data[level][room], 240);
+	if (!map) decompress_room(c_map, level_main_data[level][room]);
+	else      decompress_room(c_map2, level_main_data[level][room]);
 }
 
 

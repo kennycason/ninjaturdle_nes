@@ -247,15 +247,26 @@ def convert_tmx(tmx_file, output_file):
         with open(output_file, 'w') as f:
             # Write headers
             f.write('#include <stdint.h>\n\n')
-            
-            # Write room data
+
+            # Write room data with RLE compression
             for i, room in enumerate(rooms):
+                # RLE encode: (count, value) pairs
+                rle = []
+                j = 0
+                while j < len(room):
+                    val = room[j]
+                    count = 1
+                    while j + count < len(room) and room[j + count] == val and count < 255:
+                        count += 1
+                    rle.append(count)
+                    rle.append(val)
+                    j += count
+
                 f.write(f'const uint8_t level{level}_main_{i}[] = {{\n')
-                # Write room data in rows of 16
-                for row in range(15):
-                    start = row * 16
-                    row_data = room[start:start + 16]
-                    f.write('    ' + ', '.join(f'0x{x:02x}' for x in row_data) + ',\n')
+                # Write RLE data in groups of 16 bytes per line
+                for k in range(0, len(rle), 16):
+                    chunk = rle[k:k + 16]
+                    f.write('    ' + ', '.join(f'0x{x:02x}' for x in chunk) + ',\n')
                 f.write('};\n\n')
                 
             # Write coin data
