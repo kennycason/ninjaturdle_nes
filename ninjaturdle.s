@@ -249,6 +249,8 @@
 	.export		_coyote_time
 	.export		_was_jumping
 	.export		_enemy_dir
+	.export		_cmap_room_id
+	.export		_cmap2_room_id
 	.export		_decompress_room
 	.export		_main
 	.export		_digit_to_font_tile
@@ -1803,6 +1805,10 @@ _was_jumping:
 	.res	1,$00
 _enemy_dir:
 	.res	16,$00
+_cmap_room_id:
+	.res	1,$00
+_cmap2_room_id:
+	.res	1,$00
 
 ; ---------------------------------------------------------------
 ; void __near__ mmc1_write (unsigned int address, unsigned char value)
@@ -2530,6 +2536,16 @@ L0003:	jmp     incsp6
 ; clear_vram_buffer();
 ;
 	jsr     _clear_vram_buffer
+;
+; cmap_room_id = 0;
+;
+	lda     #$00
+	sta     _cmap_room_id
+;
+; cmap2_room_id = 1;
+;
+	lda     #$01
+	sta     _cmap2_room_id
 ;
 ; mmc1_write(MMC1_CONTROL, 0x12);  // 4KB CHR mode
 ;
@@ -4140,19 +4156,137 @@ L0002:	inx
 	lda     _pseudo_scroll_x+1
 	sta     _temp1
 ;
-; if (temp1 & 1) set_data_pointer(c_map2);
+; if (temp1 >= 8) temp1 = 7;
 ;
+	cmp     #$08
+	bcc     L001F
+	lda     #$07
+	sta     _temp1
+;
+; if (temp1 & 1) {
+;
+L001F:	lda     _temp1
 	and     #$01
-	beq     L0003
+	beq     L0020
+;
+; if (temp1 != cmap2_room_id) {
+;
+	lda     _temp1
+	cmp     _cmap2_room_id
+	beq     L0005
+;
+; decompress_room(c_map2, level_main_data[level][temp1]);
+;
 	lda     #<(_c_map2)
 	ldx     #>(_c_map2)
+	jsr     pushax
+	ldx     #$00
+	lda     _level
+	asl     a
+	bcc     L001B
+	inx
+	clc
+L001B:	adc     #<(_level_main_data)
+	sta     ptr1
+	txa
+	adc     #>(_level_main_data)
+	sta     ptr1+1
+	ldy     #$01
+	lda     (ptr1),y
+	tax
+	dey
+	lda     (ptr1),y
+	sta     ptr1
+	stx     ptr1+1
+	ldx     #$00
+	lda     _temp1
+	asl     a
+	bcc     L001C
+	inx
+	clc
+L001C:	adc     ptr1
+	sta     ptr1
+	txa
+	adc     ptr1+1
+	sta     ptr1+1
+	iny
+	lda     (ptr1),y
+	tax
+	dey
+	lda     (ptr1),y
+	jsr     _decompress_room
 ;
-; else           set_data_pointer(c_map);
+; cmap2_room_id = temp1;
 ;
-	jmp     L0012
-L0003:	lda     #<(_c_map)
+	lda     _temp1
+	sta     _cmap2_room_id
+;
+; set_data_pointer(c_map2);
+;
+L0005:	lda     #<(_c_map2)
+	ldx     #>(_c_map2)
+;
+; } else {
+;
+	jmp     L0019
+;
+; if (temp1 != cmap_room_id) {
+;
+L0020:	lda     _temp1
+	cmp     _cmap_room_id
+	beq     L0007
+;
+; decompress_room(c_map, level_main_data[level][temp1]);
+;
+	lda     #<(_c_map)
 	ldx     #>(_c_map)
-L0012:	jsr     _set_data_pointer
+	jsr     pushax
+	ldx     #$00
+	lda     _level
+	asl     a
+	bcc     L001D
+	inx
+	clc
+L001D:	adc     #<(_level_main_data)
+	sta     ptr1
+	txa
+	adc     #>(_level_main_data)
+	sta     ptr1+1
+	ldy     #$01
+	lda     (ptr1),y
+	tax
+	dey
+	lda     (ptr1),y
+	sta     ptr1
+	stx     ptr1+1
+	ldx     #$00
+	lda     _temp1
+	asl     a
+	bcc     L001E
+	inx
+	clc
+L001E:	adc     ptr1
+	sta     ptr1
+	txa
+	adc     ptr1+1
+	sta     ptr1+1
+	iny
+	lda     (ptr1),y
+	tax
+	dey
+	lda     (ptr1),y
+	jsr     _decompress_room
+;
+; cmap_room_id = temp1;
+;
+	lda     _temp1
+	sta     _cmap_room_id
+;
+; set_data_pointer(c_map);
+;
+L0007:	lda     #<(_c_map)
+	ldx     #>(_c_map)
+L0019:	jsr     _set_data_pointer
 ;
 ; nt = temp1 & 1;
 ;
@@ -4171,16 +4305,16 @@ L0012:	jsr     _set_data_pointer
 ;
 ; }
 ;
-	beq     L0007
+	beq     L000A
 	cmp     #$01
-	beq     L0009
+	beq     L000C
 	cmp     #$02
-	jeq     L000C
-	jmp     L000F
+	jeq     L000F
+	jmp     L0012
 ;
 ; address = get_ppu_addr(nt, x, 0);
 ;
-L0007:	jsr     decsp2
+L000A:	jsr     decsp2
 	lda     _nt
 	ldy     #$01
 	sta     (sp),y
@@ -4235,11 +4369,11 @@ L0007:	jsr     decsp2
 ;
 ; break;
 ;
-	jmp     L0018
+	jmp     L0025
 ;
 ; address = get_ppu_addr(nt, x, 0x40);
 ;
-L0009:	jsr     decsp2
+L000C:	jsr     decsp2
 	lda     _nt
 	ldy     #$01
 	sta     (sp),y
@@ -4296,11 +4430,11 @@ L0009:	jsr     decsp2
 ;
 ; break;
 ;
-	jmp     L0018
+	jmp     L0025
 ;
 ; address = get_ppu_addr(nt, x, 0x80);
 ;
-L000C:	jsr     decsp2
+L000F:	jsr     decsp2
 	lda     _nt
 	ldy     #$01
 	sta     (sp),y
@@ -4357,11 +4491,11 @@ L000C:	jsr     decsp2
 ;
 ; break;
 ;
-	jmp     L0018
+	jmp     L0025
 ;
 ; address = get_ppu_addr(nt, x, 0xc0);
 ;
-L000F:	jsr     decsp2
+L0012:	jsr     decsp2
 	lda     _nt
 	ldy     #$01
 	sta     (sp),y
@@ -4415,7 +4549,7 @@ L000F:	jsr     decsp2
 	lsr     a
 	clc
 	adc     #$E0
-L0018:	sta     _index
+L0025:	sta     _index
 ;
 ; buffer_4_mt(address, index); // ppu_address, index to the data
 ;
@@ -4462,36 +4596,33 @@ L0018:	sta     _index
 ; if (room >= 8) room = 7;
 ;
 	cmp     #$08
-	bcc     L000F
+	bcc     L000E
 	lda     #$07
 	sta     _room
 ;
 ; map = room & 1; //even or odd?
 ;
-L000F:	lda     _room
+L000E:	lda     _room
 	and     #$01
 	sta     _map
 ;
-; if (!map) decompress_room(c_map, level_main_data[level][room]);
+; if (!map) {
 ;
 	lda     _map
 	bne     L0004
+;
+; decompress_room(c_map, level_main_data[level][room]);
+;
 	lda     #<(_c_map)
 	ldx     #>(_c_map)
-;
-; else      decompress_room(c_map2, level_main_data[level][room]);
-;
-	jmp     L0030
-L0004:	lda     #<(_c_map2)
-	ldx     #>(_c_map2)
-L0030:	jsr     pushax
+	jsr     pushax
 	ldx     #$00
 	lda     _level
 	asl     a
-	bcc     L000D
+	bcc     L000A
 	inx
 	clc
-L000D:	adc     #<(_level_main_data)
+L000A:	adc     #<(_level_main_data)
 	sta     ptr1
 	txa
 	adc     #>(_level_main_data)
@@ -4506,10 +4637,10 @@ L000D:	adc     #<(_level_main_data)
 	ldx     #$00
 	lda     _room
 	asl     a
-	bcc     L000E
+	bcc     L000B
 	inx
 	clc
-L000E:	adc     ptr1
+L000B:	adc     ptr1
 	sta     ptr1
 	txa
 	adc     ptr1+1
@@ -4519,7 +4650,66 @@ L000E:	adc     ptr1
 	tax
 	dey
 	lda     (ptr1),y
-	jmp     _decompress_room
+	jsr     _decompress_room
+;
+; cmap_room_id = room;
+;
+	lda     _room
+	sta     _cmap_room_id
+;
+; } else {
+;
+	rts
+;
+; decompress_room(c_map2, level_main_data[level][room]);
+;
+L0004:	lda     #<(_c_map2)
+	ldx     #>(_c_map2)
+	jsr     pushax
+	ldx     #$00
+	lda     _level
+	asl     a
+	bcc     L000C
+	inx
+	clc
+L000C:	adc     #<(_level_main_data)
+	sta     ptr1
+	txa
+	adc     #>(_level_main_data)
+	sta     ptr1+1
+	ldy     #$01
+	lda     (ptr1),y
+	tax
+	dey
+	lda     (ptr1),y
+	sta     ptr1
+	stx     ptr1+1
+	ldx     #$00
+	lda     _room
+	asl     a
+	bcc     L000D
+	inx
+	clc
+L000D:	adc     ptr1
+	sta     ptr1
+	txa
+	adc     ptr1+1
+	sta     ptr1+1
+	iny
+	lda     (ptr1),y
+	tax
+	dey
+	lda     (ptr1),y
+	jsr     _decompress_room
+;
+; cmap2_room_id = room;
+;
+	lda     _room
+	sta     _cmap2_room_id
+;
+; }
+;
+	rts
 
 .endproc
 

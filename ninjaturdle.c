@@ -22,6 +22,10 @@ unsigned char was_jumping;  // Whether we were jumping last frame
 	
 unsigned char enemy_dir[MAX_ENEMY]; // 0 = left, 1 = right
 
+// Tracks which room index is in c_map and c_map2
+unsigned char cmap_room_id;   // room index stored in c_map (even rooms)
+unsigned char cmap2_room_id;  // room index stored in c_map2 (odd rooms)
+
 // Decompress RLE room data: (count, value) pairs into 240-byte dest
 void decompress_room(unsigned char *dest, const unsigned char *src) {
 	unsigned char i = 0;
@@ -388,7 +392,9 @@ void load_title(void) {
 
 void load_room(void) {
 	clear_vram_buffer();
-	
+	cmap_room_id = 0;
+	cmap2_room_id = 1;
+
 	// Set MMC1 banks for gameplay - different banks for BG and sprites
 	mmc1_write(MMC1_CONTROL, 0x12);  // 4KB CHR mode
 	mmc1_write(MMC1_CHR0, CHR_BANK_MAP);     // Pattern Table 0 (background) uses map tiles
@@ -1319,11 +1325,23 @@ void draw_screen_R(void) {
 	pseudo_scroll_x = scroll_x + 0x120;
 	
 	temp1 = pseudo_scroll_x >> 8;
+	if (temp1 >= 8) temp1 = 7;
 
-	// temp1 is the room index within the level.
-	// Room data already decompressed in c_map (even rooms) or c_map2 (odd rooms)
-	if (temp1 & 1) set_data_pointer(c_map2);
-	else           set_data_pointer(c_map);
+	// Use c_map (even rooms) or c_map2 (odd rooms) for rendering.
+	// Decompress on demand if the needed room isn't already loaded.
+	if (temp1 & 1) {
+		if (temp1 != cmap2_room_id) {
+			decompress_room(c_map2, level_main_data[level][temp1]);
+			cmap2_room_id = temp1;
+		}
+		set_data_pointer(c_map2);
+	} else {
+		if (temp1 != cmap_room_id) {
+			decompress_room(c_map, level_main_data[level][temp1]);
+			cmap_room_id = temp1;
+		}
+		set_data_pointer(c_map);
+	}
 	nt = temp1 & 1;
 	x = pseudo_scroll_x & 0xff;
 	
@@ -1384,8 +1402,13 @@ void new_cmap(void) {
 	if (room >= 8) room = 7;
 
 	map = room & 1; //even or odd?
-	if (!map) decompress_room(c_map, level_main_data[level][room]);
-	else      decompress_room(c_map2, level_main_data[level][room]);
+	if (!map) {
+		decompress_room(c_map, level_main_data[level][room]);
+		cmap_room_id = room;
+	} else {
+		decompress_room(c_map2, level_main_data[level][room]);
+		cmap2_room_id = room;
+	}
 }
 
 
