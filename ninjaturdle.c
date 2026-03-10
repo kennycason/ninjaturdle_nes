@@ -164,7 +164,8 @@ void main(void) {
 			movement();
 
 			// Fell off the bottom of the screen -> lose 2 HP and restart the level (or game over).
-			if (high_byte(NINJA.y) >= 0xF0) {
+			// Only count as death when falling (vel_y > 0), not when jumping off the top.
+			if (high_byte(NINJA.y) >= 0xF0 && NINJA.vel_y > 0) {
 				if (player_health <= 2) player_health = 0;
 				else player_health -= 2;
 
