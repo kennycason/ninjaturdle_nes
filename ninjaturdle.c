@@ -712,7 +712,7 @@ void movement(void) {
     }
     
     // do we need to load a new collision map? (scrolled into a new room)
-	if ((scroll_x & 0xff) < 4) {
+	if (L_R_switch && (scroll_x & 0xff) < 4) {
 		if (!map_loaded) {
 			new_cmap();
 			map_loaded = 1;
@@ -1508,10 +1508,9 @@ void new_cmap(void) {
 
 
 void new_cmap_L(void) {
-	// load collision map for the room to the left
+	// load collision map for the room we just entered scrolling left
 	room = (scroll_x >> 8);
-	if (room == 0) return; // already at leftmost room
-	--room;
+	if (room >= 8) room = 7;
 
 	map = room & 1;
 	if (!map) {
