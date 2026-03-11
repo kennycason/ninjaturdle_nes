@@ -25,29 +25,7 @@
 .segment	"RODATA"
 
 _level8_main_0:
-	.byte	$9C
-	.byte	$00
-	.byte	$01
-	.byte	$34
-	.byte	$01
-	.byte	$35
-	.byte	$01
-	.byte	$34
-	.byte	$01
-	.byte	$35
-	.byte	$18
-	.byte	$00
-	.byte	$01
-	.byte	$34
-	.byte	$01
-	.byte	$35
-	.byte	$01
-	.byte	$34
-	.byte	$01
-	.byte	$35
-	.byte	$01
-	.byte	$34
-	.byte	$0F
+	.byte	$CC
 	.byte	$00
 	.byte	$01
 	.byte	$37
@@ -63,24 +41,8 @@ _level8_main_0:
 	.byte	$35
 	.byte	$01
 	.byte	$34
-	.byte	$01
-	.byte	$35
-	.byte	$01
-	.byte	$34
-	.byte	$01
-	.byte	$35
-	.byte	$01
-	.byte	$34
-	.byte	$01
-	.byte	$35
-	.byte	$01
-	.byte	$34
-	.byte	$01
-	.byte	$35
-	.byte	$01
-	.byte	$34
-	.byte	$01
-	.byte	$35
+	.byte	$09
+	.byte	$00
 	.byte	$01
 	.byte	$37
 	.byte	$03
@@ -114,61 +76,7 @@ _level8_main_0:
 	.byte	$03
 	.byte	$36
 _level8_main_1:
-	.byte	$58
-	.byte	$00
-	.byte	$01
-	.byte	$34
-	.byte	$01
-	.byte	$35
-	.byte	$01
-	.byte	$34
-	.byte	$01
-	.byte	$35
-	.byte	$07
-	.byte	$00
-	.byte	$01
-	.byte	$2C
-	.byte	$04
-	.byte	$00
-	.byte	$01
-	.byte	$2C
-	.byte	$03
-	.byte	$00
-	.byte	$01
-	.byte	$2B
-	.byte	$02
-	.byte	$2C
-	.byte	$05
-	.byte	$00
-	.byte	$01
-	.byte	$34
-	.byte	$01
-	.byte	$35
-	.byte	$01
-	.byte	$34
-	.byte	$01
-	.byte	$35
-	.byte	$04
-	.byte	$00
-	.byte	$01
-	.byte	$34
-	.byte	$01
-	.byte	$35
-	.byte	$01
-	.byte	$34
-	.byte	$01
-	.byte	$35
-	.byte	$10
-	.byte	$00
-	.byte	$01
-	.byte	$34
-	.byte	$01
-	.byte	$35
-	.byte	$01
-	.byte	$34
-	.byte	$01
-	.byte	$35
-	.byte	$1F
+	.byte	$B3
 	.byte	$00
 	.byte	$03
 	.byte	$37
@@ -239,40 +147,8 @@ _level8_main_1:
 	.byte	$03
 	.byte	$00
 _level8_main_2:
-	.byte	$58
+	.byte	$91
 	.byte	$00
-	.byte	$01
-	.byte	$34
-	.byte	$01
-	.byte	$35
-	.byte	$01
-	.byte	$34
-	.byte	$01
-	.byte	$35
-	.byte	$18
-	.byte	$00
-	.byte	$01
-	.byte	$34
-	.byte	$01
-	.byte	$35
-	.byte	$01
-	.byte	$34
-	.byte	$01
-	.byte	$35
-	.byte	$04
-	.byte	$00
-	.byte	$01
-	.byte	$34
-	.byte	$01
-	.byte	$35
-	.byte	$01
-	.byte	$34
-	.byte	$01
-	.byte	$35
-	.byte	$10
-	.byte	$00
-	.byte	$01
-	.byte	$34
 	.byte	$03
 	.byte	$37
 	.byte	$06
@@ -362,23 +238,7 @@ _level8_main_2:
 	.byte	$03
 	.byte	$00
 _level8_main_3:
-	.byte	$3D
-	.byte	$00
-	.byte	$01
-	.byte	$35
-	.byte	$01
-	.byte	$34
-	.byte	$01
-	.byte	$35
-	.byte	$19
-	.byte	$00
-	.byte	$01
-	.byte	$35
-	.byte	$01
-	.byte	$34
-	.byte	$01
-	.byte	$35
-	.byte	$01
+	.byte	$5D
 	.byte	$00
 	.byte	$03
 	.byte	$37
@@ -390,15 +250,7 @@ _level8_main_3:
 	.byte	$36
 	.byte	$01
 	.byte	$37
-	.byte	$05
-	.byte	$00
-	.byte	$01
-	.byte	$35
-	.byte	$01
-	.byte	$34
-	.byte	$01
-	.byte	$35
-	.byte	$05
+	.byte	$0D
 	.byte	$00
 	.byte	$01
 	.byte	$37
@@ -419,7 +271,7 @@ _level8_main_3:
 	.byte	$01
 	.byte	$37
 	.byte	$01
-	.byte	$34
+	.byte	$00
 	.byte	$03
 	.byte	$37
 	.byte	$04
@@ -565,9 +417,9 @@ _level8_main_4:
 	.byte	$37
 	.byte	$01
 	.byte	$36
-	.byte	$01
+	.byte	$07
 	.byte	$37
-	.byte	$0D
+	.byte	$07
 	.byte	$00
 	.byte	$01
 	.byte	$37
@@ -593,15 +445,15 @@ _level8_main_4:
 	.byte	$36
 	.byte	$02
 	.byte	$37
-	.byte	$01
+	.byte	$0C
 	.byte	$00
 	.byte	$01
-	.byte	$34
+	.byte	$37
 	.byte	$01
-	.byte	$35
+	.byte	$36
 	.byte	$01
-	.byte	$34
-	.byte	$08
+	.byte	$37
+	.byte	$0D
 	.byte	$00
 	.byte	$01
 	.byte	$37
@@ -610,26 +462,6 @@ _level8_main_4:
 	.byte	$01
 	.byte	$37
 	.byte	$05
-	.byte	$00
-	.byte	$01
-	.byte	$37
-	.byte	$01
-	.byte	$34
-	.byte	$01
-	.byte	$35
-	.byte	$01
-	.byte	$34
-	.byte	$04
-	.byte	$00
-	.byte	$01
-	.byte	$37
-	.byte	$01
-	.byte	$36
-	.byte	$01
-	.byte	$37
-	.byte	$01
-	.byte	$34
-	.byte	$04
 	.byte	$00
 	.byte	$01
 	.byte	$37
@@ -645,10 +477,8 @@ _level8_main_4:
 	.byte	$00
 	.byte	$01
 	.byte	$37
-	.byte	$04
+	.byte	$05
 	.byte	$00
-	.byte	$01
-	.byte	$34
 	.byte	$02
 	.byte	$2C
 	.byte	$01
@@ -657,15 +487,15 @@ _level8_main_4:
 	.byte	$36
 	.byte	$01
 	.byte	$37
-	.byte	$0D
-	.byte	$00
-	.byte	$03
-	.byte	$37
-	.byte	$25
+	.byte	$05
 	.byte	$00
 	.byte	$01
 	.byte	$37
-	.byte	$0F
+	.byte	$07
+	.byte	$00
+	.byte	$03
+	.byte	$37
+	.byte	$35
 	.byte	$00
 	.byte	$01
 	.byte	$37
@@ -710,18 +540,14 @@ _level8_main_4:
 	.byte	$01
 	.byte	$37
 _level8_main_5:
+	.byte	$10
+	.byte	$37
 	.byte	$25
 	.byte	$00
 	.byte	$0B
 	.byte	$37
-	.byte	$04
+	.byte	$07
 	.byte	$00
-	.byte	$01
-	.byte	$34
-	.byte	$01
-	.byte	$35
-	.byte	$01
-	.byte	$34
 	.byte	$01
 	.byte	$37
 	.byte	$07
@@ -752,9 +578,7 @@ _level8_main_5:
 	.byte	$00
 	.byte	$02
 	.byte	$37
-	.byte	$01
-	.byte	$34
-	.byte	$03
+	.byte	$04
 	.byte	$00
 	.byte	$01
 	.byte	$31
@@ -764,9 +588,7 @@ _level8_main_5:
 	.byte	$36
 	.byte	$01
 	.byte	$37
-	.byte	$01
-	.byte	$34
-	.byte	$0B
+	.byte	$0C
 	.byte	$00
 	.byte	$02
 	.byte	$37
@@ -805,20 +627,6 @@ _level8_main_5:
 	.byte	$01
 	.byte	$00
 	.byte	$07
-	.byte	$37
-	.byte	$04
-	.byte	$00
-	.byte	$01
-	.byte	$37
-	.byte	$01
-	.byte	$36
-	.byte	$01
-	.byte	$37
-	.byte	$07
-	.byte	$00
-	.byte	$01
-	.byte	$36
-	.byte	$01
 	.byte	$37
 	.byte	$04
 	.byte	$00
@@ -889,11 +697,13 @@ _level8_main_5:
 	.byte	$01
 	.byte	$00
 _level8_main_6:
+	.byte	$10
+	.byte	$37
 	.byte	$04
 	.byte	$00
-	.byte	$0C
+	.byte	$01
 	.byte	$37
-	.byte	$03
+	.byte	$0E
 	.byte	$00
 	.byte	$01
 	.byte	$31
@@ -911,26 +721,6 @@ _level8_main_6:
 	.byte	$36
 	.byte	$01
 	.byte	$37
-	.byte	$01
-	.byte	$35
-	.byte	$01
-	.byte	$34
-	.byte	$05
-	.byte	$00
-	.byte	$01
-	.byte	$34
-	.byte	$01
-	.byte	$35
-	.byte	$01
-	.byte	$34
-	.byte	$03
-	.byte	$00
-	.byte	$01
-	.byte	$37
-	.byte	$01
-	.byte	$36
-	.byte	$01
-	.byte	$37
 	.byte	$0D
 	.byte	$00
 	.byte	$01
@@ -939,27 +729,17 @@ _level8_main_6:
 	.byte	$36
 	.byte	$01
 	.byte	$37
-	.byte	$0B
+	.byte	$01
+	.byte	$2C
+	.byte	$0C
 	.byte	$00
-	.byte	$01
-	.byte	$34
-	.byte	$01
-	.byte	$35
 	.byte	$01
 	.byte	$37
 	.byte	$01
 	.byte	$36
 	.byte	$01
 	.byte	$37
-	.byte	$03
-	.byte	$00
-	.byte	$01
-	.byte	$34
-	.byte	$01
-	.byte	$35
-	.byte	$01
-	.byte	$34
-	.byte	$03
+	.byte	$09
 	.byte	$00
 	.byte	$02
 	.byte	$37
@@ -974,7 +754,7 @@ _level8_main_6:
 	.byte	$06
 	.byte	$00
 	.byte	$01
-	.byte	$37
+	.byte	$2C
 	.byte	$02
 	.byte	$00
 	.byte	$01
@@ -997,7 +777,11 @@ _level8_main_6:
 	.byte	$36
 	.byte	$02
 	.byte	$00
-	.byte	$03
+	.byte	$01
+	.byte	$37
+	.byte	$01
+	.byte	$36
+	.byte	$01
 	.byte	$37
 	.byte	$04
 	.byte	$00
@@ -1011,7 +795,11 @@ _level8_main_6:
 	.byte	$37
 	.byte	$01
 	.byte	$36
-	.byte	$09
+	.byte	$02
+	.byte	$00
+	.byte	$03
+	.byte	$37
+	.byte	$04
 	.byte	$00
 	.byte	$03
 	.byte	$37
@@ -1021,50 +809,56 @@ _level8_main_6:
 	.byte	$37
 	.byte	$01
 	.byte	$36
-	.byte	$09
+	.byte	$05
 	.byte	$00
 	.byte	$01
-	.byte	$37
-	.byte	$01
-	.byte	$36
-	.byte	$01
-	.byte	$37
-	.byte	$02
-	.byte	$00
-	.byte	$01
-	.byte	$37
-	.byte	$01
-	.byte	$36
-	.byte	$09
-	.byte	$00
-	.byte	$01
-	.byte	$37
-	.byte	$01
-	.byte	$36
-	.byte	$01
-	.byte	$37
-	.byte	$02
-	.byte	$00
-	.byte	$01
-	.byte	$37
-	.byte	$01
-	.byte	$36
-	.byte	$09
-	.byte	$00
-	.byte	$01
-	.byte	$37
-	.byte	$01
-	.byte	$36
-	.byte	$01
-	.byte	$37
-	.byte	$02
-	.byte	$00
-	.byte	$01
-	.byte	$37
-	.byte	$01
-	.byte	$36
+	.byte	$2C
 	.byte	$03
 	.byte	$00
+	.byte	$01
+	.byte	$37
+	.byte	$01
+	.byte	$36
+	.byte	$01
+	.byte	$37
+	.byte	$02
+	.byte	$00
+	.byte	$01
+	.byte	$37
+	.byte	$01
+	.byte	$36
+	.byte	$09
+	.byte	$00
+	.byte	$01
+	.byte	$37
+	.byte	$01
+	.byte	$36
+	.byte	$01
+	.byte	$37
+	.byte	$02
+	.byte	$00
+	.byte	$01
+	.byte	$37
+	.byte	$01
+	.byte	$36
+	.byte	$09
+	.byte	$00
+	.byte	$01
+	.byte	$37
+	.byte	$01
+	.byte	$36
+	.byte	$01
+	.byte	$37
+	.byte	$02
+	.byte	$00
+	.byte	$01
+	.byte	$37
+	.byte	$01
+	.byte	$36
+	.byte	$02
+	.byte	$00
+	.byte	$01
+	.byte	$2F
 	.byte	$01
 	.byte	$37
 	.byte	$01
@@ -1107,7 +901,7 @@ _level8_main_7:
 	.byte	$08
 	.byte	$2C
 	.byte	$01
-	.byte	$34
+	.byte	$00
 	.byte	$01
 	.byte	$37
 	.byte	$03
@@ -1118,20 +912,14 @@ _level8_main_7:
 	.byte	$36
 	.byte	$01
 	.byte	$37
-	.byte	$01
-	.byte	$34
-	.byte	$01
-	.byte	$35
-	.byte	$07
+	.byte	$09
 	.byte	$00
 	.byte	$01
 	.byte	$37
 	.byte	$01
 	.byte	$1A
-	.byte	$01
-	.byte	$35
-	.byte	$01
-	.byte	$34
+	.byte	$02
+	.byte	$00
 	.byte	$01
 	.byte	$37
 	.byte	$01
@@ -1277,10 +1065,6 @@ _level8_main_7:
 	.byte	$02
 	.byte	$37
 _level8_coins:
-	.byte	$00
-	.byte	$04
-	.byte	$60
-	.byte	$02
 	.byte	$20
 	.byte	$03
 	.byte	$E0
@@ -1288,14 +1072,6 @@ _level8_coins:
 	.byte	$20
 	.byte	$04
 	.byte	$E0
-	.byte	$02
-	.byte	$40
-	.byte	$01
-	.byte	$A0
-	.byte	$02
-	.byte	$40
-	.byte	$02
-	.byte	$A0
 	.byte	$02
 	.byte	$40
 	.byte	$03
@@ -1305,8 +1081,20 @@ _level8_coins:
 	.byte	$04
 	.byte	$10
 	.byte	$02
+	.byte	$40
+	.byte	$06
+	.byte	$50
+	.byte	$02
 	.byte	$60
-	.byte	$01
+	.byte	$02
+	.byte	$20
+	.byte	$02
+	.byte	$60
+	.byte	$02
+	.byte	$B0
+	.byte	$02
+	.byte	$60
+	.byte	$04
 	.byte	$60
 	.byte	$02
 	.byte	$80
@@ -1314,16 +1102,36 @@ _level8_coins:
 	.byte	$E0
 	.byte	$02
 	.byte	$80
+	.byte	$01
+	.byte	$40
 	.byte	$02
-	.byte	$20
+	.byte	$80
+	.byte	$01
+	.byte	$B0
 	.byte	$02
 	.byte	$80
 	.byte	$03
 	.byte	$20
 	.byte	$02
+	.byte	$80
+	.byte	$07
+	.byte	$A0
+	.byte	$02
+	.byte	$80
+	.byte	$07
+	.byte	$E0
+	.byte	$02
+	.byte	$90
+	.byte	$05
+	.byte	$A0
+	.byte	$02
 	.byte	$A0
 	.byte	$00
 	.byte	$A0
+	.byte	$02
+	.byte	$D0
+	.byte	$05
+	.byte	$90
 	.byte	$02
 	.byte	$D0
 	.byte	$07
@@ -1331,6 +1139,16 @@ _level8_coins:
 	.byte	$08
 	.byte	$FF
 _level8_enemies:
+	.byte	$20
+	.byte	$05
+	.byte	$B0
+	.byte	$09
+	.byte	$00
+	.byte	$20
+	.byte	$07
+	.byte	$40
+	.byte	$0C
+	.byte	$04
 	.byte	$40
 	.byte	$03
 	.byte	$E0
@@ -1341,11 +1159,16 @@ _level8_enemies:
 	.byte	$50
 	.byte	$09
 	.byte	$00
-	.byte	$60
-	.byte	$01
-	.byte	$E0
-	.byte	$09
+	.byte	$40
+	.byte	$05
 	.byte	$00
+	.byte	$0C
+	.byte	$04
+	.byte	$50
+	.byte	$06
+	.byte	$F0
+	.byte	$0C
+	.byte	$04
 	.byte	$60
 	.byte	$02
 	.byte	$E0
@@ -1376,9 +1199,9 @@ _level8_enemies:
 	.byte	$90
 	.byte	$0B
 	.byte	$00
-	.byte	$C0
+	.byte	$D0
 	.byte	$00
-	.byte	$60
+	.byte	$A0
 	.byte	$0B
 	.byte	$00
 	.byte	$FF
