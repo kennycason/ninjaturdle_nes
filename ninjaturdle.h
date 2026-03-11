@@ -10,6 +10,7 @@
 #define MAX_SPEED 0x240
 #define JUMP_VEL -0x600
 #define MAX_RIGHT 0x9000
+#define MIN_LEFT  0x6000
 
 
 #pragma bss-name(push, "ZEROPAGE")
@@ -239,7 +240,9 @@ void load_room(void);
 void draw_sprites(void);
 void movement(void);	
 void draw_screen_R(void);
+void draw_screen_L(void);
 void new_cmap(void);
+void new_cmap_L(void);
 char bg_collision_sub(void);
 char get_position(void);
 void enemy_moves(void);

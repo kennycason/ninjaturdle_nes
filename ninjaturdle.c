@@ -192,8 +192,12 @@ void main(void) {
 			set_scroll_x(scroll_x);
 			set_scroll_y(scroll_y);
 			
-			draw_screen_R();
-			
+			if (L_R_switch) {
+				draw_screen_R();
+			} else {
+				draw_screen_L();
+			}
+
 			draw_sprites();
 			
 			if (pad1_new & PAD_START) {
@@ -445,7 +449,8 @@ void load_room(void) {
 	above_screen = 0;
 
 	map_loaded = 0;
-	
+	L_R_switch = 1; // default to right scrolling
+
 	// Reset player health when starting a new level (but not when restarting after a fall/death)
 	if (!restart_level) player_health = MAX_HEALTH;
 	damage_cooldown = 0;
@@ -707,12 +712,17 @@ void movement(void) {
     }
     
     // do we need to load a new collision map? (scrolled into a new room)
-	if ((scroll_x & 0xff) < 4) {
+	if (L_R_switch && (scroll_x & 0xff) < 4) {
 		if (!map_loaded) {
 			new_cmap();
-			map_loaded = 1; // only do once
+			map_loaded = 1;
 		}
-		
+	}
+	else if (!L_R_switch && (scroll_x & 0xff) > 0xfb) {
+		if (!map_loaded) {
+			new_cmap_L();
+			map_loaded = 1;
+		}
 	}
 	else {
 		map_loaded = 0;
@@ -725,6 +735,15 @@ void movement(void) {
         if (temp1 > 3) temp1 = 3; // max scroll change
 		scroll_x += temp1;
 		high_byte(NINJA.x) = high_byte(NINJA.x) - temp1;
+		L_R_switch = 1;
+	}
+	else if (NINJA.x < MIN_LEFT && scroll_x > 0) {
+		temp1 = (MIN_LEFT - NINJA.x) >> 8;
+		if (temp1 > 3) temp1 = 3; // max scroll change
+		if (temp1 > scroll_x) temp1 = scroll_x; // don't go below 0
+		scroll_x -= temp1;
+		high_byte(NINJA.x) = high_byte(NINJA.x) + temp1;
+		L_R_switch = 0;
 	}
 
 	if (scroll_x >= MAX_SCROLL) {
@@ -1398,6 +1417,76 @@ void draw_screen_R(void) {
 }
 
 
+void draw_screen_L(void) {
+	// scrolling to the left, draw metatiles behind the left edge
+	if (scroll_x < 0x10) return; // nothing to draw at far left
+
+	pseudo_scroll_x = scroll_x - 0x10;
+
+	temp1 = pseudo_scroll_x >> 8;
+
+	// Use c_map (even rooms) or c_map2 (odd rooms) for rendering.
+	// Decompress on demand if the needed room isn't already loaded.
+	if (temp1 & 1) {
+		if (temp1 != cmap2_room_id) {
+			decompress_room(c_map2, level_main_data[level][temp1]);
+			cmap2_room_id = temp1;
+		}
+		set_data_pointer(c_map2);
+	} else {
+		if (temp1 != cmap_room_id) {
+			decompress_room(c_map, level_main_data[level][temp1]);
+			cmap_room_id = temp1;
+		}
+		set_data_pointer(c_map);
+	}
+	nt = temp1 & 1;
+	x = pseudo_scroll_x & 0xff;
+
+	switch(scroll_count) {
+		case 0:
+			address = get_ppu_addr(nt, x, 0);
+			index = 0 + (x >> 4);
+			buffer_4_mt(address, index);
+
+			address = get_ppu_addr(nt, x, 0x20);
+			index = 0x20 + (x >> 4);
+			buffer_4_mt(address, index);
+			break;
+
+		case 1:
+			address = get_ppu_addr(nt, x, 0x40);
+			index = 0x40 + (x >> 4);
+			buffer_4_mt(address, index);
+
+			address = get_ppu_addr(nt, x, 0x60);
+			index = 0x60 + (x >> 4);
+			buffer_4_mt(address, index);
+			break;
+
+		case 2:
+			address = get_ppu_addr(nt, x, 0x80);
+			index = 0x80 + (x >> 4);
+			buffer_4_mt(address, index);
+
+			address = get_ppu_addr(nt, x, 0xa0);
+			index = 0xa0 + (x >> 4);
+			buffer_4_mt(address, index);
+			break;
+
+		default:
+			address = get_ppu_addr(nt, x, 0xc0);
+			index = 0xc0 + (x >> 4);
+			buffer_4_mt(address, index);
+
+			address = get_ppu_addr(nt, x, 0xe0);
+			index = 0xe0 + (x >> 4);
+			buffer_4_mt(address, index);
+	}
+
+	++scroll_count;
+	scroll_count &= 3;
+}
 
 
 void new_cmap(void) {
@@ -1408,6 +1497,22 @@ void new_cmap(void) {
 	if (room >= 8) room = 7;
 
 	map = room & 1; //even or odd?
+	if (!map) {
+		decompress_room(c_map, level_main_data[level][room]);
+		cmap_room_id = room;
+	} else {
+		decompress_room(c_map2, level_main_data[level][room]);
+		cmap2_room_id = room;
+	}
+}
+
+
+void new_cmap_L(void) {
+	// load collision map for the room we just entered scrolling left
+	room = (scroll_x >> 8);
+	if (room >= 8) room = 7;
+
+	map = room & 1;
 	if (!map) {
 		decompress_room(c_map, level_main_data[level][room]);
 		cmap_room_id = room;
