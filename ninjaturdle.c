@@ -718,7 +718,7 @@ void movement(void) {
 			map_loaded = 1;
 		}
 	}
-	else if ((scroll_x & 0xff) > 0xfb) {
+	else if (!L_R_switch && (scroll_x & 0xff) > 0xfb) {
 		if (!map_loaded) {
 			new_cmap_L();
 			map_loaded = 1;
