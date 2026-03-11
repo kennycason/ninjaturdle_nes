@@ -25,151 +25,257 @@
 .segment	"RODATA"
 
 _level6_main_0:
-	.byte	$68
+	.byte	$67
 	.byte	$00
-	.byte	$03
+	.byte	$01
+	.byte	$2D
+	.byte	$02
 	.byte	$24
-	.byte	$55
+	.byte	$01
+	.byte	$25
+	.byte	$28
 	.byte	$00
-	.byte	$0D
+	.byte	$01
+	.byte	$2D
+	.byte	$01
+	.byte	$25
+	.byte	$1B
+	.byte	$00
+	.byte	$01
+	.byte	$2D
+	.byte	$01
+	.byte	$25
+	.byte	$1E
+	.byte	$00
+	.byte	$01
+	.byte	$2D
+	.byte	$0B
 	.byte	$24
-	.byte	$03
-	.byte	$00
-	.byte	$0D
-	.byte	$26
-	.byte	$03
-	.byte	$00
-	.byte	$0D
-	.byte	$26
-	.byte	$03
+	.byte	$01
+	.byte	$25
+	.byte	$13
 	.byte	$00
 _level6_main_1:
 	.byte	$8A
 	.byte	$00
-	.byte	$03
+	.byte	$01
+	.byte	$2D
+	.byte	$01
 	.byte	$24
+	.byte	$01
+	.byte	$25
 	.byte	$15
 	.byte	$00
-	.byte	$04
+	.byte	$01
+	.byte	$2D
+	.byte	$02
 	.byte	$24
+	.byte	$01
+	.byte	$25
 	.byte	$4A
 	.byte	$00
 _level6_main_2:
 	.byte	$7D
 	.byte	$00
-	.byte	$03
+	.byte	$01
+	.byte	$2D
+	.byte	$02
 	.byte	$25
 	.byte	$19
 	.byte	$00
-	.byte	$03
+	.byte	$01
+	.byte	$2D
+	.byte	$01
 	.byte	$24
+	.byte	$01
+	.byte	$25
 	.byte	$16
 	.byte	$00
-	.byte	$03
+	.byte	$01
+	.byte	$2D
+	.byte	$01
 	.byte	$24
+	.byte	$01
+	.byte	$25
 	.byte	$3B
 	.byte	$00
 _level6_main_3:
 	.byte	$69
 	.byte	$00
-	.byte	$03
+	.byte	$01
+	.byte	$2D
+	.byte	$01
 	.byte	$24
+	.byte	$01
+	.byte	$25
 	.byte	$19
 	.byte	$00
-	.byte	$03
+	.byte	$01
+	.byte	$2D
+	.byte	$01
 	.byte	$24
+	.byte	$01
+	.byte	$25
 	.byte	$11
 	.byte	$00
-	.byte	$03
+	.byte	$01
+	.byte	$2D
+	.byte	$02
 	.byte	$25
 	.byte	$05
 	.byte	$00
-	.byte	$03
+	.byte	$01
+	.byte	$2D
+	.byte	$01
 	.byte	$24
+	.byte	$01
+	.byte	$25
 	.byte	$4C
 	.byte	$00
 _level6_main_4:
 	.byte	$57
 	.byte	$00
-	.byte	$03
+	.byte	$01
+	.byte	$2D
+	.byte	$02
 	.byte	$25
 	.byte	$1A
 	.byte	$00
-	.byte	$03
+	.byte	$01
+	.byte	$2D
+	.byte	$01
 	.byte	$24
+	.byte	$01
+	.byte	$25
 	.byte	$2A
 	.byte	$00
-	.byte	$03
+	.byte	$01
+	.byte	$2D
+	.byte	$01
 	.byte	$24
+	.byte	$01
+	.byte	$25
 	.byte	$06
 	.byte	$00
-	.byte	$03
+	.byte	$01
+	.byte	$2D
+	.byte	$01
 	.byte	$24
+	.byte	$01
+	.byte	$25
 	.byte	$43
 	.byte	$00
 _level6_main_5:
 	.byte	$5A
 	.byte	$00
-	.byte	$03
+	.byte	$01
+	.byte	$2D
+	.byte	$02
 	.byte	$25
 	.byte	$17
 	.byte	$00
-	.byte	$03
+	.byte	$01
+	.byte	$2D
+	.byte	$01
 	.byte	$24
+	.byte	$01
+	.byte	$25
 	.byte	$0A
 	.byte	$00
-	.byte	$03
+	.byte	$01
+	.byte	$2D
+	.byte	$01
 	.byte	$24
+	.byte	$01
+	.byte	$25
 	.byte	$14
 	.byte	$00
-	.byte	$03
-	.byte	$24
+	.byte	$01
+	.byte	$2D
+	.byte	$02
+	.byte	$25
 	.byte	$0A
 	.byte	$00
-	.byte	$03
+	.byte	$01
+	.byte	$2D
+	.byte	$01
 	.byte	$24
+	.byte	$01
+	.byte	$25
 	.byte	$48
 	.byte	$00
 _level6_main_6:
 	.byte	$5D
 	.byte	$00
-	.byte	$03
+	.byte	$01
+	.byte	$2D
+	.byte	$02
 	.byte	$25
 	.byte	$07
 	.byte	$00
-	.byte	$03
+	.byte	$01
+	.byte	$2D
+	.byte	$01
 	.byte	$24
+	.byte	$01
+	.byte	$25
 	.byte	$19
 	.byte	$00
-	.byte	$02
-	.byte	$24
+	.byte	$01
+	.byte	$2D
+	.byte	$01
+	.byte	$25
 	.byte	$1B
 	.byte	$00
-	.byte	$03
+	.byte	$01
+	.byte	$2D
+	.byte	$01
 	.byte	$24
+	.byte	$01
+	.byte	$25
 	.byte	$0A
 	.byte	$00
-	.byte	$03
+	.byte	$01
+	.byte	$2D
+	.byte	$01
 	.byte	$24
+	.byte	$01
+	.byte	$25
 	.byte	$40
 	.byte	$00
 _level6_main_7:
 	.byte	$2A
 	.byte	$00
-	.byte	$04
+	.byte	$01
+	.byte	$2D
+	.byte	$02
 	.byte	$24
+	.byte	$01
+	.byte	$25
 	.byte	$06
 	.byte	$00
-	.byte	$03
+	.byte	$01
+	.byte	$2D
+	.byte	$01
 	.byte	$24
+	.byte	$01
+	.byte	$25
 	.byte	$4D
 	.byte	$00
-	.byte	$03
+	.byte	$01
+	.byte	$2D
+	.byte	$01
 	.byte	$24
+	.byte	$01
+	.byte	$25
 	.byte	$1A
 	.byte	$00
-	.byte	$03
+	.byte	$01
+	.byte	$2D
+	.byte	$01
 	.byte	$24
+	.byte	$01
+	.byte	$25
 	.byte	$4C
 	.byte	$00
 _level6_coins:
@@ -258,18 +364,8 @@ _level6_enemies:
 	.byte	$0B
 	.byte	$00
 	.byte	$90
-	.byte	$05
-	.byte	$A0
-	.byte	$0C
-	.byte	$04
-	.byte	$90
 	.byte	$06
 	.byte	$10
-	.byte	$0B
-	.byte	$00
-	.byte	$A0
-	.byte	$05
-	.byte	$60
 	.byte	$0B
 	.byte	$00
 	.byte	$FF

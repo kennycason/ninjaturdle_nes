@@ -83,10 +83,8 @@ _level7_main_0:
 	.byte	$2F
 	.byte	$0E
 	.byte	$00
-	.byte	$01
+	.byte	$02
 	.byte	$2F
-	.byte	$01
-	.byte	$2C
 	.byte	$01
 	.byte	$2D
 	.byte	$01
@@ -295,8 +293,10 @@ _level7_main_2:
 	.byte	$2C
 	.byte	$01
 	.byte	$2D
-	.byte	$02
-	.byte	$00
+	.byte	$01
+	.byte	$2C
+	.byte	$01
+	.byte	$2D
 	.byte	$01
 	.byte	$2C
 	.byte	$01
@@ -388,8 +388,10 @@ _level7_main_3:
 	.byte	$2C
 	.byte	$01
 	.byte	$2D
-	.byte	$02
-	.byte	$00
+	.byte	$01
+	.byte	$2C
+	.byte	$01
+	.byte	$2D
 	.byte	$01
 	.byte	$2C
 	.byte	$01
@@ -487,10 +489,8 @@ _level7_main_4:
 	.byte	$2C
 	.byte	$01
 	.byte	$2D
-	.byte	$02
+	.byte	$03
 	.byte	$00
-	.byte	$01
-	.byte	$2C
 	.byte	$01
 	.byte	$2D
 	.byte	$01
@@ -580,9 +580,7 @@ _level7_main_5:
 	.byte	$2C
 	.byte	$01
 	.byte	$2D
-	.byte	$02
-	.byte	$00
-	.byte	$01
+	.byte	$03
 	.byte	$2C
 	.byte	$01
 	.byte	$2D
@@ -697,9 +695,7 @@ _level7_main_6:
 	.byte	$2C
 	.byte	$01
 	.byte	$2D
-	.byte	$02
-	.byte	$00
-	.byte	$01
+	.byte	$03
 	.byte	$2C
 	.byte	$01
 	.byte	$2D
@@ -720,7 +716,17 @@ _level7_main_7:
 	.byte	$00
 	.byte	$02
 	.byte	$2F
-	.byte	$0E
+	.byte	$01
+	.byte	$2C
+	.byte	$02
+	.byte	$00
+	.byte	$02
+	.byte	$2C
+	.byte	$02
+	.byte	$00
+	.byte	$02
+	.byte	$2C
+	.byte	$05
 	.byte	$00
 	.byte	$02
 	.byte	$2F
@@ -728,8 +734,10 @@ _level7_main_7:
 	.byte	$00
 	.byte	$02
 	.byte	$2F
-	.byte	$0E
+	.byte	$0C
 	.byte	$00
+	.byte	$02
+	.byte	$2C
 	.byte	$02
 	.byte	$2F
 	.byte	$0E
@@ -750,7 +758,9 @@ _level7_main_7:
 	.byte	$2C
 	.byte	$01
 	.byte	$2D
-	.byte	$05
+	.byte	$01
+	.byte	$2C
+	.byte	$04
 	.byte	$00
 	.byte	$02
 	.byte	$2F
@@ -758,8 +768,10 @@ _level7_main_7:
 	.byte	$00
 	.byte	$02
 	.byte	$2F
-	.byte	$0E
+	.byte	$0C
 	.byte	$00
+	.byte	$02
+	.byte	$2C
 	.byte	$01
 	.byte	$2F
 	.byte	$0F
@@ -849,10 +861,6 @@ _level7_coins:
 	.byte	$06
 	.byte	$10
 	.byte	$02
-	.byte	$B0
-	.byte	$07
-	.byte	$60
-	.byte	$08
 	.byte	$FF
 _level7_enemies:
 	.byte	$30
@@ -900,16 +908,6 @@ _level7_enemies:
 	.byte	$A0
 	.byte	$0C
 	.byte	$04
-	.byte	$D0
-	.byte	$02
-	.byte	$50
-	.byte	$0B
-	.byte	$00
-	.byte	$D0
-	.byte	$02
-	.byte	$60
-	.byte	$0B
-	.byte	$00
 	.byte	$D0
 	.byte	$04
 	.byte	$90

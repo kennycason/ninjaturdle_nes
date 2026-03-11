@@ -779,11 +779,7 @@ _level4_main_6:
 	.byte	$13
 	.byte	$01
 	.byte	$0B
-	.byte	$01
-	.byte	$00
-	.byte	$01
-	.byte	$1A
-	.byte	$01
+	.byte	$03
 	.byte	$00
 	.byte	$01
 	.byte	$0A
