@@ -25,6 +25,7 @@ unsigned char enemy_dir[MAX_ENEMY]; // 0 = left, 1 = right
 // Tracks which room index is in c_map and c_map2
 unsigned char cmap_room_id;   // room index stored in c_map (even rooms)
 unsigned char cmap2_room_id;  // room index stored in c_map2 (odd rooms)
+unsigned char above_screen;   // nonzero when player jumped above top of screen
 
 // Decompress RLE room data: (count, value) pairs into 240-byte dest
 void decompress_room(unsigned char *dest, const unsigned char *src) {
@@ -163,9 +164,12 @@ void main(void) {
 			
 			movement();
 
+			// Track when player jumps above screen vs falls below
+			if (high_byte(NINJA.y) < 0xE0) above_screen = 0;
+			else if (NINJA.vel_y < 0) above_screen = 1;
+
 			// Fell off the bottom of the screen -> lose 2 HP and restart the level (or game over).
-			// Only count as death when falling (vel_y > 0), not when jumping off the top.
-			if (high_byte(NINJA.y) >= 0xF0 && NINJA.vel_y > 0) {
+			if (high_byte(NINJA.y) >= 0xF0 && !above_screen) {
 				if (player_health <= 2) player_health = 0;
 				else player_health -= 2;
 
@@ -438,7 +442,8 @@ void load_room(void) {
 	NINJA.y = 0xc400;
 	NINJA.vel_x = 0;
 	NINJA.vel_y = 0;
-	
+	above_screen = 0;
+
 	map_loaded = 0;
 	
 	// Reset player health when starting a new level (but not when restarting after a fall/death)

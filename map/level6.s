@@ -64,10 +64,12 @@ _level6_main_1:
 	.byte	$24
 	.byte	$01
 	.byte	$25
-	.byte	$15
+	.byte	$14
 	.byte	$00
 	.byte	$01
 	.byte	$2D
+	.byte	$01
+	.byte	$25
 	.byte	$02
 	.byte	$24
 	.byte	$01

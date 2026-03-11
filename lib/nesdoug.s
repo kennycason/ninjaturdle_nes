@@ -432,6 +432,10 @@ _set_mt_pointer:
 ;void __fastcall__ buffer_4_mt(int ppu_address, char index);
 _buffer_4_mt:
 	;a is the index into the data, get 4 metatiles
+	pha
+	lda META_PTR+1
+	sta TEMP+11 ;save original META_PTR high byte
+	pla
 
 	and #$ee ;sanitize, x and y should be even
 	tay
@@ -485,34 +489,52 @@ _buffer_4_mt:
 	lda (META_PTR), y
 	sta VRAM_BUF+3,x ;		buffer the 4 tiles
 	iny
+	bne @nw1
+	inc META_PTR+1
+@nw1:
 	lda (META_PTR), y
 	sta VRAM_BUF+4,x
 	iny
+	bne @nw2
+	inc META_PTR+1
+@nw2:
 	lda (META_PTR), y
 	sta VRAM_BUF+10,x
 	iny
+	bne @nw3
+	inc META_PTR+1
+@nw3:
 	lda (META_PTR), y
 	sta VRAM_BUF+11,x
 	jsr @sub4 ;get attrib bits, shift into place
-	
-;same, but for right side	
+
+;same, but for right side
 	lda TEMP ;low byte ppu address, again
 	sta VRAM_BUF+8,x
 	lda TEMP+1 ;high byte
 	sta VRAM_BUF+7,x
 	jsr @sub1
-	
+
 	inc TEMP+6 ;count and index
 	jsr @sub2
 	lda (META_PTR), y
 	sta VRAM_BUF+5,x ;		buffer the 4 tiles
 	iny
+	bne @nw4
+	inc META_PTR+1
+@nw4:
 	lda (META_PTR), y
 	sta VRAM_BUF+6,x
 	iny
+	bne @nw5
+	inc META_PTR+1
+@nw5:
 	lda (META_PTR), y
 	sta VRAM_BUF+12,x
 	iny
+	bne @nw6
+	inc META_PTR+1
+@nw6:
 	lda (META_PTR), y
 	sta VRAM_BUF+13,x
 	jsr @sub4
@@ -528,8 +550,9 @@ _buffer_4_mt:
 	inc TEMP+6
 	ldy TEMP+6
 	cpy #4
-	bcc @loop
-	
+	bcs @loop_done
+	jmp @loop
+
 @loop_done:	
 	
 	
@@ -574,9 +597,11 @@ _buffer_4_mt:
 	lda #$ff ;=NT_UPD_EOF
 	sta VRAM_BUF,x
 	stx VRAM_INDEX
+	lda TEMP+11
+	sta META_PTR+1 ;restore original META_PTR high byte
 	rts
 
-	
+
 @sub1:	;add $20 is a 1 down on the screen
 	tay ;high byte
 	lda TEMP
@@ -591,15 +616,20 @@ _buffer_4_mt:
 	
 	
 @sub2:	;get the next metatile offset
+	lda TEMP+11
+	sta META_PTR+1 ;restore original high byte
 	ldy TEMP+6
 	lda TEMP+2, y ;metatile
-;multiply by 5	
+;multiply by 5
 	sta TEMP+9
 	asl a
 	asl a ;x4 = 4 bytes per
 	clc
 	adc TEMP+9
 	tay
+	bcc @sub2done
+	inc META_PTR+1 ;handle overflow past 256
+@sub2done:
 	rts
 	
 
@@ -624,6 +654,9 @@ _buffer_4_mt:
 	
 @sub4: ;get attrib bits, roll them in place
 	iny
+	bne @nw7
+	inc META_PTR+1
+@nw7:
 	lda (META_PTR), y ;5th byte = attribute
 	and #3 ;just need 2 bits
 	ror a ;bit to carry
@@ -663,23 +696,39 @@ _buffer_1_mt:
 	sta VRAM_BUF+2,x
 	sta VRAM_BUF+7,x
 	
+	lda META_PTR+1
+	pha ;save original META_PTR high byte
 	lda TEMP+2 ;which metatile
 	asl a
 	asl a
 	clc
 	adc TEMP+2 ;multiply 5
 	tay
+	bcc @b1_nocarry
+	inc META_PTR+1
+@b1_nocarry:
 	lda (META_PTR), y ;tile
 	sta VRAM_BUF+3,x
 	iny
+	bne @b1_nw1
+	inc META_PTR+1
+@b1_nw1:
 	lda (META_PTR), y ;tile
 	sta VRAM_BUF+4,x
 	iny
+	bne @b1_nw2
+	inc META_PTR+1
+@b1_nw2:
 	lda (META_PTR), y ;tile
 	sta VRAM_BUF+8,x
 	iny
+	bne @b1_nw3
+	inc META_PTR+1
+@b1_nw3:
 	lda (META_PTR), y ;tile
 	sta VRAM_BUF+9,x
+	pla
+	sta META_PTR+1 ;restore original META_PTR high byte
 	
 	txa
 	clc

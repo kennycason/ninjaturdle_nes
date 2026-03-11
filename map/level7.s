@@ -186,9 +186,9 @@ _level7_main_1:
 	.byte	$2F
 	.byte	$02
 	.byte	$00
-	.byte	$02
+	.byte	$01
 	.byte	$2F
-	.byte	$0B
+	.byte	$0C
 	.byte	$00
 	.byte	$04
 	.byte	$2F
@@ -813,6 +813,10 @@ _level7_main_7:
 	.byte	$11
 	.byte	$2F
 _level7_coins:
+	.byte	$20
+	.byte	$07
+	.byte	$10
+	.byte	$08
 	.byte	$40
 	.byte	$00
 	.byte	$90
@@ -837,30 +841,6 @@ _level7_coins:
 	.byte	$05
 	.byte	$70
 	.byte	$02
-	.byte	$70
-	.byte	$01
-	.byte	$30
-	.byte	$02
-	.byte	$70
-	.byte	$01
-	.byte	$50
-	.byte	$02
-	.byte	$70
-	.byte	$05
-	.byte	$B0
-	.byte	$02
-	.byte	$80
-	.byte	$03
-	.byte	$60
-	.byte	$02
-	.byte	$80
-	.byte	$03
-	.byte	$80
-	.byte	$02
-	.byte	$80
-	.byte	$06
-	.byte	$10
-	.byte	$02
 	.byte	$FF
 _level7_enemies:
 	.byte	$30
@@ -868,25 +848,10 @@ _level7_enemies:
 	.byte	$50
 	.byte	$09
 	.byte	$00
-	.byte	$60
-	.byte	$02
-	.byte	$B0
-	.byte	$0B
-	.byte	$00
 	.byte	$70
 	.byte	$04
 	.byte	$30
 	.byte	$09
-	.byte	$00
-	.byte	$90
-	.byte	$02
-	.byte	$70
-	.byte	$0C
-	.byte	$04
-	.byte	$B0
-	.byte	$02
-	.byte	$50
-	.byte	$0B
 	.byte	$00
 	.byte	$C0
 	.byte	$03
@@ -908,11 +873,6 @@ _level7_enemies:
 	.byte	$A0
 	.byte	$0C
 	.byte	$04
-	.byte	$D0
-	.byte	$04
-	.byte	$90
-	.byte	$09
-	.byte	$00
 	.byte	$FF
 _level7_main:
 	.addr	_level7_main_0

@@ -135,8 +135,10 @@ _level8_main_1:
 	.byte	$03
 	.byte	$00
 	.byte	$01
+	.byte	$2B
+	.byte	$02
 	.byte	$2C
-	.byte	$07
+	.byte	$05
 	.byte	$00
 	.byte	$01
 	.byte	$34
@@ -969,7 +971,11 @@ _level8_main_6:
 	.byte	$36
 	.byte	$01
 	.byte	$37
-	.byte	$09
+	.byte	$06
+	.byte	$00
+	.byte	$01
+	.byte	$37
+	.byte	$02
 	.byte	$00
 	.byte	$01
 	.byte	$37

@@ -773,15 +773,15 @@ _level10_enemies:
 	.byte	$70
 	.byte	$09
 	.byte	$00
+	.byte	$70
+	.byte	$07
+	.byte	$D0
+	.byte	$20
+	.byte	$00
 	.byte	$90
 	.byte	$04
 	.byte	$D0
 	.byte	$09
-	.byte	$00
-	.byte	$90
-	.byte	$07
-	.byte	$D0
-	.byte	$20
 	.byte	$00
 	.byte	$FF
 _level10_main:
