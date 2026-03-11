@@ -1034,11 +1034,23 @@ _level8_main_7:
 	.byte	$37
 	.byte	$01
 	.byte	$36
+	.byte	$02
+	.byte	$37
+	.byte	$01
+	.byte	$00
 	.byte	$01
 	.byte	$37
-	.byte	$09
+	.byte	$01
 	.byte	$00
-	.byte	$02
+	.byte	$01
+	.byte	$37
+	.byte	$01
+	.byte	$00
+	.byte	$01
+	.byte	$37
+	.byte	$01
+	.byte	$00
+	.byte	$03
 	.byte	$37
 	.byte	$02
 	.byte	$00
@@ -1129,14 +1141,14 @@ _level8_coins:
 	.byte	$00
 	.byte	$A0
 	.byte	$02
+	.byte	$C0
+	.byte	$07
+	.byte	$E0
+	.byte	$08
 	.byte	$D0
 	.byte	$05
 	.byte	$90
 	.byte	$02
-	.byte	$D0
-	.byte	$07
-	.byte	$E0
-	.byte	$08
 	.byte	$FF
 _level8_enemies:
 	.byte	$20
