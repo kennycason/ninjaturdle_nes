@@ -472,7 +472,7 @@ void draw_sprites(void) {
 	if (temp_x == 0) temp_x = 1;
 	// draw 1 hero
 	if (direction == LEFT) {
-		oam_meta_spr(temp_x, high_byte(NINJA.y), NinjaSprL);
+		oam_meta_spr_flip_h(temp_x, high_byte(NINJA.y), NinjaSprR);
 	}
 	else {
 		oam_meta_spr(temp_x, high_byte(NINJA.y), NinjaSprR);

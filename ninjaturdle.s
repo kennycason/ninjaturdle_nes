@@ -55,6 +55,7 @@
 	.export		_setup_pattern_tables
 	.export		_fade_in_palette
 	.export		_fade_out_palette
+	.export		_oam_meta_spr_flip_h
 	.export		_create_sprite
 	.export		_update_sprite_pos
 	.export		_draw_border
@@ -2259,6 +2260,247 @@ L0008:	ldy     #$23
 .endproc
 
 ; ---------------------------------------------------------------
+; void __near__ oam_meta_spr_flip_h (unsigned char x, unsigned char y, const unsigned char *data)
+; ---------------------------------------------------------------
+
+.segment	"CODE"
+
+.proc	_oam_meta_spr_flip_h: near
+
+.segment	"CODE"
+
+;
+; void oam_meta_spr_flip_h(unsigned char x, unsigned char y, const unsigned char *data) {
+;
+	jsr     pushax
+;
+; p = data;
+;
+	jsr     decsp6
+	ldy     #$07
+	lda     (sp),y
+	tax
+	dey
+	lda     (sp),y
+	ldy     #$04
+	jsr     staxysp
+;
+; min_x = max_x = (signed char)p[0];
+;
+	ldy     #$00
+	jsr     ldaidx
+	ldy     #$02
+	sta     (sp),y
+;
+; while (p[0] != 128) {
+;
+	jmp     L0020
+;
+; ox = (signed char)p[0];
+;
+L0002:	ldy     #$05
+	lda     (sp),y
+	tax
+	dey
+	lda     (sp),y
+	ldy     #$00
+	jsr     ldaidx
+	iny
+	sta     (sp),y
+;
+; if (ox < min_x) min_x = ox;
+;
+	ldx     #$00
+	lda     (sp),y
+	bpl     L0006
+	dex
+L0006:	jsr     pushax
+	ldy     #$05
+	ldx     #$00
+	lda     (sp),y
+	bpl     L0007
+	dex
+L0007:	jsr     tosicmp
+	bpl     L0005
+	ldy     #$01
+	lda     (sp),y
+	ldy     #$03
+	sta     (sp),y
+;
+; if (ox > max_x) max_x = ox;
+;
+L0005:	ldy     #$01
+	ldx     #$00
+	lda     (sp),y
+	bpl     L000A
+	dex
+L000A:	jsr     pushax
+	ldy     #$04
+	ldx     #$00
+	lda     (sp),y
+	bpl     L000B
+	dex
+L000B:	jsr     tosicmp
+	bmi     L0009
+	beq     L0009
+	ldy     #$01
+	lda     (sp),y
+L0020:	iny
+	sta     (sp),y
+;
+; p += 4;
+;
+L0009:	ldy     #$04
+	ldx     #$00
+	tya
+	jsr     addeqysp
+;
+; while (p[0] != 128) {
+;
+	ldy     #$05
+	lda     (sp),y
+	sta     ptr1+1
+	dey
+	lda     (sp),y
+	sta     ptr1
+	ldy     #$00
+	lda     (ptr1),y
+	cmp     #$80
+	bne     L0002
+;
+; sum = min_x + max_x;
+;
+	ldy     #$03
+	ldx     #$00
+	lda     (sp),y
+	bpl     L000D
+	dex
+L000D:	sta     ptr1
+	stx     ptr1+1
+	ldx     #$00
+	dey
+	lda     (sp),y
+	bpl     L000E
+	dex
+L000E:	clc
+	adc     ptr1
+	pha
+	txa
+	adc     ptr1+1
+	pla
+	cmp     #$80
+	ldy     #$00
+	sta     (sp),y
+;
+; p = data;
+;
+	ldy     #$07
+	lda     (sp),y
+	tax
+	dey
+	lda     (sp),y
+	ldy     #$04
+	jsr     staxysp
+;
+; while (p[0] != 128) {
+;
+	jmp     L0012
+;
+; ox = sum - (signed char)p[0];
+;
+L001C:	lda     (sp),y
+	bpl     L0013
+	ldx     #$FF
+L0013:	jsr     pushax
+	ldy     #$07
+	lda     (sp),y
+	tax
+	dey
+	lda     (sp),y
+	ldy     #$00
+	jsr     ldaidx
+	jsr     tossubax
+	cmp     #$80
+	ldy     #$01
+	sta     (sp),y
+;
+; oam_spr(x + (unsigned char)ox, y + p[1], p[2], p[3] | OAM_FLIP_H);
+;
+	jsr     decsp3
+	ldy     #$04
+	lda     (sp),y
+	clc
+	ldy     #$0C
+	adc     (sp),y
+	ldy     #$02
+	sta     (sp),y
+	ldy     #$0B
+	lda     (sp),y
+	sta     sreg
+	ldy     #$08
+	lda     (sp),y
+	tax
+	dey
+	lda     (sp),y
+	ldy     #$01
+	sta     ptr1
+	stx     ptr1+1
+	lda     (ptr1),y
+	clc
+	adc     sreg
+	sta     (sp),y
+	ldy     #$08
+	lda     (sp),y
+	tax
+	dey
+	lda     (sp),y
+	ldy     #$02
+	sta     ptr1
+	stx     ptr1+1
+	lda     (ptr1),y
+	ldy     #$00
+	sta     (sp),y
+	ldy     #$08
+	lda     (sp),y
+	tax
+	dey
+	lda     (sp),y
+	ldy     #$03
+	sta     ptr1
+	stx     ptr1+1
+	lda     (ptr1),y
+	ora     #$40
+	jsr     _oam_spr
+;
+; p += 4;
+;
+	ldy     #$04
+	ldx     #$00
+	tya
+	jsr     addeqysp
+;
+; while (p[0] != 128) {
+;
+L0012:	ldy     #$05
+	lda     (sp),y
+	sta     ptr1+1
+	dey
+	lda     (sp),y
+	sta     ptr1
+	ldy     #$00
+	ldx     #$00
+	lda     (ptr1),y
+	cmp     #$80
+	jne     L001C
+;
+; }
+;
+	ldy     #$0A
+	jmp     addysp
+
+.endproc
+
+; ---------------------------------------------------------------
 ; unsigned char __near__ create_sprite (unsigned char x, unsigned char y, unsigned char tile, unsigned char palette, unsigned char flip_h, unsigned char flip_v, unsigned char behind)
 ; ---------------------------------------------------------------
 
@@ -2900,23 +3142,23 @@ L001D:	lda     #$00
 ; if (temp_x > 0xfc) temp_x = 1;
 ;
 	cmp     #$FD
-	bcc     L0038
+	bcc     L0037
 	lda     #$01
 	sta     _temp_x
 ;
 ; if (temp_x == 0) temp_x = 1;
 ;
-L0038:	lda     _temp_x
-	bne     L0039
+L0037:	lda     _temp_x
+	bne     L0038
 	lda     #$01
 	sta     _temp_x
 ;
 ; if (direction == LEFT) {
 ;
-L0039:	lda     _direction
+L0038:	lda     _direction
 	bne     L0004
 ;
-; oam_meta_spr(temp_x, high_byte(NINJA.y), NinjaSprL);
+; oam_meta_spr_flip_h(temp_x, high_byte(NINJA.y), NinjaSprR);
 ;
 	jsr     decsp2
 	lda     _temp_x
@@ -2925,12 +3167,13 @@ L0039:	lda     _direction
 	lda     _NINJA+3
 	dey
 	sta     (sp),y
-	lda     #<(_NinjaSprL)
-	ldx     #>(_NinjaSprL)
+	lda     #<(_NinjaSprR)
+	ldx     #>(_NinjaSprR)
+	jsr     _oam_meta_spr_flip_h
 ;
 ; else {
 ;
-	jmp     L0032
+	jmp     L0005
 ;
 ; oam_meta_spr(temp_x, high_byte(NINJA.y), NinjaSprR);
 ;
@@ -2943,17 +3186,17 @@ L0004:	jsr     decsp2
 	sta     (sp),y
 	lda     #<(_NinjaSprR)
 	ldx     #>(_NinjaSprR)
-L0032:	jsr     _oam_meta_spr
+	jsr     _oam_meta_spr
 ;
 ; draw_turds();
 ;
-	jsr     _draw_turds
+L0005:	jsr     _draw_turds
 ;
 ; for (index = 0; index < MAX_COINS; ++index) {
 ;
 	lda     #$00
 	sta     _index
-L003A:	lda     _index
+L0039:	lda     _index
 	cmp     #$10
 	jcs     L0007
 ;
@@ -2966,13 +3209,13 @@ L003A:	lda     _index
 ; if (temp_y == TURN_OFF) continue;
 ;
 	cmp     #$FF
-	jeq     L003B
+	jeq     L003A
 ;
 ; if (!coin_active[index]) continue;
 ;
 	ldy     _index
 	lda     _coin_active,y
-	jeq     L003B
+	jeq     L003A
 ;
 ; temp_x = coin_x[index];
 ;
@@ -2983,13 +3226,13 @@ L003A:	lda     _index
 ; if (temp_x > 0xf0) continue;
 ;
 	cmp     #$F1
-	jcs     L003B
+	jcs     L003A
 ;
 ; if (temp_y < 0xf0) {
 ;
 	lda     _temp_y
 	cmp     #$F0
-	jcs     L003B
+	jcs     L003A
 ;
 ; if (coin_type[index] == COIN_REG) {
 ;
@@ -3036,7 +3279,7 @@ L003A:	lda     _index
 ;
 ; else if (coin_type[index] == COIN_END) {
 ;
-	jmp     L0033
+	jmp     L0032
 L0011:	ldy     _index
 	lda     _coin_type,y
 	cmp     #$08
@@ -3056,7 +3299,7 @@ L0011:	ldy     _index
 ;
 ; else {
 ;
-	jmp     L0033
+	jmp     L0032
 ;
 ; temp1 = get_frame_count();
 ;
@@ -3093,12 +3336,12 @@ L0015:	jsr     _get_frame_count
 	sta     (sp),y
 	lda     #<(_BigCoinSpr)
 	ldx     #>(_BigCoinSpr)
-L0033:	jsr     _oam_meta_spr
+L0032:	jsr     _oam_meta_spr
 ;
 ; for (index = 0; index < MAX_COINS; ++index) {
 ;
-L003B:	inc     _index
-	jmp     L003A
+L003A:	inc     _index
+	jmp     L0039
 ;
 ; offset = get_frame_count() & 3;
 ;
@@ -3118,7 +3361,7 @@ L0007:	jsr     _get_frame_count
 ;
 	lda     #$00
 	sta     _index
-L003C:	lda     _index
+L003B:	lda     _index
 	cmp     #$10
 	jcs     L001A
 ;
@@ -3141,13 +3384,13 @@ L003C:	lda     _index
 ; if (temp_y == TURN_OFF) continue;
 ;
 	cmp     #$FF
-	beq     L003E
+	beq     L003D
 ;
 ; if (!enemy_active[index2]) continue;
 ;
 	ldy     _index2
 	lda     _enemy_active,y
-	beq     L003E
+	beq     L003D
 ;
 ; temp_x = enemy_x[index2];
 ;
@@ -3158,21 +3401,21 @@ L003C:	lda     _index
 ; if (temp_x == 0) temp_x = 1; // problems with x = 0
 ;
 	lda     _temp_x
-	bne     L003D
+	bne     L003C
 	lda     #$01
 	sta     _temp_x
 ;
 ; if (temp_x > 0xf0) continue;
 ;
-L003D:	lda     _temp_x
+L003C:	lda     _temp_x
 	cmp     #$F1
-	bcs     L003E
+	bcs     L003D
 ;
 ; if (temp_y < 0xf0) {
 ;
 	lda     _temp_y
 	cmp     #$F0
-	bcs     L003E
+	bcs     L003D
 ;
 ; if (enemy_type[index2] == ENEMY_BOSS2) {
 ;
@@ -3190,13 +3433,13 @@ L003D:	lda     _temp_x
 ;
 ; } else {
 ;
-	jmp     L0052
+	jmp     L0051
 ;
 ; oam_meta_spr(temp_x, temp_y, enemy_anim[index2]);
 ;
 L0026:	jsr     decsp2
 	lda     _temp_x
-L0052:	ldy     #$01
+L0051:	ldy     #$01
 	sta     (sp),y
 	lda     _temp_y
 	dey
@@ -3204,10 +3447,10 @@ L0052:	ldy     #$01
 	ldx     #$00
 	lda     _index2
 	asl     a
-	bcc     L0037
+	bcc     L0036
 	inx
 	clc
-L0037:	adc     #<(_enemy_anim)
+L0036:	adc     #<(_enemy_anim)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_anim)
@@ -3221,8 +3464,8 @@ L0037:	adc     #<(_enemy_anim)
 ;
 ; for (index = 0; index < MAX_ENEMY; ++index) {
 ;
-L003E:	inc     _index
-	jmp     L003C
+L003D:	inc     _index
+	jmp     L003B
 ;
 ; draw_enemy_bullets();
 ;
@@ -3310,7 +3553,7 @@ L001A:	jsr     _draw_enemy_bullets
 ;
 ; else {
 ;
-	jmp     L0035
+	jmp     L0034
 ;
 ; oam_meta_spr(0xDD, 0x10, CoinSpr);
 ;
@@ -3323,7 +3566,7 @@ L002C:	jsr     decsp2
 	sta     (sp),y
 	lda     #<(_CoinSpr)
 	ldx     #>(_CoinSpr)
-L0035:	jsr     _oam_meta_spr
+L0034:	jsr     _oam_meta_spr
 ;
 ; temp1 = (coins / 10) + 0xF0; // Convert to tile number
 ;

@@ -124,6 +124,32 @@ void fade_out_palette(unsigned char delay_frames) {
     }
 }
 
+// Draw a metasprite horizontally flipped (mirrors x offsets and sets OAM_FLIP_H)
+void oam_meta_spr_flip_h(unsigned char x, unsigned char y, const unsigned char *data) {
+    const unsigned char *p;
+    signed char min_x, max_x, ox, sum;
+
+    // First pass: find min and max x offsets to compute mirror axis
+    p = data;
+    min_x = max_x = (signed char)p[0];
+    p += 4;
+    while (p[0] != 128) {
+        ox = (signed char)p[0];
+        if (ox < min_x) min_x = ox;
+        if (ox > max_x) max_x = ox;
+        p += 4;
+    }
+    sum = min_x + max_x;
+
+    // Second pass: draw each tile with mirrored x and OAM_FLIP_H
+    p = data;
+    while (p[0] != 128) {
+        ox = sum - (signed char)p[0];
+        oam_spr(x + (unsigned char)ox, y + p[1], p[2], p[3] | OAM_FLIP_H);
+        p += 4;
+    }
+}
+
 // Create a simple sprite with position and attributes
 unsigned char create_sprite(unsigned char x, unsigned char y, unsigned char tile, 
                           unsigned char palette, unsigned char flip_h, 
