@@ -190,17 +190,17 @@ _level5_main_1:
 	.byte	$00
 	.byte	$09
 	.byte	$1F
-	.byte	$24
+	.byte	$25
 	.byte	$00
-	.byte	$0E
+	.byte	$0D
 	.byte	$1F
-	.byte	$02
+	.byte	$03
 	.byte	$00
-	.byte	$0E
+	.byte	$0D
 	.byte	$1F
-	.byte	$02
+	.byte	$03
 	.byte	$00
-	.byte	$07
+	.byte	$06
 	.byte	$1F
 _level5_main_2:
 	.byte	$11
@@ -239,9 +239,9 @@ _level5_main_2:
 	.byte	$1F
 	.byte	$05
 	.byte	$00
-	.byte	$03
+	.byte	$02
 	.byte	$1F
-	.byte	$07
+	.byte	$08
 	.byte	$00
 	.byte	$01
 	.byte	$1F
@@ -253,9 +253,9 @@ _level5_main_2:
 	.byte	$00
 	.byte	$01
 	.byte	$1F
-	.byte	$08
+	.byte	$09
 	.byte	$00
-	.byte	$03
+	.byte	$02
 	.byte	$1F
 	.byte	$09
 	.byte	$00
@@ -269,11 +269,7 @@ _level5_main_2:
 	.byte	$00
 	.byte	$04
 	.byte	$1F
-	.byte	$02
-	.byte	$00
-	.byte	$05
-	.byte	$1F
-	.byte	$02
+	.byte	$09
 	.byte	$00
 	.byte	$02
 	.byte	$1F
@@ -281,11 +277,7 @@ _level5_main_2:
 	.byte	$00
 	.byte	$04
 	.byte	$1F
-	.byte	$02
-	.byte	$00
-	.byte	$05
-	.byte	$1F
-	.byte	$02
+	.byte	$09
 	.byte	$00
 	.byte	$02
 	.byte	$1F
@@ -293,11 +285,7 @@ _level5_main_2:
 	.byte	$00
 	.byte	$04
 	.byte	$1F
-	.byte	$02
-	.byte	$00
-	.byte	$05
-	.byte	$1F
-	.byte	$02
+	.byte	$09
 	.byte	$00
 	.byte	$03
 	.byte	$1F
@@ -348,9 +336,9 @@ _level5_main_3:
 	.byte	$00
 	.byte	$02
 	.byte	$1C
-	.byte	$02
+	.byte	$03
 	.byte	$00
-	.byte	$04
+	.byte	$03
 	.byte	$1F
 	.byte	$04
 	.byte	$00
@@ -382,11 +370,19 @@ _level5_main_3:
 	.byte	$1F
 	.byte	$02
 	.byte	$00
-	.byte	$0E
+	.byte	$04
 	.byte	$1F
 	.byte	$02
 	.byte	$00
 	.byte	$08
+	.byte	$1F
+	.byte	$02
+	.byte	$00
+	.byte	$04
+	.byte	$1F
+	.byte	$02
+	.byte	$00
+	.byte	$02
 	.byte	$1F
 _level5_main_4:
 	.byte	$11
@@ -463,26 +459,32 @@ _level5_main_4:
 	.byte	$00
 	.byte	$05
 	.byte	$1F
+	.byte	$03
+	.byte	$00
+	.byte	$02
+	.byte	$1F
 	.byte	$02
 	.byte	$00
-	.byte	$07
+	.byte	$02
 	.byte	$1F
 	.byte	$02
 	.byte	$00
 	.byte	$05
 	.byte	$1F
+	.byte	$03
+	.byte	$00
+	.byte	$02
+	.byte	$1F
 	.byte	$02
 	.byte	$00
-	.byte	$07
+	.byte	$02
 	.byte	$1F
 	.byte	$02
 	.byte	$00
 	.byte	$05
 	.byte	$1F
-	.byte	$02
+	.byte	$03
 	.byte	$00
-	.byte	$01
-	.byte	$1F
 _level5_main_5:
 	.byte	$11
 	.byte	$1F
@@ -546,29 +548,29 @@ _level5_main_5:
 	.byte	$00
 	.byte	$02
 	.byte	$1C
-	.byte	$06
+	.byte	$09
 	.byte	$00
-	.byte	$06
-	.byte	$1F
-	.byte	$02
-	.byte	$00
-	.byte	$05
-	.byte	$1F
 	.byte	$03
-	.byte	$00
-	.byte	$06
 	.byte	$1F
-	.byte	$02
+	.byte	$04
 	.byte	$00
-	.byte	$05
-	.byte	$1F
 	.byte	$03
+	.byte	$1F
+	.byte	$06
+	.byte	$00
+	.byte	$03
+	.byte	$1F
+	.byte	$04
+	.byte	$00
+	.byte	$03
+	.byte	$1F
+	.byte	$06
+	.byte	$00
+	.byte	$03
+	.byte	$1F
+	.byte	$04
 	.byte	$00
 	.byte	$06
-	.byte	$1F
-	.byte	$02
-	.byte	$00
-	.byte	$08
 	.byte	$1F
 _level5_main_6:
 	.byte	$11
@@ -645,11 +647,11 @@ _level5_main_6:
 	.byte	$1F
 	.byte	$0D
 	.byte	$00
-	.byte	$06
+	.byte	$05
 	.byte	$1F
-	.byte	$02
+	.byte	$04
 	.byte	$00
-	.byte	$0B
+	.byte	$0A
 	.byte	$1F
 _level5_main_7:
 	.byte	$12
@@ -811,11 +813,6 @@ _level5_enemies:
 	.byte	$00
 	.byte	$60
 	.byte	$09
-	.byte	$00
-	.byte	$A0
-	.byte	$02
-	.byte	$50
-	.byte	$0B
 	.byte	$00
 	.byte	$B0
 	.byte	$00

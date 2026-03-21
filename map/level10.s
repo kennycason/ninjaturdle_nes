@@ -28,382 +28,620 @@ _level10_main_0:
 	.byte	$11
 	.byte	$3E
 	.byte	$0E
-	.byte	$09
+	.byte	$00
 	.byte	$02
 	.byte	$3E
-	.byte	$0E
-	.byte	$09
+	.byte	$01
+	.byte	$00
+	.byte	$0C
+	.byte	$3E
+	.byte	$01
+	.byte	$00
 	.byte	$02
 	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$02
-	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$02
-	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$02
-	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$02
-	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$02
-	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$02
-	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$02
-	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$02
-	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$02
-	.byte	$3E
-	.byte	$0F
-	.byte	$09
+	.byte	$01
+	.byte	$00
 	.byte	$01
 	.byte	$3E
-	.byte	$0F
 	.byte	$09
-	.byte	$0D
+	.byte	$00
+	.byte	$02
+	.byte	$3E
+	.byte	$01
+	.byte	$00
+	.byte	$02
+	.byte	$3E
+	.byte	$0B
+	.byte	$00
+	.byte	$02
+	.byte	$3E
+	.byte	$01
+	.byte	$00
+	.byte	$0C
 	.byte	$3E
 	.byte	$02
-	.byte	$09
+	.byte	$00
+	.byte	$01
+	.byte	$3E
+	.byte	$01
+	.byte	$00
+	.byte	$02
+	.byte	$3E
+	.byte	$0C
+	.byte	$00
+	.byte	$01
+	.byte	$3E
+	.byte	$01
+	.byte	$00
+	.byte	$02
+	.byte	$3E
+	.byte	$0C
+	.byte	$00
+	.byte	$01
+	.byte	$3E
+	.byte	$01
+	.byte	$00
+	.byte	$02
+	.byte	$3E
+	.byte	$0A
+	.byte	$00
+	.byte	$01
+	.byte	$0C
+	.byte	$01
+	.byte	$00
+	.byte	$01
+	.byte	$3E
+	.byte	$01
+	.byte	$00
+	.byte	$02
+	.byte	$3E
+	.byte	$07
+	.byte	$00
+	.byte	$01
+	.byte	$0C
+	.byte	$04
+	.byte	$00
+	.byte	$01
+	.byte	$3E
+	.byte	$01
+	.byte	$00
+	.byte	$02
+	.byte	$3E
+	.byte	$04
+	.byte	$00
+	.byte	$01
+	.byte	$0C
+	.byte	$07
+	.byte	$00
+	.byte	$01
+	.byte	$3E
+	.byte	$01
+	.byte	$00
+	.byte	$02
+	.byte	$3E
+	.byte	$01
+	.byte	$00
+	.byte	$01
+	.byte	$0C
+	.byte	$0A
+	.byte	$00
+	.byte	$01
+	.byte	$3E
+	.byte	$02
+	.byte	$00
+	.byte	$01
+	.byte	$3E
+	.byte	$0B
+	.byte	$00
+	.byte	$02
+	.byte	$3E
+	.byte	$02
+	.byte	$00
+	.byte	$0E
+	.byte	$3E
+	.byte	$01
+	.byte	$00
+	.byte	$0F
+	.byte	$3E
+	.byte	$01
+	.byte	$00
 	.byte	$01
 	.byte	$3E
 _level10_main_1:
-	.byte	$11
+	.byte	$12
 	.byte	$3E
-	.byte	$0E
+	.byte	$0C
+	.byte	$00
+	.byte	$04
+	.byte	$3E
+	.byte	$0C
+	.byte	$00
+	.byte	$03
+	.byte	$3E
+	.byte	$07
+	.byte	$00
+	.byte	$01
+	.byte	$0C
+	.byte	$02
+	.byte	$00
+	.byte	$01
+	.byte	$0C
+	.byte	$03
+	.byte	$00
+	.byte	$02
+	.byte	$3E
+	.byte	$04
+	.byte	$00
+	.byte	$01
+	.byte	$0C
 	.byte	$09
+	.byte	$00
 	.byte	$02
 	.byte	$3E
 	.byte	$0E
-	.byte	$09
+	.byte	$00
 	.byte	$02
 	.byte	$3E
 	.byte	$0E
-	.byte	$09
+	.byte	$00
+	.byte	$02
+	.byte	$3E
+	.byte	$03
+	.byte	$00
+	.byte	$01
+	.byte	$0C
+	.byte	$0A
+	.byte	$00
 	.byte	$02
 	.byte	$3E
 	.byte	$0E
-	.byte	$09
+	.byte	$00
 	.byte	$02
 	.byte	$3E
 	.byte	$0E
-	.byte	$09
+	.byte	$00
 	.byte	$02
 	.byte	$3E
-	.byte	$0E
-	.byte	$09
 	.byte	$02
-	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$02
-	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$02
-	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$02
-	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$02
-	.byte	$3E
-	.byte	$0E
-	.byte	$09
+	.byte	$00
+	.byte	$01
+	.byte	$0C
+	.byte	$0B
+	.byte	$00
 	.byte	$01
 	.byte	$3E
-	.byte	$20
-	.byte	$09
+	.byte	$0F
+	.byte	$00
+	.byte	$01
+	.byte	$3E
 	.byte	$10
+	.byte	$00
+	.byte	$02
+	.byte	$3E
+	.byte	$0C
+	.byte	$00
+	.byte	$04
+	.byte	$3E
+	.byte	$0C
+	.byte	$00
+	.byte	$02
 	.byte	$3E
 _level10_main_2:
-	.byte	$11
+	.byte	$12
 	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$02
+	.byte	$0C
+	.byte	$00
+	.byte	$04
 	.byte	$3E
-	.byte	$02
-	.byte	$09
-	.byte	$02
-	.byte	$3E
-	.byte	$06
-	.byte	$09
-	.byte	$02
-	.byte	$3E
-	.byte	$02
-	.byte	$09
-	.byte	$02
-	.byte	$3E
-	.byte	$02
-	.byte	$09
+	.byte	$01
+	.byte	$00
 	.byte	$02
 	.byte	$3E
 	.byte	$06
-	.byte	$09
+	.byte	$00
+	.byte	$02
+	.byte	$3E
+	.byte	$01
+	.byte	$00
+	.byte	$03
+	.byte	$3E
+	.byte	$02
+	.byte	$00
 	.byte	$02
 	.byte	$3E
 	.byte	$02
-	.byte	$09
+	.byte	$00
+	.byte	$02
+	.byte	$0C
+	.byte	$02
+	.byte	$00
 	.byte	$02
 	.byte	$3E
-	.byte	$0E
-	.byte	$09
 	.byte	$02
-	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$02
-	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$02
-	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$02
-	.byte	$3E
-	.byte	$0E
-	.byte	$09
+	.byte	$00
 	.byte	$02
 	.byte	$3E
 	.byte	$0E
-	.byte	$09
+	.byte	$00
 	.byte	$02
 	.byte	$3E
 	.byte	$0E
-	.byte	$09
+	.byte	$00
+	.byte	$02
+	.byte	$3E
+	.byte	$03
+	.byte	$00
+	.byte	$01
+	.byte	$0C
+	.byte	$06
+	.byte	$00
+	.byte	$01
+	.byte	$0C
+	.byte	$03
+	.byte	$00
 	.byte	$02
 	.byte	$3E
 	.byte	$0E
-	.byte	$09
+	.byte	$00
+	.byte	$02
+	.byte	$3E
+	.byte	$0E
+	.byte	$00
+	.byte	$02
+	.byte	$3E
+	.byte	$06
+	.byte	$00
+	.byte	$02
+	.byte	$0C
+	.byte	$06
+	.byte	$00
+	.byte	$02
+	.byte	$3E
+	.byte	$0E
+	.byte	$00
+	.byte	$02
+	.byte	$3E
+	.byte	$0E
+	.byte	$00
 	.byte	$01
 	.byte	$3E
-	.byte	$20
-	.byte	$09
-	.byte	$10
+	.byte	$04
+	.byte	$00
+	.byte	$01
+	.byte	$0C
+	.byte	$06
+	.byte	$00
+	.byte	$01
+	.byte	$0C
+	.byte	$04
+	.byte	$00
+	.byte	$02
+	.byte	$3E
+	.byte	$0C
+	.byte	$00
+	.byte	$04
+	.byte	$3E
+	.byte	$0C
+	.byte	$00
+	.byte	$02
 	.byte	$3E
 _level10_main_3:
-	.byte	$11
+	.byte	$12
 	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$02
+	.byte	$0C
+	.byte	$00
+	.byte	$04
 	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$02
+	.byte	$0C
+	.byte	$00
+	.byte	$03
 	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$02
-	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$02
-	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$02
-	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$02
-	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$02
-	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$02
-	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$02
-	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$02
-	.byte	$3E
-	.byte	$0E
-	.byte	$09
+	.byte	$0F
+	.byte	$00
 	.byte	$01
 	.byte	$3E
-	.byte	$20
-	.byte	$09
 	.byte	$03
-	.byte	$3E
-	.byte	$04
-	.byte	$09
+	.byte	$00
+	.byte	$01
+	.byte	$0C
+	.byte	$02
+	.byte	$00
+	.byte	$01
+	.byte	$0C
+	.byte	$02
+	.byte	$00
+	.byte	$01
+	.byte	$0C
+	.byte	$02
+	.byte	$00
+	.byte	$01
+	.byte	$0C
+	.byte	$01
+	.byte	$00
 	.byte	$02
 	.byte	$3E
-	.byte	$04
-	.byte	$09
+	.byte	$0E
+	.byte	$00
+	.byte	$02
+	.byte	$3E
+	.byte	$0E
+	.byte	$00
+	.byte	$02
+	.byte	$3E
+	.byte	$01
+	.byte	$00
+	.byte	$01
+	.byte	$0C
+	.byte	$02
+	.byte	$00
+	.byte	$01
+	.byte	$0C
+	.byte	$02
+	.byte	$00
+	.byte	$01
+	.byte	$0C
+	.byte	$02
+	.byte	$00
+	.byte	$01
+	.byte	$0C
 	.byte	$03
+	.byte	$00
+	.byte	$02
+	.byte	$3E
+	.byte	$0E
+	.byte	$00
+	.byte	$02
+	.byte	$3E
+	.byte	$0E
+	.byte	$00
+	.byte	$02
+	.byte	$3E
+	.byte	$03
+	.byte	$00
+	.byte	$01
+	.byte	$0C
+	.byte	$02
+	.byte	$00
+	.byte	$01
+	.byte	$0C
+	.byte	$02
+	.byte	$00
+	.byte	$01
+	.byte	$0C
+	.byte	$02
+	.byte	$00
+	.byte	$01
+	.byte	$0C
+	.byte	$01
+	.byte	$00
+	.byte	$02
+	.byte	$3E
+	.byte	$0E
+	.byte	$00
+	.byte	$01
+	.byte	$3E
+	.byte	$0F
+	.byte	$00
+	.byte	$03
+	.byte	$3E
+	.byte	$01
+	.byte	$0C
+	.byte	$02
+	.byte	$00
+	.byte	$01
+	.byte	$0C
+	.byte	$02
+	.byte	$00
+	.byte	$01
+	.byte	$0C
+	.byte	$02
+	.byte	$00
+	.byte	$01
+	.byte	$0C
+	.byte	$02
+	.byte	$00
+	.byte	$04
+	.byte	$3E
+	.byte	$0C
+	.byte	$00
+	.byte	$02
 	.byte	$3E
 _level10_main_4:
-	.byte	$11
+	.byte	$12
 	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$02
-	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$02
-	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$02
-	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$02
-	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$02
-	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$02
-	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$02
-	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$02
-	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$02
-	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$02
-	.byte	$3E
-	.byte	$0E
-	.byte	$09
-	.byte	$01
-	.byte	$3E
-	.byte	$20
-	.byte	$09
+	.byte	$0D
+	.byte	$00
 	.byte	$03
 	.byte	$3E
+	.byte	$0C
+	.byte	$0C
+	.byte	$01
+	.byte	$00
+	.byte	$01
+	.byte	$3E
+	.byte	$0D
+	.byte	$00
+	.byte	$01
+	.byte	$3F
+	.byte	$01
+	.byte	$00
 	.byte	$02
-	.byte	$09
+	.byte	$3E
+	.byte	$0D
+	.byte	$0C
+	.byte	$01
+	.byte	$00
+	.byte	$02
+	.byte	$3E
+	.byte	$06
+	.byte	$00
+	.byte	$01
+	.byte	$3F
+	.byte	$07
+	.byte	$00
+	.byte	$02
+	.byte	$3E
+	.byte	$03
+	.byte	$0C
+	.byte	$01
+	.byte	$00
+	.byte	$05
+	.byte	$0C
+	.byte	$01
+	.byte	$00
+	.byte	$04
+	.byte	$0C
+	.byte	$02
+	.byte	$3E
+	.byte	$0E
+	.byte	$00
+	.byte	$02
+	.byte	$3E
+	.byte	$01
+	.byte	$00
+	.byte	$05
+	.byte	$0C
+	.byte	$01
+	.byte	$00
+	.byte	$05
+	.byte	$0C
+	.byte	$01
+	.byte	$00
+	.byte	$01
+	.byte	$0C
 	.byte	$02
 	.byte	$3E
 	.byte	$04
+	.byte	$00
+	.byte	$01
+	.byte	$3F
 	.byte	$09
+	.byte	$00
 	.byte	$02
 	.byte	$3E
 	.byte	$02
-	.byte	$09
+	.byte	$0C
+	.byte	$01
+	.byte	$00
+	.byte	$05
+	.byte	$0C
+	.byte	$01
+	.byte	$00
+	.byte	$05
+	.byte	$0C
+	.byte	$02
+	.byte	$3E
+	.byte	$0E
+	.byte	$00
+	.byte	$02
+	.byte	$3E
+	.byte	$02
+	.byte	$0C
+	.byte	$01
+	.byte	$00
+	.byte	$03
+	.byte	$0C
+	.byte	$01
+	.byte	$00
+	.byte	$04
+	.byte	$0C
+	.byte	$01
+	.byte	$00
+	.byte	$01
+	.byte	$0C
+	.byte	$02
+	.byte	$00
+	.byte	$02
+	.byte	$3E
+	.byte	$0E
+	.byte	$00
+	.byte	$02
+	.byte	$3E
+	.byte	$0D
+	.byte	$00
 	.byte	$01
 	.byte	$3E
 _level10_main_5:
 	.byte	$11
 	.byte	$3E
 	.byte	$0E
-	.byte	$09
+	.byte	$00
 	.byte	$02
 	.byte	$3E
 	.byte	$0E
-	.byte	$09
+	.byte	$00
 	.byte	$02
 	.byte	$3E
 	.byte	$0E
-	.byte	$09
+	.byte	$00
 	.byte	$02
 	.byte	$3E
 	.byte	$02
-	.byte	$09
+	.byte	$00
 	.byte	$03
 	.byte	$3E
 	.byte	$04
-	.byte	$09
+	.byte	$00
 	.byte	$03
 	.byte	$3E
 	.byte	$02
-	.byte	$09
+	.byte	$00
 	.byte	$02
 	.byte	$3E
 	.byte	$02
-	.byte	$09
+	.byte	$00
 	.byte	$01
 	.byte	$3E
 	.byte	$08
-	.byte	$09
+	.byte	$00
 	.byte	$01
 	.byte	$3E
 	.byte	$03
-	.byte	$09
+	.byte	$00
 	.byte	$01
 	.byte	$3E
 	.byte	$0F
-	.byte	$09
+	.byte	$00
 	.byte	$01
 	.byte	$3E
 	.byte	$0F
-	.byte	$09
+	.byte	$00
 	.byte	$01
 	.byte	$3E
 	.byte	$02
-	.byte	$09
+	.byte	$00
 	.byte	$03
-	.byte	$3E
+	.byte	$0C
 	.byte	$04
-	.byte	$09
+	.byte	$00
 	.byte	$03
-	.byte	$3E
+	.byte	$0C
 	.byte	$03
-	.byte	$09
+	.byte	$00
 	.byte	$01
 	.byte	$3E
 	.byte	$0F
-	.byte	$09
+	.byte	$00
 	.byte	$01
 	.byte	$3E
 	.byte	$0E
-	.byte	$09
+	.byte	$00
 	.byte	$04
 	.byte	$3E
 	.byte	$0C
-	.byte	$09
+	.byte	$00
 	.byte	$01
 	.byte	$3E
 	.byte	$0F
-	.byte	$09
+	.byte	$00
 	.byte	$01
 	.byte	$3E
 	.byte	$0F
-	.byte	$09
+	.byte	$00
 	.byte	$05
 	.byte	$3E
 	.byte	$0B
-	.byte	$09
+	.byte	$00
 	.byte	$01
 	.byte	$3E
 _level10_main_6:
@@ -426,7 +664,7 @@ _level10_main_6:
 	.byte	$11
 	.byte	$3E
 	.byte	$50
-	.byte	$09
+	.byte	$00
 	.byte	$11
 	.byte	$3E
 	.byte	$0E
@@ -449,89 +687,100 @@ _level10_main_7:
 	.byte	$11
 	.byte	$3E
 	.byte	$0E
-	.byte	$09
+	.byte	$00
 	.byte	$02
 	.byte	$3E
 	.byte	$0E
-	.byte	$09
+	.byte	$00
 	.byte	$02
 	.byte	$3E
 	.byte	$0E
-	.byte	$09
+	.byte	$00
 	.byte	$02
 	.byte	$3E
 	.byte	$0E
-	.byte	$09
+	.byte	$00
 	.byte	$01
 	.byte	$3E
 	.byte	$0F
-	.byte	$09
+	.byte	$00
 	.byte	$01
 	.byte	$3E
 	.byte	$0F
-	.byte	$09
+	.byte	$00
 	.byte	$01
 	.byte	$3E
 	.byte	$0F
-	.byte	$09
+	.byte	$00
 	.byte	$01
 	.byte	$3E
 	.byte	$0F
-	.byte	$09
+	.byte	$00
 	.byte	$01
 	.byte	$3E
 	.byte	$0F
-	.byte	$09
+	.byte	$00
 	.byte	$02
 	.byte	$3E
 	.byte	$03
-	.byte	$09
+	.byte	$00
 	.byte	$01
 	.byte	$3E
 	.byte	$03
-	.byte	$09
+	.byte	$00
 	.byte	$01
 	.byte	$3E
 	.byte	$03
-	.byte	$09
+	.byte	$00
 	.byte	$05
 	.byte	$3E
 	.byte	$0E
-	.byte	$09
+	.byte	$00
 	.byte	$02
 	.byte	$3E
 	.byte	$0E
-	.byte	$09
+	.byte	$00
 	.byte	$02
 	.byte	$3E
 	.byte	$0E
-	.byte	$09
+	.byte	$00
 	.byte	$02
 	.byte	$3E
 	.byte	$0E
-	.byte	$09
+	.byte	$00
 	.byte	$01
 	.byte	$3E
 _level10_coins:
-	.byte	$90
-	.byte	$06
 	.byte	$10
 	.byte	$02
-	.byte	$90
-	.byte	$06
+	.byte	$B0
+	.byte	$02
+	.byte	$10
+	.byte	$03
+	.byte	$20
+	.byte	$02
+	.byte	$40
+	.byte	$05
+	.byte	$80
+	.byte	$02
 	.byte	$50
+	.byte	$04
+	.byte	$10
+	.byte	$02
+	.byte	$70
+	.byte	$01
+	.byte	$C0
 	.byte	$02
 	.byte	$90
-	.byte	$06
-	.byte	$90
+	.byte	$07
+	.byte	$80
+	.byte	$02
+	.byte	$B0
+	.byte	$04
+	.byte	$10
 	.byte	$02
 	.byte	$FF
 _level10_enemies:
-	.byte	$60
-	.byte	$04
-	.byte	$70
-	.byte	$09
-	.byte	$00
 	.byte	$70
 	.byte	$07
 	.byte	$D0

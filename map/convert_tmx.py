@@ -16,6 +16,10 @@ TILE_ENEMY_THORNS = 0x0C  # Stationary thorns (toggle spikes)
 TILE_ENEMY_BOSS1 = 0x10   # Boss enemy
 TILE_ENEMY_BOSS2 = 0x20   # Boss2 enemy
 
+# Game engine limits - must match ninjaturdle.h
+MAX_COINS = 16
+MAX_ENEMY = 16
+
 # Sprite tileset GIDs (firstgid=129)
 SPRITE_GID_HP_UP = 129      # 129 + 0 (first tile at 0,0)
 SPRITE_GID_CORN_UP = 130    # 129 + 1 (second tile at 1,0)
@@ -237,6 +241,31 @@ def convert_tmx(tmx_file, output_file):
         # Process object layer for coins and enemies
         coin_data, enemy_data = process_object_layer(tmx_data.root)
         
+        # Validate object counts against game engine limits
+        has_exit = any(ct == 0x08 for _, _, ct in coin_data)
+        has_boss = any(et in (TILE_ENEMY_BOSS1, TILE_ENEMY_BOSS2) for _, _, et, _ in enemy_data)
+        if not has_exit and not has_boss:
+            print(f"ERROR: No exit or boss found! Level must have an exit object (GID {SPRITE_GID_EXIT}) or a boss enemy.")
+            return False
+
+        if len(coin_data) > MAX_COINS:
+            print(f"ERROR: Too many coins/objects ({len(coin_data)}) - max is {MAX_COINS}.")
+            print(f"  The game will only load the first {MAX_COINS} entries.")
+            # Show which items would be dropped
+            for i, (x, y, ct) in enumerate(coin_data):
+                marker = " <-- DROPPED!" if i >= MAX_COINS else ""
+                type_name = "EXIT" if ct == 0x08 else "COIN" if ct == 0x02 else f"0x{ct:02x}"
+                print(f"  [{i:2d}] ({x:3d}, {y:2d}) {type_name}{marker}")
+            return False
+
+        if len(enemy_data) > MAX_ENEMY:
+            print(f"ERROR: Too many enemies ({len(enemy_data)}) - max is {MAX_ENEMY}.")
+            print(f"  The game will only load the first {MAX_ENEMY} entries.")
+            for i, (x, y, et, _) in enumerate(enemy_data):
+                marker = " <-- DROPPED!" if i >= MAX_ENEMY else ""
+                print(f"  [{i:2d}] ({x:3d}, {y:2d}) type=0x{et:02x}{marker}")
+            return False
+
         # Get level number from filename
         level = extract_level_num(tmx_file)
         if not level:

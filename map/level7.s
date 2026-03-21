@@ -109,7 +109,15 @@ _level7_main_0:
 	.byte	$2D
 	.byte	$01
 	.byte	$2C
-	.byte	$13
+	.byte	$01
+	.byte	$2D
+	.byte	$01
+	.byte	$2C
+	.byte	$02
+	.byte	$2F
+	.byte	$0E
+	.byte	$00
+	.byte	$01
 	.byte	$2F
 _level7_main_1:
 	.byte	$11
@@ -208,21 +216,27 @@ _level7_main_1:
 	.byte	$2C
 	.byte	$01
 	.byte	$2D
+	.byte	$01
+	.byte	$2C
+	.byte	$01
+	.byte	$2D
+	.byte	$01
+	.byte	$2C
+	.byte	$01
+	.byte	$2D
+	.byte	$01
+	.byte	$2C
+	.byte	$01
+	.byte	$2D
+	.byte	$01
+	.byte	$2C
+	.byte	$01
+	.byte	$2D
 	.byte	$02
+	.byte	$2F
+	.byte	$0E
 	.byte	$00
 	.byte	$01
-	.byte	$2C
-	.byte	$01
-	.byte	$2D
-	.byte	$01
-	.byte	$2C
-	.byte	$01
-	.byte	$2D
-	.byte	$01
-	.byte	$2C
-	.byte	$01
-	.byte	$2D
-	.byte	$11
 	.byte	$2F
 _level7_main_2:
 	.byte	$11
@@ -305,13 +319,19 @@ _level7_main_2:
 	.byte	$2C
 	.byte	$01
 	.byte	$2D
-	.byte	$02
-	.byte	$00
 	.byte	$01
 	.byte	$2C
 	.byte	$01
 	.byte	$2D
-	.byte	$11
+	.byte	$01
+	.byte	$2C
+	.byte	$01
+	.byte	$2D
+	.byte	$02
+	.byte	$2F
+	.byte	$0E
+	.byte	$00
+	.byte	$01
 	.byte	$2F
 _level7_main_3:
 	.byte	$11
@@ -404,7 +424,11 @@ _level7_main_3:
 	.byte	$2C
 	.byte	$01
 	.byte	$2D
-	.byte	$11
+	.byte	$02
+	.byte	$2F
+	.byte	$0E
+	.byte	$00
+	.byte	$01
 	.byte	$2F
 _level7_main_4:
 	.byte	$11
@@ -489,15 +513,23 @@ _level7_main_4:
 	.byte	$2C
 	.byte	$01
 	.byte	$2D
-	.byte	$03
-	.byte	$00
+	.byte	$01
+	.byte	$2C
 	.byte	$01
 	.byte	$2D
 	.byte	$01
 	.byte	$2C
 	.byte	$01
 	.byte	$2D
-	.byte	$11
+	.byte	$01
+	.byte	$2C
+	.byte	$01
+	.byte	$2D
+	.byte	$02
+	.byte	$2F
+	.byte	$0E
+	.byte	$00
+	.byte	$01
 	.byte	$2F
 _level7_main_5:
 	.byte	$11
@@ -580,10 +612,6 @@ _level7_main_5:
 	.byte	$2C
 	.byte	$01
 	.byte	$2D
-	.byte	$03
-	.byte	$2C
-	.byte	$01
-	.byte	$2D
 	.byte	$01
 	.byte	$2C
 	.byte	$01
@@ -592,7 +620,19 @@ _level7_main_5:
 	.byte	$2C
 	.byte	$01
 	.byte	$2D
-	.byte	$11
+	.byte	$01
+	.byte	$2C
+	.byte	$01
+	.byte	$2D
+	.byte	$01
+	.byte	$2C
+	.byte	$01
+	.byte	$2D
+	.byte	$02
+	.byte	$2F
+	.byte	$0E
+	.byte	$00
+	.byte	$01
 	.byte	$2F
 _level7_main_6:
 	.byte	$11
@@ -695,7 +735,11 @@ _level7_main_6:
 	.byte	$2C
 	.byte	$01
 	.byte	$2D
-	.byte	$03
+	.byte	$01
+	.byte	$2C
+	.byte	$01
+	.byte	$2D
+	.byte	$01
 	.byte	$2C
 	.byte	$01
 	.byte	$2D
@@ -703,7 +747,11 @@ _level7_main_6:
 	.byte	$2C
 	.byte	$01
 	.byte	$2D
-	.byte	$11
+	.byte	$02
+	.byte	$2F
+	.byte	$0E
+	.byte	$00
+	.byte	$01
 	.byte	$2F
 _level7_main_7:
 	.byte	$11
@@ -810,7 +858,11 @@ _level7_main_7:
 	.byte	$2C
 	.byte	$01
 	.byte	$2D
-	.byte	$11
+	.byte	$02
+	.byte	$2F
+	.byte	$0E
+	.byte	$00
+	.byte	$01
 	.byte	$2F
 _level7_coins:
 	.byte	$20

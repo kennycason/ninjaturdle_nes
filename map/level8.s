@@ -1090,10 +1090,6 @@ _level8_coins:
 	.byte	$A0
 	.byte	$02
 	.byte	$40
-	.byte	$04
-	.byte	$10
-	.byte	$02
-	.byte	$40
 	.byte	$06
 	.byte	$50
 	.byte	$02
@@ -1108,10 +1104,6 @@ _level8_coins:
 	.byte	$60
 	.byte	$04
 	.byte	$60
-	.byte	$02
-	.byte	$80
-	.byte	$00
-	.byte	$E0
 	.byte	$02
 	.byte	$80
 	.byte	$01
@@ -1135,10 +1127,6 @@ _level8_coins:
 	.byte	$02
 	.byte	$90
 	.byte	$05
-	.byte	$A0
-	.byte	$02
-	.byte	$A0
-	.byte	$00
 	.byte	$A0
 	.byte	$02
 	.byte	$C0

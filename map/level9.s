@@ -79,13 +79,13 @@ _level9_main_0:
 	.byte	$00
 	.byte	$02
 	.byte	$3F
-	.byte	$0D
-	.byte	$00
-	.byte	$03
-	.byte	$3F
 	.byte	$0E
 	.byte	$00
 	.byte	$02
+	.byte	$3F
+	.byte	$0D
+	.byte	$00
+	.byte	$03
 	.byte	$3F
 	.byte	$0E
 	.byte	$00
