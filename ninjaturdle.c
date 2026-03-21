@@ -711,7 +711,7 @@ void movement(void) {
         drop_through = 12;
     }
 
-    // Handle jumping - use pad1 instead of pad1_new for more responsiveness
+    // Handle jumping - variable height: tap for short jump, hold for full jump
     if (pad1 & PAD_A) {
         if (can_jump && !was_jumping) {
             NINJA.vel_y = JUMP_VEL;
@@ -719,6 +719,10 @@ void movement(void) {
             was_jumping = 1;
         }
     } else {
+        // When A is released early, cut upward velocity for a short hop
+        if (was_jumping && NINJA.vel_y < -0x200) {
+            NINJA.vel_y = -0x200;
+        }
         was_jumping = 0;
     }
 
