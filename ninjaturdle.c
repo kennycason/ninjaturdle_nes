@@ -19,6 +19,7 @@ unsigned char bounce[] = {
 unsigned char boss_health;
 unsigned char coyote_time;  // Frames of coyote time remaining
 unsigned char was_jumping;  // Whether we were jumping last frame
+unsigned char drop_through; // Timer: when > 0, ninja falls through platforms
 	
 unsigned char enemy_dir[MAX_ENEMY]; // 0 = left, 1 = right
 
@@ -476,7 +477,11 @@ void draw_sprites(void) {
 	else {
 		oam_meta_spr(temp_x, high_byte(NINJA.y), NinjaSprR);
 	}
-	
+
+	// Draw turds early so they render on top of level and enemy tiles
+	// (lower OAM index = higher sprite priority on NES)
+	draw_turds();
+
 	// draw coin sprites
 	for (index = 0; index < MAX_COINS; ++index) {
 		temp_y = coin_y[index];
@@ -530,9 +535,6 @@ void draw_sprites(void) {
 			}
 		}
 	}
-	
-	// Draw turds
-	draw_turds();
 	
 	// Draw enemy bullets
 	draw_enemy_bullets();
@@ -700,6 +702,15 @@ void movement(void) {
         can_jump = 1; // Allow jumping during coyote time
     }
     
+    // Handle dropping through platforms with DOWN press
+    if (drop_through > 0) {
+        --drop_through;
+    }
+    if ((pad1_new & PAD_DOWN) && can_jump) {
+        // Set drop_through timer so ninja falls through platforms
+        drop_through = 12;
+    }
+
     // Handle jumping - use pad1 instead of pad1_new for more responsiveness
     if (pad1 & PAD_A) {
         if (can_jump && !was_jumping) {
@@ -710,7 +721,7 @@ void movement(void) {
     } else {
         was_jumping = 0;
     }
-    
+
     // do we need to load a new collision map? (scrolled into a new room)
 	if (L_R_switch && (scroll_x & 0xff) < 4) {
 		if (!map_loaded) {
@@ -1274,17 +1285,15 @@ char bg_collision_sub(void) {
         return COLLISION_SOLID;  // Solid collision from all sides
     }
     else if (IS_PLATFORM(temp1)) {
-        // For ninja, only return platform collision if falling (vel_y > 0)
+        // For ninja, only return platform collision if falling (vel_y > 0) and not dropping through
         if (ENTITY1.width == HERO_WIDTH) {  // This is the ninja
-            if (NINJA.vel_y > 0) {
+            if (NINJA.vel_y > 0 && drop_through == 0) {
                 return COLLISION_PLATFORM;
             }
         }
-        // For turds and bullets, check their own velocity
+        // Turds pass through platforms entirely (no collision)
         else if (ENTITY1.width == TURD_WIDTH) {  // This is a turd
-            if (turd_vel_y[index] > 0) {
-                return COLLISION_PLATFORM;
-            }
+            // Do nothing - turds ignore platforms
         }
         else if (ENTITY1.width == ENEMY_BULLET_WIDTH) {  // This is an enemy bullet
             // Find which bullet this is by checking its position

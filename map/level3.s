@@ -543,10 +543,6 @@ _level3_main_7:
 _level3_coins:
 	.byte	$40
 	.byte	$03
-	.byte	$A0
-	.byte	$02
-	.byte	$40
-	.byte	$03
 	.byte	$D0
 	.byte	$02
 	.byte	$40
@@ -555,23 +551,7 @@ _level3_coins:
 	.byte	$02
 	.byte	$40
 	.byte	$06
-	.byte	$50
-	.byte	$02
-	.byte	$40
-	.byte	$06
-	.byte	$70
-	.byte	$02
-	.byte	$40
-	.byte	$06
 	.byte	$90
-	.byte	$02
-	.byte	$50
-	.byte	$00
-	.byte	$90
-	.byte	$02
-	.byte	$50
-	.byte	$00
-	.byte	$A0
 	.byte	$02
 	.byte	$50
 	.byte	$04
@@ -579,15 +559,7 @@ _level3_coins:
 	.byte	$02
 	.byte	$50
 	.byte	$05
-	.byte	$00
-	.byte	$02
-	.byte	$50
-	.byte	$05
 	.byte	$40
-	.byte	$02
-	.byte	$50
-	.byte	$05
-	.byte	$50
 	.byte	$02
 	.byte	$50
 	.byte	$05
@@ -596,10 +568,6 @@ _level3_coins:
 	.byte	$50
 	.byte	$05
 	.byte	$E0
-	.byte	$02
-	.byte	$80
-	.byte	$03
-	.byte	$B0
 	.byte	$02
 	.byte	$B0
 	.byte	$03
@@ -612,10 +580,6 @@ _level3_coins:
 	.byte	$C0
 	.byte	$02
 	.byte	$90
-	.byte	$02
-	.byte	$C0
-	.byte	$03
-	.byte	$B0
 	.byte	$02
 	.byte	$C0
 	.byte	$05
