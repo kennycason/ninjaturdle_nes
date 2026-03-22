@@ -11,6 +11,8 @@
 #define JUMP_VEL -0x600
 #define MAX_RIGHT 0x9000
 #define MIN_LEFT  0x6000
+#define MAX_DOWN  0x9000
+#define MIN_UP    0x5000
 
 
 #pragma bss-name(push, "ZEROPAGE")
@@ -68,8 +70,10 @@ unsigned int scroll_x;
 unsigned int scroll_y;
 unsigned char scroll_count;
 unsigned int pseudo_scroll_x;
-//unsigned int pseudo_scroll_y;
+unsigned int pseudo_scroll_y;
 unsigned char L_R_switch;
+unsigned char U_D_switch; // 0 = scrolling up, 1 = scrolling down
+unsigned char is_vertical; // current level scroll mode (0=horiz, 1=vert)
 unsigned int old_x;
 //unsigned char old_y;
 unsigned char temp_x;
@@ -158,6 +162,7 @@ unsigned char coin_y[MAX_COINS];
 unsigned char coin_active[MAX_COINS];
 unsigned char coin_room[MAX_COINS];
 unsigned char coin_actual_x[MAX_COINS];
+unsigned char coin_actual_y[MAX_COINS]; // for vertical levels: Y offset in room
 unsigned char coin_type[MAX_COINS];
 
 
@@ -173,6 +178,7 @@ unsigned char enemy_y[MAX_ENEMY];
 unsigned char enemy_active[MAX_ENEMY];
 unsigned char enemy_room[MAX_ENEMY];
 unsigned char enemy_actual_x[MAX_ENEMY];
+unsigned char enemy_actual_y[MAX_ENEMY]; // for vertical levels: Y offset in room
 unsigned char enemy_type[MAX_ENEMY];
 const unsigned char * enemy_anim[MAX_ENEMY];
 // Thorns enemy state
@@ -241,10 +247,15 @@ void draw_sprites(void);
 void movement(void);	
 void draw_screen_R(void);
 void draw_screen_L(void);
+void draw_screen_D(void);
+void draw_screen_U(void);
 void new_cmap(void);
 void new_cmap_L(void);
+void new_cmap_D(void);
+void new_cmap_U(void);
 char bg_collision_sub(void);
 char get_position(void);
+char get_position_vert(void);
 void enemy_moves(void);
 void sprite_collisions(void);
 void check_spr_objects(void);

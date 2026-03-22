@@ -44,6 +44,7 @@ void decompress_room(unsigned char *dest, const unsigned char *src) {
 // Forward declarations (cc65 defaults to C89 rules; functions must be declared before use).
 static char bg_collision_sub_any_ground(void);
 static char has_ground_ahead(unsigned char dir);
+static void vert_set_room_y(unsigned char screen_y);
 
 void main(void) {
 	ppu_off(); // screen off
@@ -62,7 +63,7 @@ void main(void) {
 	
 	scroll_x = 0;
 	set_scroll_x(scroll_x);
-	//level = 3; // debugging, start on level 4 (0-indexed)
+	level = 10; // debugging, start on level 11 (vertical shaft)
 	
 	has_turd_power = 1; // Default to having turd power
 	turd_cooldown = 0;
@@ -190,13 +191,28 @@ void main(void) {
 			update_enemy_bullets();
 			
 			// set scroll
-			set_scroll_x(scroll_x);
-			set_scroll_y(scroll_y);
-			
-			if (L_R_switch) {
-				draw_screen_R();
+			if (is_vertical) {
+				set_scroll_x(0);
+				// For vertical scrolling: convert room-based scroll_y to PPU scroll
+				// Low byte = Y offset in room (0-239), high byte & 1 = nametable select
+				temp5 = scroll_y & 0xff;
+				temp1 = (scroll_y >> 8) & 1;
+				set_scroll_y(temp5 | ((unsigned int)temp1 << 8));
+
+				if (U_D_switch) {
+					draw_screen_D();
+				} else {
+					draw_screen_U();
+				}
 			} else {
-				draw_screen_L();
+				set_scroll_x(scroll_x);
+				set_scroll_y(scroll_y);
+
+				if (L_R_switch) {
+					draw_screen_R();
+				} else {
+					draw_screen_L();
+				}
 			}
 
 			draw_sprites();
@@ -402,61 +418,127 @@ void load_title(void) {
 
 void load_room(void) {
 	clear_vram_buffer();
-	cmap_room_id = 0;
-	cmap2_room_id = 1;
 
-	// Set MMC1 banks for gameplay - different banks for BG and sprites
-	mmc1_write(MMC1_CONTROL, 0x12);  // 4KB CHR mode
-	mmc1_write(MMC1_CHR0, CHR_BANK_MAP);     // Pattern Table 0 (background) uses map tiles
-	mmc1_write(MMC1_CHR1, CHR_BANK_SPRITES); // Pattern Table 1 (sprites) uses sprite tiles
-	
-	// Ensure sprite pattern table is set to 1
-	bank_spr(1);
+	is_vertical = scroll_mode[level];
 
-	// Level data is RLE compressed - decompress room 0 into c_map
-	decompress_room(c_map, level_main_data[level][0]);
-	set_data_pointer(c_map);
-	set_mt_pointer(metatiles1);
-	for(y=0; ;y+=0x20) {
-		for(x=0; ;x+=0x20) {
-			address = get_ppu_addr(0, x, y);
-			index = (y & 0xf0) + (x >> 4);
-			buffer_4_mt(address, index); // ppu_address, index to the data
-			flush_vram_update2();
-			if (x == 0xe0) break;
+	if (is_vertical) {
+		// Vertical level: start at the bottom room, scroll up
+		// horizontal mirroring = nametables stacked top/bottom for vertical scrolling
+		mmc1_write(MMC1_CONTROL, 0x13);  // 4KB CHR mode + horizontal mirroring
+		mmc1_write(MMC1_CHR0, CHR_BANK_MAP);
+		mmc1_write(MMC1_CHR1, CHR_BANK_SPRITES);
+		bank_spr(1);
+
+		// Start at the bottom room (last room)
+		temp1 = scroll_limits[level]; // e.g. 8 for 9-room level
+
+		// Load last two rooms: even room -> c_map, odd room -> c_map2
+		if (temp1 & 1) {
+			cmap2_room_id = temp1;
+			cmap_room_id = temp1 - 1;
+		} else {
+			cmap_room_id = temp1;
+			cmap2_room_id = temp1 > 0 ? temp1 - 1 : 0;
 		}
-		if (y == 0xe0) break;
+		decompress_room(c_map, level_main_data[level][cmap_room_id]);
+		decompress_room(c_map2, level_main_data[level][cmap2_room_id]);
+
+		// Draw bottom room (temp1) to its nametable
+		// For vertical scrolling with horizontal mirroring: nt0=$2000, nt2=$2800
+		nt = temp1 & 1;
+		if (nt) set_data_pointer(c_map2);
+		else set_data_pointer(c_map);
+		set_mt_pointer(metatiles1);
+		for(y=0; ;y+=0x20) {
+			for(x=0; ;x+=0x20) {
+				address = get_ppu_addr(nt << 1, x, y);
+				index = (y & 0xf0) + (x >> 4);
+				buffer_4_mt(address, index);
+				flush_vram_update2();
+				if (x == 0xe0) break;
+			}
+			if (y == 0xe0) break;
+		}
+
+		// Draw room above (temp1-1) fully to the other nametable
+		temp2 = temp1 - 1;
+		nt = temp2 & 1;
+		if (nt) set_data_pointer(c_map2);
+		else set_data_pointer(c_map);
+		for(y=0; ;y+=0x20) {
+			for(x=0; ;x+=0x20) {
+				address = get_ppu_addr(nt << 1, x, y);
+				index = (y & 0xf0) + (x >> 4);
+				buffer_4_mt(address, index);
+				flush_vram_update2();
+				if (x == 0xe0) break;
+			}
+			if (y == 0xe0) break;
+		}
+
+		// Set scroll to bottom room
+		scroll_y = (unsigned int)temp1 << 8;
+		scroll_x = 0;
+
+		sprite_obj_init();
+		NINJA.x = 0x7800; // center horizontally
+		NINJA.y = 0xc400; // near bottom of screen
+		NINJA.vel_x = 0;
+		NINJA.vel_y = 0;
+		above_screen = 0;
+
+		map_loaded = 0;
+		U_D_switch = 0; // default to scrolling up
+		L_R_switch = 0;
+
+	} else {
+		// Horizontal level (original code)
+		cmap_room_id = 0;
+		cmap2_room_id = 1;
+
+		mmc1_write(MMC1_CONTROL, 0x12);  // 4KB CHR mode + vertical mirroring
+		mmc1_write(MMC1_CHR0, CHR_BANK_MAP);
+		mmc1_write(MMC1_CHR1, CHR_BANK_SPRITES);
+		bank_spr(1);
+
+		decompress_room(c_map, level_main_data[level][0]);
+		set_data_pointer(c_map);
+		set_mt_pointer(metatiles1);
+		for(y=0; ;y+=0x20) {
+			for(x=0; ;x+=0x20) {
+				address = get_ppu_addr(0, x, y);
+				index = (y & 0xf0) + (x >> 4);
+				buffer_4_mt(address, index);
+				flush_vram_update2();
+				if (x == 0xe0) break;
+			}
+			if (y == 0xe0) break;
+		}
+
+		decompress_room(c_map2, level_main_data[level][1]);
+		set_data_pointer(c_map2);
+		for(y=0; ;y+=0x20) {
+			x = 0;
+			address = get_ppu_addr(1, x, y);
+			index = (y & 0xf0) + (x >> 4);
+			buffer_4_mt(address, index);
+			flush_vram_update2();
+			if (y == 0xe0) break;
+		}
+
+		sprite_obj_init();
+		NINJA.x = 0x4000;
+		NINJA.y = 0xc400;
+		NINJA.vel_x = 0;
+		NINJA.vel_y = 0;
+		above_screen = 0;
+
+		map_loaded = 0;
+		L_R_switch = 1;
 	}
 
-
-	// a little bit in the next room - decompress into c_map2
-	decompress_room(c_map2, level_main_data[level][1]);
-	set_data_pointer(c_map2);
-	for(y=0; ;y+=0x20) {
-		x = 0;
-		address = get_ppu_addr(1, x, y);
-		index = (y & 0xf0) + (x >> 4);
-		buffer_4_mt(address, index); // ppu_address, index to the data
-		flush_vram_update2();
-		if (y == 0xe0) break;
-	}
-	
-	
-	sprite_obj_init();
-	NINJA.x = 0x4000;
-	NINJA.y = 0xc400;
-	NINJA.vel_x = 0;
-	NINJA.vel_y = 0;
-	above_screen = 0;
-
-	map_loaded = 0;
-	L_R_switch = 1; // default to right scrolling
-
-	// Reset player health when starting a new level (but not when restarting after a fall/death)
 	if (!restart_level) player_health = MAX_HEALTH;
 	damage_cooldown = 0;
-	
-	// Reset boss health when starting a new level
 	boss_health = BOSS_MAX_HEALTH;
 	coyote_time = 0;
 	was_jumping = 0;
@@ -726,46 +808,100 @@ void movement(void) {
         was_jumping = 0;
     }
 
-    // do we need to load a new collision map? (scrolled into a new room)
-	if (L_R_switch && (scroll_x & 0xff) < 4) {
-		if (!map_loaded) {
-			new_cmap();
-			map_loaded = 1;
+    if (is_vertical) {
+		// VERTICAL SCROLLING
+		// Load new collision map when entering a new vertical room
+		if (U_D_switch && (scroll_y & 0xff) > 0xe8) {
+			if (!map_loaded) {
+				new_cmap_D();
+				map_loaded = 1;
+			}
 		}
-	}
-	else if (!L_R_switch && (scroll_x & 0xff) > 0xfb) {
-		if (!map_loaded) {
-			new_cmap_L();
-			map_loaded = 1;
+		else if (!U_D_switch && (scroll_y & 0xff) < 4) {
+			if (!map_loaded) {
+				new_cmap_U();
+				map_loaded = 1;
+			}
 		}
-	}
-	else {
-		map_loaded = 0;
-	}
-	
-	// scroll
-	temp5 = NINJA.x;
-	if (NINJA.x > MAX_RIGHT) {
-		temp1 = (NINJA.x - MAX_RIGHT) >> 8;
-        if (temp1 > 3) temp1 = 3; // max scroll change
-		scroll_x += temp1;
-		high_byte(NINJA.x) = high_byte(NINJA.x) - temp1;
-		L_R_switch = 1;
-	}
-	else if (NINJA.x < MIN_LEFT && scroll_x > 0) {
-		temp1 = (MIN_LEFT - NINJA.x) >> 8;
-		if (temp1 > 3) temp1 = 3; // max scroll change
-		if (temp1 > scroll_x) temp1 = scroll_x; // don't go below 0
-		scroll_x -= temp1;
-		high_byte(NINJA.x) = high_byte(NINJA.x) + temp1;
-		L_R_switch = 0;
-	}
+		else {
+			map_loaded = 0;
+		}
 
-	if (scroll_x >= MAX_SCROLL) {
-		scroll_x = MAX_SCROLL; // stop scrolling right, end of level
-		NINJA.x = temp5; // but allow the x position to go all the way right
-		if (high_byte(NINJA.x) >= 0xf1) {
-			NINJA.x = 0xf100;
+		// Vertical scroll: camera follows player up/down
+		temp6 = NINJA.y;
+		if (NINJA.y < MIN_UP && scroll_y > 0) {
+			temp1 = (MIN_UP - NINJA.y) >> 8;
+			if (temp1 > 3) temp1 = 3;
+			if (temp1 > scroll_y) temp1 = scroll_y;
+			scroll_y -= temp1;
+			// Skip the 240-255 dead zone (NES rooms are 240px, not 256)
+			if ((scroll_y & 0xff) >= 240) scroll_y -= 16;
+			high_byte(NINJA.y) = high_byte(NINJA.y) + temp1;
+			U_D_switch = 0; // scrolling up
+		}
+		else if (NINJA.y > MAX_DOWN) {
+			temp1 = (NINJA.y - MAX_DOWN) >> 8;
+			if (temp1 > 3) temp1 = 3;
+			scroll_y += temp1;
+			// Skip the 240-255 dead zone
+			if ((scroll_y & 0xff) >= 240) scroll_y += 16;
+			high_byte(NINJA.y) = high_byte(NINJA.y) - temp1;
+			U_D_switch = 1; // scrolling down
+		}
+
+		if (scroll_y >= MAX_SCROLL_V) {
+			scroll_y = MAX_SCROLL_V;
+			NINJA.y = temp6;
+			if (high_byte(NINJA.y) >= 0xf1) {
+				NINJA.y = 0xf100;
+			}
+		}
+		// Don't scroll past top
+		if (scroll_y > 0xF000) { // unsigned underflow check
+			scroll_y = 0;
+		}
+
+	} else {
+		// HORIZONTAL SCROLLING (original code)
+		if (L_R_switch && (scroll_x & 0xff) < 4) {
+			if (!map_loaded) {
+				new_cmap();
+				map_loaded = 1;
+			}
+		}
+		else if (!L_R_switch && (scroll_x & 0xff) > 0xfb) {
+			if (!map_loaded) {
+				new_cmap_L();
+				map_loaded = 1;
+			}
+		}
+		else {
+			map_loaded = 0;
+		}
+
+		temp5 = NINJA.x;
+		if (NINJA.x > MAX_RIGHT) {
+			temp1 = (NINJA.x - MAX_RIGHT) >> 8;
+			if (temp1 > 3) temp1 = 3;
+			scroll_x += temp1;
+			high_byte(NINJA.x) = high_byte(NINJA.x) - temp1;
+			L_R_switch = 1;
+		}
+		else if (NINJA.x < MIN_LEFT && scroll_x > 0) {
+			temp1 = (MIN_LEFT - NINJA.x) >> 8;
+			if (temp1 > 3) temp1 = 3;
+			if (temp1 > scroll_x) temp1 = scroll_x;
+			scroll_x -= temp1;
+			high_byte(NINJA.x) = high_byte(NINJA.x) + temp1;
+			L_R_switch = 0;
+		}
+
+		if (scroll_x >= MAX_SCROLL_H) {
+			scroll_x = MAX_SCROLL_H;
+			NINJA.x = temp5;
+			if (high_byte(NINJA.x) >= 0xf1) {
+				NINJA.x = 0xf100;
+			}
 		}
 	}
 
@@ -814,39 +950,64 @@ void movement(void) {
 void check_spr_objects(void) {
 	++enemy_frames;
 	ENTITY2.x = high_byte(NINJA.x);
-	// mark each object "active" if they are, and get the screen x
-	
-	for (index = 0; index < MAX_COINS; ++index) {
-		coin_active[index] = 0; //default to zero
-		if (coin_y[index] != TURN_OFF) {
-			high_byte(temp5) = coin_room[index];
-			low_byte(temp5) = coin_actual_x[index];
-			coin_active[index] = get_position();
-			coin_x[index] = temp_x; // screen x coords
-		}
 
+	for (index = 0; index < MAX_COINS; ++index) {
+		coin_active[index] = 0;
+		if (coin_y[index] != TURN_OFF) {
+			if (is_vertical) {
+				// Vertical: check Y visibility (room+y_offset vs scroll_y)
+				high_byte(temp5) = coin_room[index];
+				low_byte(temp5) = coin_actual_y[index];
+				coin_active[index] = get_position_vert();
+				coin_y[index] = temp_y; // computed screen Y
+				coin_x[index] = coin_actual_x[index]; // X is fixed (no scroll)
+			} else {
+				// Horizontal: check X visibility
+				high_byte(temp5) = coin_room[index];
+				low_byte(temp5) = coin_actual_x[index];
+				coin_active[index] = get_position();
+				coin_x[index] = temp_x;
+			}
+		}
 	}
-	
 
 	for (index = 0; index < MAX_ENEMY; ++index) {
-		enemy_active[index] = 0; //default to zero
+		enemy_active[index] = 0;
 		if (enemy_y[index] != TURN_OFF) {
-			high_byte(temp5) = enemy_room[index];
-			low_byte(temp5) = enemy_actual_x[index];
-			temp1 = enemy_active[index] = get_position();
-			if (temp1 == 0) continue;
-			enemy_x[index] = temp_x; // screen x coords
-			
-			enemy_moves(); // if active, do it's moves now
+			if (is_vertical) {
+				high_byte(temp5) = enemy_room[index];
+				low_byte(temp5) = enemy_actual_y[index];
+				temp1 = enemy_active[index] = get_position_vert();
+				if (temp1 == 0) continue;
+				enemy_y[index] = temp_y; // computed screen Y
+				enemy_x[index] = enemy_actual_x[index]; // X is fixed
+			} else {
+				high_byte(temp5) = enemy_room[index];
+				low_byte(temp5) = enemy_actual_x[index];
+				temp1 = enemy_active[index] = get_position();
+				if (temp1 == 0) continue;
+				enemy_x[index] = temp_x;
+			}
+
+			enemy_moves();
 		}
 	}
 }
 
 
 char get_position(void) {
-	// is it in range ? return 1 if yes
+	// Horizontal: is the object within one screen of scroll_x?
 	temp5 -= scroll_x;
 	temp_x = temp5 & 0xff;
+	if (high_byte(temp5)) return 0;
+	return 1;
+}
+
+
+char get_position_vert(void) {
+	// Vertical: is the object within one screen of scroll_y?
+	temp5 -= scroll_y;
+	temp_y = temp5 & 0xff;
 	if (high_byte(temp5)) return 0;
 	return 1;
 }
@@ -1129,17 +1290,21 @@ void enemy_moves(void) {
 void bg_collision_fast(void) {
 	// rewrote this for enemies, bg_collision was too slow
     // test 1 point on each side
-    
+
 	collision_L = 0;
 	collision_R = 0;
-    
+
 	if (ENTITY1.y >= 0xf0) return;
-	
+
 	temp5 = ENTITY1.x + scroll_x;
 	temp_x = temp5 & 0xff; // low byte x
 	temp_room = temp5 >> 8; // high byte x
-	
-	temp_y = ENTITY1.y + 6; // y middle
+
+	if (is_vertical) {
+		vert_set_room_y(ENTITY1.y + 6);
+	} else {
+		temp_y = ENTITY1.y + 6; // y middle
+	}
 	
 	bg_collision_sub();
 	
@@ -1162,108 +1327,139 @@ void bg_collision_fast(void) {
 
 
 
+// Helper: convert screen_y to (temp_room, temp_y) for vertical mode
+// screen_y + scroll_y_offset -> room number and y-within-room
+static void vert_set_room_y(unsigned char screen_y) {
+    temp5 = (unsigned int)screen_y + (scroll_y & 0xff);
+    temp_room = scroll_y >> 8;
+    if (temp5 >= 240) {
+        ++temp_room;
+        temp_y = (unsigned char)(temp5 - 240);
+    } else {
+        temp_y = (unsigned char)temp5;
+    }
+}
+
 char bg_coll_L(void) {
     // check 2 points on the left side
     temp5 = ENTITY1.x + scroll_x;
-    temp_x = (char)temp5; // low byte
-    temp_room = temp5 >> 8; // high byte
-    
+    temp_x = (char)temp5;
+    temp_room = temp5 >> 8;
+
     eject_L = temp_x | 0xf0;
-    temp_y = ENTITY1.y + 2;
+
+    if (is_vertical) {
+        vert_set_room_y(ENTITY1.y + 2);
+    } else {
+        temp_y = ENTITY1.y + 2;
+    }
     if (bg_collision_sub() & COLLISION_SOLID) return 1;
-    
-    temp_y = ENTITY1.y + ENTITY1.height;
-    temp_y -= 2;
+
+    if (is_vertical) {
+        vert_set_room_y(ENTITY1.y + ENTITY1.height - 2);
+    } else {
+        temp_y = ENTITY1.y + ENTITY1.height - 2;
+    }
     if (bg_collision_sub() & COLLISION_SOLID) return 1;
-    
+
     return 0;
 }
 
 char bg_coll_R(void) {
     // check 2 points on the right side
     temp5 = ENTITY1.x + scroll_x + ENTITY1.width;
-    temp_x = (char)temp5; // low byte
-    temp_room = temp5 >> 8; // high byte
-    
+    temp_x = (char)temp5;
+    temp_room = temp5 >> 8;
+
     eject_R = (temp_x + 1) & 0x0f;
-    temp_y = ENTITY1.y + 2;
+
+    if (is_vertical) {
+        vert_set_room_y(ENTITY1.y + 2);
+    } else {
+        temp_y = ENTITY1.y + 2;
+    }
     if (bg_collision_sub() & COLLISION_SOLID) return 1;
-    
-    temp_y = ENTITY1.y + ENTITY1.height;
-    temp_y -= 2;
+
+    if (is_vertical) {
+        vert_set_room_y(ENTITY1.y + ENTITY1.height - 2);
+    } else {
+        temp_y = ENTITY1.y + ENTITY1.height - 2;
+    }
     if (bg_collision_sub() & COLLISION_SOLID) return 1;
-    
+
     return 0;
 }
 
 char bg_coll_U(void) {
     // check 2 points on the top side
-    temp5 = ENTITY1.x + scroll_x;
-    temp5 += 2;
-    temp_x = (char)temp5; // low byte
-    temp_room = temp5 >> 8; // high byte
-    
-    temp_y = ENTITY1.y;
-    eject_U = temp_y | 0xf0;
+    temp5 = ENTITY1.x + scroll_x + 2;
+    temp_x = (char)temp5;
+    temp_room = temp5 >> 8;
+
+    if (is_vertical) {
+        vert_set_room_y(ENTITY1.y);
+        eject_U = temp_y | 0xf0;
+    } else {
+        temp_y = ENTITY1.y;
+        eject_U = temp_y | 0xf0;
+    }
     if (bg_collision_sub() & COLLISION_SOLID) return 1;
-    
-    temp5 = ENTITY1.x + scroll_x + ENTITY1.width;
-    temp5 -= 2;
-    temp_x = (char)temp5; // low byte
-    temp_room = temp5 >> 8; // high byte
-    
+
+    temp5 = ENTITY1.x + scroll_x + ENTITY1.width - 2;
+    temp_x = (char)temp5;
+    if (!is_vertical) temp_room = temp5 >> 8;
+    // In vertical mode, temp_room stays from vert_set_room_y
+
     if (bg_collision_sub() & COLLISION_SOLID) return 1;
-    
+
     return 0;
 }
 
 char bg_coll_D(void) {
     // check 2 points on the bottom side
-    temp5 = ENTITY1.x + scroll_x;
-    temp5 += 2;
-    temp_x = (char)temp5; // low byte
-    temp_room = temp5 >> 8; // high byte
-    
-    temp_y = ENTITY1.y + ENTITY1.height;
-    
-    if ((temp_y & 0x0f) > 3) return 0; // bug fix
-    // so we don't snap to those platforms
-    // don't fall too fast, or might miss it.
-    
+    temp5 = ENTITY1.x + scroll_x + 2;
+    temp_x = (char)temp5;
+    temp_room = temp5 >> 8;
+
+    if (is_vertical) {
+        vert_set_room_y(ENTITY1.y + ENTITY1.height);
+    } else {
+        temp_y = ENTITY1.y + ENTITY1.height;
+    }
+
+    if ((temp_y & 0x0f) > 3) return 0;
     eject_D = (temp_y + 1) & 0x0f;
-    
-    // Check for both solid and platform collisions when falling
+
     if (bg_collision_sub() & (COLLISION_SOLID | COLLISION_PLATFORM)) return 1;
-    
-    temp5 = ENTITY1.x + scroll_x + ENTITY1.width;
-    temp5 -= 2;
-    temp_x = (char)temp5; // low byte
-    temp_room = temp5 >> 8; // high byte
-    
+
+    temp5 = ENTITY1.x + scroll_x + ENTITY1.width - 2;
+    temp_x = (char)temp5;
+    if (!is_vertical) temp_room = temp5 >> 8;
+
     if (bg_collision_sub() & (COLLISION_SOLID | COLLISION_PLATFORM)) return 1;
-    
+
     return 0;
 }
 
 char bg_coll_D2(void) {
-    // check 2 points on the bottom side
-    // a little lower, for jumping
-    temp5 = ENTITY1.x + scroll_x;
-    temp5 += 2;
-    temp_x = (char)temp5; // low byte
-    temp_room = temp5 >> 8; // high byte
-    
-    temp_y = ENTITY1.y + ENTITY1.height;
-    temp_y += 2;
+    // check 2 points on the bottom side, a little lower for jumping
+    temp5 = ENTITY1.x + scroll_x + 2;
+    temp_x = (char)temp5;
+    temp_room = temp5 >> 8;
+
+    if (is_vertical) {
+        vert_set_room_y(ENTITY1.y + ENTITY1.height + 2);
+    } else {
+        temp_y = ENTITY1.y + ENTITY1.height + 2;
+    }
     if (bg_collision_sub() & (COLLISION_SOLID | COLLISION_PLATFORM)) return 1;
-    
-    temp5 = ENTITY1.x + scroll_x + ENTITY1.width;
-    temp5 -= 2;
-    temp_x = (char)temp5; // low byte
-    temp_room = temp5 >> 8; // high byte
-    
+
+    temp5 = ENTITY1.x + scroll_x + ENTITY1.width - 2;
+    temp_x = (char)temp5;
+    if (!is_vertical) temp_room = temp5 >> 8;
+
     if (bg_collision_sub() & (COLLISION_SOLID | COLLISION_PLATFORM)) return 1;
-    
+
     return 0;
 }
 
@@ -1339,19 +1535,21 @@ static char has_ground_ahead(unsigned char dir) {
 	unsigned char probe_x;
 	unsigned char probe_y;
 
-	// Probe one pixel beyond the leading edge.
 	if (dir == 0) probe_x = ENTITY1.x - 1;
 	else          probe_x = ENTITY1.x + ENTITY1.width + 1;
 
-	// Probe a few pixels below the bottom so we land inside the tile row underneath.
-	// (Enemy Y from Tiled is often 16-aligned, while ENTITY1.height is smaller than 16.)
 	probe_y = ENTITY1.y + ENTITY1.height + 4;
 	if (probe_y >= 0xf0) return 0;
 
 	wx = (unsigned int)probe_x + scroll_x;
 	temp_x = (unsigned char)wx;
-	temp_room = wx >> 8;
-	temp_y = probe_y;
+	if (is_vertical) {
+		temp_room = scroll_y >> 8; // room from vertical scroll
+		vert_set_room_y(probe_y);
+	} else {
+		temp_room = wx >> 8;
+		temp_y = probe_y;
+	}
 
 	return bg_collision_sub_any_ground();
 }
@@ -1536,6 +1734,185 @@ void new_cmap_L(void) {
 }
 
 
+void draw_screen_D(void) {
+	// Scrolling down - draw rows below the visible area
+	// Look ahead by 0x120 pixels below current scroll position
+	pseudo_scroll_y = scroll_y + 0x120;
+	// Skip 240-255 dead zone (NES rooms are 240px)
+	if ((pseudo_scroll_y & 0xff) >= 240) pseudo_scroll_y += 16;
+
+	temp1 = pseudo_scroll_y >> 8; // room number
+	if (temp1 >= scroll_limits[level]) temp1 = scroll_limits[level];
+
+	// Decompress room if needed
+	if (temp1 & 1) {
+		if (temp1 != cmap2_room_id) {
+			decompress_room(c_map2, level_main_data[level][temp1]);
+			cmap2_room_id = temp1;
+		}
+		set_data_pointer(c_map2);
+	} else {
+		if (temp1 != cmap_room_id) {
+			decompress_room(c_map, level_main_data[level][temp1]);
+			cmap_room_id = temp1;
+		}
+		set_data_pointer(c_map);
+	}
+	// For vertical scrolling with horizontal mirroring: nt 0 and 2
+	nt = (temp1 & 1) << 1;
+	y = pseudo_scroll_y & 0xff;
+
+	// Draw 2 columns of a row per frame, cycle through 4 frames for full row
+	switch(scroll_count) {
+		case 0:
+			address = get_ppu_addr(nt, 0x00, y);
+			index = (y & 0xf0) + 0;
+			buffer_4_mt(address, index);
+
+			address = get_ppu_addr(nt, 0x20, y);
+			index = (y & 0xf0) + 2;
+			buffer_4_mt(address, index);
+			break;
+
+		case 1:
+			address = get_ppu_addr(nt, 0x40, y);
+			index = (y & 0xf0) + 4;
+			buffer_4_mt(address, index);
+
+			address = get_ppu_addr(nt, 0x60, y);
+			index = (y & 0xf0) + 6;
+			buffer_4_mt(address, index);
+			break;
+
+		case 2:
+			address = get_ppu_addr(nt, 0x80, y);
+			index = (y & 0xf0) + 8;
+			buffer_4_mt(address, index);
+
+			address = get_ppu_addr(nt, 0xa0, y);
+			index = (y & 0xf0) + 10;
+			buffer_4_mt(address, index);
+			break;
+
+		default:
+			address = get_ppu_addr(nt, 0xc0, y);
+			index = (y & 0xf0) + 12;
+			buffer_4_mt(address, index);
+
+			address = get_ppu_addr(nt, 0xe0, y);
+			index = (y & 0xf0) + 14;
+			buffer_4_mt(address, index);
+	}
+
+	++scroll_count;
+	scroll_count &= 3;
+}
+
+
+void draw_screen_U(void) {
+	// Scrolling up - draw rows above the visible area
+	if (scroll_y < 0x10) return;
+
+	pseudo_scroll_y = scroll_y - 0x10;
+	// Skip 240-255 dead zone (NES rooms are 240px)
+	if ((pseudo_scroll_y & 0xff) >= 240) pseudo_scroll_y -= 16;
+
+	temp1 = pseudo_scroll_y >> 8; // room number
+
+	if (temp1 & 1) {
+		if (temp1 != cmap2_room_id) {
+			decompress_room(c_map2, level_main_data[level][temp1]);
+			cmap2_room_id = temp1;
+		}
+		set_data_pointer(c_map2);
+	} else {
+		if (temp1 != cmap_room_id) {
+			decompress_room(c_map, level_main_data[level][temp1]);
+			cmap_room_id = temp1;
+		}
+		set_data_pointer(c_map);
+	}
+	nt = (temp1 & 1) << 1;
+	y = pseudo_scroll_y & 0xff;
+
+	switch(scroll_count) {
+		case 0:
+			address = get_ppu_addr(nt, 0x00, y);
+			index = (y & 0xf0) + 0;
+			buffer_4_mt(address, index);
+
+			address = get_ppu_addr(nt, 0x20, y);
+			index = (y & 0xf0) + 2;
+			buffer_4_mt(address, index);
+			break;
+
+		case 1:
+			address = get_ppu_addr(nt, 0x40, y);
+			index = (y & 0xf0) + 4;
+			buffer_4_mt(address, index);
+
+			address = get_ppu_addr(nt, 0x60, y);
+			index = (y & 0xf0) + 6;
+			buffer_4_mt(address, index);
+			break;
+
+		case 2:
+			address = get_ppu_addr(nt, 0x80, y);
+			index = (y & 0xf0) + 8;
+			buffer_4_mt(address, index);
+
+			address = get_ppu_addr(nt, 0xa0, y);
+			index = (y & 0xf0) + 10;
+			buffer_4_mt(address, index);
+			break;
+
+		default:
+			address = get_ppu_addr(nt, 0xc0, y);
+			index = (y & 0xf0) + 12;
+			buffer_4_mt(address, index);
+
+			address = get_ppu_addr(nt, 0xe0, y);
+			index = (y & 0xf0) + 14;
+			buffer_4_mt(address, index);
+	}
+
+	++scroll_count;
+	scroll_count &= 3;
+}
+
+
+void new_cmap_D(void) {
+	// Load collision map for room below (scrolling down)
+	room = (scroll_y >> 8) + 1;
+	if (room > scroll_limits[level]) room = scroll_limits[level];
+
+	map = room & 1;
+	if (!map) {
+		decompress_room(c_map, level_main_data[level][room]);
+		cmap_room_id = room;
+	} else {
+		decompress_room(c_map2, level_main_data[level][room]);
+		cmap2_room_id = room;
+	}
+}
+
+
+void new_cmap_U(void) {
+	// Load collision map for room above (scrolling up)
+	room = scroll_y >> 8;
+	if (room > 0) --room;
+
+	map = room & 1;
+	if (!map) {
+		decompress_room(c_map, level_main_data[level][room]);
+		cmap_room_id = room;
+	} else {
+		decompress_room(c_map2, level_main_data[level][room]);
+		cmap2_room_id = room;
+	}
+}
+
+
 void sprite_collisions(void) {
     // Update damage cooldown
     if (damage_cooldown > 0) {
@@ -1667,35 +2044,42 @@ void sprite_obj_init(void) {
 
 	pointer = Coins_list[level];
 	for(index = 0,index2 = 0;index < MAX_COINS; ++index) {
-		
+
 		coin_x[index] = 0;
 
-		temp1 = pointer[index2]; // get a byte of data
+		temp1 = pointer[index2]; // byte 0: y_val
 		coin_y[index] = temp1;
-		
+
 		if (temp1 == TURN_OFF) break;
 
 		++index2;
-		
+
 		coin_active[index] = 0;
 
-		
-		temp1 = pointer[index2]; // get a byte of data
+		temp1 = pointer[index2]; // byte 1: room
 		coin_room[index] = temp1;
-		
+
 		++index2;
-		
-		temp1 = pointer[index2]; // get a byte of data
+
+		temp1 = pointer[index2]; // byte 2: x_val
 		coin_actual_x[index] = temp1;
-		
+
 		++index2;
-		
-		temp1 = pointer[index2]; // get a byte of data
+
+		temp1 = pointer[index2]; // byte 3: type
 		coin_type[index] = temp1;
-		
+
 		++index2;
+
+		// For vertical levels: y_val = Y-in-room, x_val = screen X
+		// For horizontal: y_val = screen Y, x_val = X-in-room
+		if (is_vertical) {
+			coin_actual_y[index] = coin_y[index]; // store Y-in-room
+		} else {
+			coin_actual_y[index] = coin_y[index]; // store screen Y (for consistency)
+		}
 	}
-	
+
 	for(++index;index < MAX_COINS; ++index) {
 		coin_y[index] = TURN_OFF;
 	}
@@ -1726,14 +2110,21 @@ void sprite_obj_init(void) {
 		
 		++index2;
 		
-		temp1 = pointer[index2]; // get a byte of data
+		temp1 = pointer[index2]; // byte 2: x_val
 		enemy_actual_x[index] = temp1;
-		
+
 		++index2;
-		
-		temp1 = pointer[index2]; // get a byte of data
+
+		temp1 = pointer[index2]; // byte 3: type
 		enemy_type[index] = temp1;
 		++index2;
+
+		// Store actual Y for vertical mode
+		if (is_vertical) {
+			enemy_actual_y[index] = enemy_y[index];
+		} else {
+			enemy_actual_y[index] = enemy_y[index];
+		}
 
 		param = 0;
 		if (enemy_stride == 5) {

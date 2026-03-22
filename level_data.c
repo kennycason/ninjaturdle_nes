@@ -15,6 +15,7 @@ extern const uint8_t* const level7_main[];
 extern const uint8_t* const level8_main[];
 extern const uint8_t* const level9_main[];
 extern const uint8_t* const level10_main[];
+extern const uint8_t* const level11_main[];
 extern const uint8_t level1_coins[];
 extern const uint8_t level2_coins[];
 extern const uint8_t level3_coins[];
@@ -25,6 +26,7 @@ extern const uint8_t level7_coins[];
 extern const uint8_t level8_coins[];
 extern const uint8_t level9_coins[];
 extern const uint8_t level10_coins[];
+extern const uint8_t level11_coins[];
 extern const uint8_t level1_enemies[];
 extern const uint8_t level2_enemies[];
 extern const uint8_t level3_enemies[];
@@ -35,6 +37,7 @@ extern const uint8_t level7_enemies[];
 extern const uint8_t level8_enemies[];
 extern const uint8_t level9_enemies[];
 extern const uint8_t level10_enemies[];
+extern const uint8_t level11_enemies[];
 
 // Main level data arrays - each level has an array of room pointers
 const uint8_t* const* const level_main_data[] = {
@@ -47,7 +50,9 @@ const uint8_t* const* const level_main_data[] = {
     level7_main,
     level8_main,
     level9_main,
-    level10_main
+    level10_main,
+    level11_main,
+    level11_main  // level12 shares level11 data for now
 };
 
 // Coin/item data arrays
@@ -61,7 +66,9 @@ const uint8_t* const Coins_list[] = {
     level7_coins,
     level8_coins,
     level9_coins,
-    level10_coins
+    level10_coins,
+    level11_coins,
+    level11_coins  // level12 shares level11 data for now
 };
 
 // Enemy data arrays
@@ -75,7 +82,27 @@ const uint8_t* const Enemy_list[] = {
     level7_enemies,
     level8_enemies,
     level9_enemies,
-    level10_enemies
+    level10_enemies,
+    level11_enemies,
+    level11_enemies  // level12 shares level11 data for now
+};
+
+// Scroll mode per level: 0 = horizontal, 1 = vertical
+#define SCROLL_HORIZ 0
+#define SCROLL_VERT  1
+const uint8_t scroll_mode[] = {
+    SCROLL_HORIZ,  // level 1
+    SCROLL_HORIZ,  // level 2
+    SCROLL_HORIZ,  // level 3
+    SCROLL_HORIZ,  // level 4
+    SCROLL_HORIZ,  // level 5
+    SCROLL_HORIZ,  // level 6
+    SCROLL_HORIZ,  // level 7
+    SCROLL_HORIZ,  // level 8
+    SCROLL_HORIZ,  // level 9
+    SCROLL_HORIZ,  // level 10
+    SCROLL_VERT,   // level 11 (vertical shaft)
+    SCROLL_VERT    // level 12 (vertical shaft)
 };
 
 // Metatile definitions (64 metatiles, 0x00-0x3F)
@@ -373,12 +400,14 @@ const unsigned char metatiles_pal1[]={
     2,  // ID 3F - Solid block 2
 };
 
-// Maximum rooms and scroll limits
-const uint8_t max_rooms[] = {8, 8, 8, 8, 8, 8, 8, 8, 8, 8};  // Each level has 8 rooms
-const uint8_t scroll_limits[] = {7, 7, 7, 7, 7, 7, 7, 7, 7, 7};  // Each level has 7 scroll limits
+// Maximum rooms and scroll limits per level
+const uint8_t max_rooms[] = {8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 9, 9};
+const uint8_t scroll_limits[] = {7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8};
 
-#define MAX_ROOMS (8-1)
-#define MAX_SCROLL (MAX_ROOMS*0x100)-1
+#define MAX_ROOMS_H (8-1)
+#define MAX_SCROLL_H (MAX_ROOMS_H*0x100)-1
+#define MAX_ROOMS_V (9-1)
+#define MAX_SCROLL_V (MAX_ROOMS_V*0x100)
 // data is exactly 240 bytes, 16 * 15
 // doubles as the collision map data
 

@@ -31,6 +31,17 @@ SPRITE_GID_THORNS = 140     # 129 + 11 (tile after worm)
 SPRITE_GID_BOSS = 144       # 129 + 15
 SPRITE_GID_BOSS2 = 152      # 129 + 8 + 15
 
+
+# Tiled flip flags (upper 3 bits of 32-bit GID)
+TILED_FLIP_H    = 0x80000000
+TILED_FLIP_V    = 0x40000000
+TILED_FLIP_D    = 0x20000000
+TILED_FLIP_MASK = 0xE0000000
+
+def strip_flip_flags(gid):
+    """Strip Tiled horizontal/vertical/diagonal flip flags from a GID."""
+    return gid & ~TILED_FLIP_MASK
+
 def extract_level_num(filename):
     """Extract level number from filename (levelN.tmx)."""
     match = re.match(r'level(\d+)', os.path.basename(filename))
@@ -44,40 +55,78 @@ def parse_csv_data(csv_text):
     return [[int(cell) for cell in row.split(',') if cell.strip()] for row in rows if row]
 
 def process_layer(layer, room_num):
-    """Process a single layer for a specific room"""
+    """Process a single layer for a specific horizontal room (16-tile wide columns)"""
     # Get layer data
     data = layer.find('data')
     if data is None or data.get('encoding') != 'csv':
         print("Error: Only CSV encoding is supported for tile layers")
         return None
-        
+
     # Parse CSV data into 2D array
     tile_data = parse_csv_data(data.text)
     height = len(tile_data)
     width = len(tile_data[0]) if height > 0 else 0
-    
+
     # Extract room data
     room_data = []
     start_x = room_num * 16
     end_x = start_x + 16
-    
+
     if start_x >= width:
         return None
-        
+
     # Extract the 16x15 room section
     for y in range(min(15, height)):
         row = tile_data[y][start_x:end_x]
         if len(row) == 16:  # Only add complete rows
-            # Subtract 1 from tile IDs (unless 0)
-            room_data.extend([(x - 1) if x > 0 else 0 for x in row])
-            
+            # Strip flip flags, subtract 1 from tile IDs (unless 0)
+            room_data.extend([(strip_flip_flags(x) - 1) if strip_flip_flags(x) > 0 else 0 for x in row])
+
     return room_data
 
-def process_object_layer(root):
+
+def process_layer_vert(layer, room_num, pad_rows=0):
+    """Process a single layer for a specific vertical room (15-tile tall rows).
+    pad_rows: number of empty rows prepended to align total height to a multiple of 15."""
+    data = layer.find('data')
+    if data is None or data.get('encoding') != 'csv':
+        print("Error: Only CSV encoding is supported for tile layers")
+        return None
+
+    tile_data = parse_csv_data(data.text)
+    height = len(tile_data)
+    width = len(tile_data[0]) if height > 0 else 0
+
+    # Prepend empty rows for top-padding
+    if pad_rows > 0:
+        empty_row = [0] * width
+        tile_data = [empty_row[:] for _ in range(pad_rows)] + tile_data
+        height += pad_rows
+
+    room_data = []
+    start_y = room_num * 15
+    end_y = start_y + 15
+
+    if start_y >= height:
+        return None
+
+    # Extract the 16x15 room section (rows start_y to end_y-1, columns 0-15)
+    for y in range(start_y, min(end_y, height)):
+        row = tile_data[y][0:16]
+        if len(row) == 16:
+            room_data.extend([(strip_flip_flags(x) - 1) if strip_flip_flags(x) > 0 else 0 for x in row])
+
+    # Pad to 240 bytes if fewer than 15 rows
+    while len(room_data) < 240:
+        room_data.append(0)
+
+    return room_data
+
+def process_object_layer(root, is_vertical=False):
     """Process object layer and extract coin/enemy data"""
     coin_data = []
     enemy_data = []
-    
+
     # Prefer an objectgroup named "object" with tile objects (supports per-object properties)
     object_group = root.find(".//objectgroup[@name='object']")
     if object_group is not None:
@@ -227,19 +276,45 @@ def convert_tmx(tmx_file, output_file):
         tmx_data = load_tmx(tmx_file)
         if not tmx_data:
             return False
-            
+
+        # Detect vertical levels: width == 16 (one screen wide) and taller than wide
+        is_vertical = (tmx_data.width == 16 and tmx_data.height > 15)
+        if is_vertical:
+            print(f"Detected VERTICAL level ({tmx_data.width}x{tmx_data.height})")
+        else:
+            print(f"Detected HORIZONTAL level ({tmx_data.width}x{tmx_data.height})")
+
         # Process background layer
         rooms = []
         main_layer = tmx_data.layers[0]  # First layer should be the main/background layer
-        
-        # Process each room (16x15 tile sections)
-        for i in range(tmx_data.width // 16):
-            room = process_layer(main_layer, i)
-            if room:
-                rooms.append(room)
-                
+
+        if is_vertical:
+            # Vertical: pad height to a multiple of 15 rows by adding empty rows at the TOP.
+            # This ensures the last room is fully filled, so the level bottom aligns
+            # with the bottom of the screen when starting at the last room.
+            pad_rows = (15 - (tmx_data.height % 15)) % 15
+            padded_height = tmx_data.height + pad_rows
+            if pad_rows > 0:
+                print(f"  Padding {pad_rows} empty rows at top ({tmx_data.height} -> {padded_height} rows)")
+            num_rooms = padded_height // 15
+            for i in range(num_rooms):
+                room = process_layer_vert(main_layer, i, pad_rows)
+                if room:
+                    rooms.append(room)
+        else:
+            # Horizontal: split into rooms by columns (every 16 columns = 1 room)
+            for i in range(tmx_data.width // 16):
+                room = process_layer(main_layer, i)
+                if room:
+                    rooms.append(room)
+
         # Process object layer for coins and enemies
-        coin_data, enemy_data = process_object_layer(tmx_data.root)
+        coin_data, enemy_data = process_object_layer(tmx_data.root, is_vertical)
+
+        # For vertical levels with top-padding, shift object Y coordinates down
+        if is_vertical and pad_rows > 0:
+            coin_data = [(x, y + pad_rows, ct) for x, y, ct in coin_data]
+            enemy_data = [(x, y + pad_rows, et, p) for x, y, et, p in enemy_data]
         
         # Validate object counts against game engine limits
         has_exit = any(ct == 0x08 for _, _, ct in coin_data)
@@ -297,20 +372,35 @@ def convert_tmx(tmx_file, output_file):
                     chunk = rle[k:k + 16]
                     f.write('    ' + ', '.join(f'0x{x:02x}' for x in chunk) + ',\n')
                 f.write('};\n\n')
-                
+
             # Write coin data
+            # Format: (y_val, room, x_val, type)
+            # Horizontal: y_val=screen_y, room=x//16, x_val=(x%16)*16
+            # Vertical:   y_val=(y%15)*16, room=y//15, x_val=x*16
             f.write(f'const uint8_t level{level}_coins[] = {{\n')
             for x, y, coin_type in coin_data:
-                f.write(f'    0x{(y*16):02x}, {x//16}, 0x{(x%16)*16:02x}, 0x{coin_type:02x},\n')
+                if is_vertical:
+                    room_num = y // 15
+                    y_in_room = (y % 15) * 16
+                    x_pixel = x * 16
+                    f.write(f'    0x{y_in_room:02x}, {room_num}, 0x{x_pixel:02x}, 0x{coin_type:02x},\n')
+                else:
+                    f.write(f'    0x{(y*16):02x}, {x//16}, 0x{(x%16)*16:02x}, 0x{coin_type:02x},\n')
             f.write('    0xff  // End marker\n};\n\n')
-            
+
             # Write enemy data (y, room, x, type, param)
             f.write(f'const uint8_t level{level}_enemies[] = {{\n')
             for x, y, enemy_type, param in enemy_data:
                 param_byte = max(0, min(255, int(param)))
-                f.write(f'    0x{(y*16):02x}, {x//16}, 0x{(x%16)*16:02x}, 0x{enemy_type:02x}, 0x{param_byte:02x},\n')
+                if is_vertical:
+                    room_num = y // 15
+                    y_in_room = (y % 15) * 16
+                    x_pixel = x * 16
+                    f.write(f'    0x{y_in_room:02x}, {room_num}, 0x{x_pixel:02x}, 0x{enemy_type:02x}, 0x{param_byte:02x},\n')
+                else:
+                    f.write(f'    0x{(y*16):02x}, {x//16}, 0x{(x%16)*16:02x}, 0x{enemy_type:02x}, 0x{param_byte:02x},\n')
             f.write('    0xff  // End marker\n};\n\n')
-            
+
             # Write room pointers array
             f.write(f'const uint8_t* const level{level}_main[] = {{\n')
             for i in range(len(rooms)):
