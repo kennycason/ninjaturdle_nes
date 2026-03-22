@@ -574,12 +574,12 @@ void draw_sprites(void) {
 		
 		if (temp_y < 0xf0) {
 			if (coin_type[index] == COIN_REG) {
-				// bounce the corn
+				// bounce the corn (center 8x8 sprite in 16x16 metatile)
 				temp1 = get_frame_count();
 				temp1 = (temp1 >> 2) & 7;
 				temp1 = bounce[temp1];
 				temp_y += temp1;
-				oam_meta_spr(temp_x, temp_y, CoinSpr);
+				oam_meta_spr(temp_x + 4, temp_y + 4, CoinSpr);
 			}
 			else if (coin_type[index] == COIN_END) {
 				// Level exit marker (no bounce)
@@ -859,6 +859,11 @@ void movement(void) {
 		// Don't scroll past top
 		if (scroll_y > 0xF000) { // unsigned underflow check
 			scroll_y = 0;
+			NINJA.y = temp6;
+			// Clamp ninja to top of screen
+			if (high_byte(NINJA.y) < 8) {
+				NINJA.y = 0x0800;
+			}
 		}
 
 	} else {
@@ -959,8 +964,10 @@ void check_spr_objects(void) {
 				high_byte(temp5) = coin_room[index];
 				low_byte(temp5) = coin_actual_y[index];
 				coin_active[index] = get_position_vert();
-				coin_y[index] = temp_y; // computed screen Y
-				coin_x[index] = coin_actual_x[index]; // X is fixed (no scroll)
+				if (coin_active[index]) {
+					coin_y[index] = temp_y; // computed screen Y
+					coin_x[index] = coin_actual_x[index]; // X is fixed (no scroll)
+				}
 			} else {
 				// Horizontal: check X visibility
 				high_byte(temp5) = coin_room[index];
@@ -1005,8 +1012,16 @@ char get_position(void) {
 
 
 char get_position_vert(void) {
-	// Vertical: is the object within one screen of scroll_y?
-	temp5 -= scroll_y;
+	// Vertical: convert from 256-per-room encoding to linear pixels (240 per room)
+	// linear = room * 240 + offset = (room << 8) - (room << 4) + offset
+	// This eliminates the 16-pixel-per-room error in the subtraction.
+	temp1 = high_byte(temp5);
+	temp5 -= (unsigned int)temp1 << 4; // object linear Y
+
+	temp1 = scroll_y >> 8;
+	temp6 = scroll_y - ((unsigned int)temp1 << 4); // scroll linear Y
+
+	temp5 -= temp6; // screen Y = object_linear - scroll_linear
 	temp_y = temp5 & 0xff;
 	if (high_byte(temp5)) return 0;
 	return 1;
@@ -1301,26 +1316,24 @@ void bg_collision_fast(void) {
 	temp_room = temp5 >> 8; // high byte x
 
 	if (is_vertical) {
+		temp6 = temp5; // save X before vert_set_room_y clobbers temp5
 		vert_set_room_y(ENTITY1.y + 6);
+		temp5 = temp6; // restore X
 	} else {
 		temp_y = ENTITY1.y + 6; // y middle
 	}
-	
-	bg_collision_sub();
-	
+
 	if (bg_collision_sub() & COLLISION_SOLID) {
 		++collision_L;
 	}
-	
+
 	// right side
 	temp5 += ENTITY1.width;
 	temp_x = temp5 & 0xff; // low byte x
-	temp_room = temp5 >> 8; // high byte x
-	
-	// temp_y is unchanged
-	bg_collision_sub();
-	
-	if (bg_collision_sub() & COLLISION_SOLID) { // find a corner in the collision map
+	if (!is_vertical) temp_room = temp5 >> 8; // X-based room (horiz only)
+
+	// temp_y and temp_room (vertical) are unchanged
+	if (bg_collision_sub() & COLLISION_SOLID) {
 		++collision_R;
 	}
 }
