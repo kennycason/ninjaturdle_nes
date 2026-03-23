@@ -6,30 +6,53 @@ import re
 import xml.etree.ElementTree as ET
 import argparse
 
-# Tile type constants - matching sprite sheet layout
-TILE_HP_UP = 0x01     # First tile in top row (0,0)
-TILE_CORN_UP = 0x02   # Second tile in top row (1,0)
-TILE_ENEMY_WASP = 0x09    # Flying wasp
-TILE_ENEMY_BOUNCE = 0x0A  # Bouncing enemy
-TILE_ENEMY_WORM = 0x0B    # Worm enemy
-TILE_ENEMY_THORNS = 0x0C  # Stationary thorns (toggle spikes)
-TILE_ENEMY_BOSS1 = 0x10   # Boss enemy
-TILE_ENEMY_BOSS2 = 0x20   # Boss2 enemy
+# Tile type constants - must match tile_types.h
+TILE_HP_UP = 0x01
+TILE_CORN_UP = 0x02
+TILE_ENEMY_WASP = 0x09
+TILE_ENEMY_BOUNCE = 0x0A
+TILE_ENEMY_WORM = 0x0B
+TILE_ENEMY_THORNS = 0x0C
+TILE_ENEMY_RINGWORM = 0x0D
+TILE_ENEMY_HOPWORM = 0x0E
+TILE_ENEMY_POOD = 0x0F
+TILE_ENEMY_BOSS1 = 0x10
+TILE_ENEMY_SPIDER = 0x11
+TILE_ENEMY_FLYBUG = 0x12
+TILE_ENEMY_VIRUS = 0x13
+TILE_ENEMY_BOSS2 = 0x20
 
 # Game engine limits - must match ninjaturdle.h
 MAX_COINS = 16
 MAX_ENEMY = 16
 
-# Sprite tileset GIDs (firstgid=129)
-SPRITE_GID_HP_UP = 129      # 129 + 0 (first tile at 0,0)
-SPRITE_GID_CORN_UP = 130    # 129 + 1 (second tile at 1,0)
-SPRITE_GID_EXIT = 136       # 129 + 7 (last tile in top row = level exit)
-SPRITE_GID_WASP = 137       # 129 + 8
-SPRITE_GID_BOUNCE = 138     # 129 + 9
-SPRITE_GID_WORM = 139       # 129 + 10
-SPRITE_GID_THORNS = 140     # 129 + 11 (tile after worm)
-SPRITE_GID_BOSS = 144       # 129 + 15
-SPRITE_GID_BOSS2 = 152      # 129 + 8 + 15
+# Sprite tileset GIDs (firstgid=129, matches sprites.tsx/sprites.png 16x16 grid, 8 cols)
+# -----------------------------------------------------------------------
+# sprites.png tile ID → object type (place these in Tiled object layer)
+# -----------------------------------------------------------------------
+# Row 0: 0=turd+2life  1=corn  2-5=(unused)  6=(unused)  7=exit marker
+# Row 1: 8=wasp  9=jumping monster  10=worm  11=thorns  12=(dupe/unused)
+#         13=ring worm  14=jumping worm  15=boss1 (colonel kernel)
+# Row 2: 16=spider  17=flying bug  18=(TBD enemy)  19=scorpion(TBD)
+#         20=poop monster  21-22=(unused)  23=mother worm boss
+# -----------------------------------------------------------------------
+SPRITE_FIRSTGID = 129
+SPRITE_GID_TURD_LIFE = 129   # tile 0:  turd + 2 max life
+SPRITE_GID_CORN_UP   = 130   # tile 1:  corn collectible
+SPRITE_GID_EXIT      = 136   # tile 7:  end of level marker
+SPRITE_GID_WASP      = 137   # tile 8:  wasp (flies back and forth)
+SPRITE_GID_BOUNCE    = 138   # tile 9:  jumping monster
+SPRITE_GID_WORM      = 139   # tile 10: worm (walks left/right on ledge)
+SPRITE_GID_THORNS    = 140   # tile 11: spike thorns
+SPRITE_GID_RINGWORM  = 142   # tile 13: ring worm (bounces around room)
+SPRITE_GID_HOPWORM   = 143   # tile 14: jumping worm (hops toward player)
+SPRITE_GID_BOSS      = 144   # tile 15: boss1 - colonel kernel
+SPRITE_GID_SPIDER    = 145   # tile 16: spider (drops down when player near)
+SPRITE_GID_FLYBUG    = 146   # tile 17: flying bug (ping pongs off walls)
+SPRITE_GID_VIRUS     = 147   # tile 18: angry virus (chases when provoked)
+SPRITE_GID_SCORPION  = 148   # tile 19: scorpion (TBD - sprite missing)
+SPRITE_GID_POOD      = 149   # tile 20: poop monster (chases + jumps when close)
+SPRITE_GID_BOSS2     = 152   # tile 23: mother worm boss
 
 
 # Tiled flip flags (upper 3 bits of 32-bit GID)
@@ -167,9 +190,27 @@ def process_object_layer(root, is_vertical=False):
             elif gid == SPRITE_GID_THORNS:
                 print(f"Adding thorns at ({x}, {y}) with delay {delay_seconds}s")
                 enemy_data.append((x, y, TILE_ENEMY_THORNS, delay_seconds))
+            elif gid == SPRITE_GID_RINGWORM:
+                print(f"Adding ring worm at ({x}, {y})")
+                enemy_data.append((x, y, TILE_ENEMY_RINGWORM, 0))
+            elif gid == SPRITE_GID_HOPWORM:
+                print(f"Adding hop worm at ({x}, {y})")
+                enemy_data.append((x, y, TILE_ENEMY_HOPWORM, 0))
+            elif gid == SPRITE_GID_POOD:
+                print(f"Adding poop monster at ({x}, {y})")
+                enemy_data.append((x, y, TILE_ENEMY_POOD, 0))
             elif gid == SPRITE_GID_BOSS:
                 print(f"Adding boss at ({x}, {y})")
                 enemy_data.append((x, y, TILE_ENEMY_BOSS1, 0))
+            elif gid == SPRITE_GID_SPIDER:
+                print(f"Adding spider at ({x}, {y})")
+                enemy_data.append((x, y, TILE_ENEMY_SPIDER, 0))
+            elif gid == SPRITE_GID_FLYBUG:
+                print(f"Adding flying bug at ({x}, {y})")
+                enemy_data.append((x, y, TILE_ENEMY_FLYBUG, 0))
+            elif gid == SPRITE_GID_VIRUS:
+                print(f"Adding virus at ({x}, {y})")
+                enemy_data.append((x, y, TILE_ENEMY_VIRUS, 0))
             elif gid == SPRITE_GID_BOSS2:
                 print(f"Adding boss2 at ({x}, {y})")
                 enemy_data.append((x, y, TILE_ENEMY_BOSS2, 0))
@@ -218,16 +259,34 @@ def process_object_layer(root, is_vertical=False):
                 enemy_data.append((x, y, TILE_ENEMY_WORM, 0))
             elif gid == SPRITE_GID_THORNS:
                 print(f"Adding thorns at ({x}, {y})")
-                enemy_data.append((x, y, TILE_ENEMY_THORNS, 4))  # default 4s delay in legacy mode
+                enemy_data.append((x, y, TILE_ENEMY_THORNS, 4))
+            elif gid == SPRITE_GID_RINGWORM:
+                print(f"Adding ring worm at ({x}, {y})")
+                enemy_data.append((x, y, TILE_ENEMY_RINGWORM, 0))
+            elif gid == SPRITE_GID_HOPWORM:
+                print(f"Adding hop worm at ({x}, {y})")
+                enemy_data.append((x, y, TILE_ENEMY_HOPWORM, 0))
+            elif gid == SPRITE_GID_POOD:
+                print(f"Adding poop monster at ({x}, {y})")
+                enemy_data.append((x, y, TILE_ENEMY_POOD, 0))
             elif gid == SPRITE_GID_BOSS:
                 print(f"Adding boss at ({x}, {y})")
                 enemy_data.append((x, y, TILE_ENEMY_BOSS1, 0))
+            elif gid == SPRITE_GID_SPIDER:
+                print(f"Adding spider at ({x}, {y})")
+                enemy_data.append((x, y, TILE_ENEMY_SPIDER, 0))
+            elif gid == SPRITE_GID_FLYBUG:
+                print(f"Adding flying bug at ({x}, {y})")
+                enemy_data.append((x, y, TILE_ENEMY_FLYBUG, 0))
+            elif gid == SPRITE_GID_VIRUS:
+                print(f"Adding virus at ({x}, {y})")
+                enemy_data.append((x, y, TILE_ENEMY_VIRUS, 0))
             elif gid == SPRITE_GID_BOSS2:
                 print(f"Adding boss2 at ({x}, {y})")
                 enemy_data.append((x, y, TILE_ENEMY_BOSS2, 0))
             else:
                 print(f"Unknown GID {gid} at ({x}, {y})")
-            
+
     return coin_data, enemy_data
 
 class TMXData:

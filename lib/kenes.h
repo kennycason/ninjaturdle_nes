@@ -124,59 +124,12 @@ void fade_out_palette(unsigned char delay_frames) {
     }
 }
 
-// Draw a metasprite horizontally flipped (mirrors x offsets and sets OAM_FLIP_H)
+// Single-pass H-flip with configurable mirror axis.
+// sum = min_x + max_x: 6 for 16x16/8x8, 22 for 32x32 boss.
 void oam_meta_spr_flip_h(unsigned char x, unsigned char y, const unsigned char *data) {
-    const unsigned char *p;
-    signed char min_x, max_x, ox, sum;
-
-    // First pass: find min and max x offsets to compute mirror axis
-    p = data;
-    min_x = max_x = (signed char)p[0];
-    p += 4;
-    while (p[0] != 128) {
-        ox = (signed char)p[0];
-        if (ox < min_x) min_x = ox;
-        if (ox > max_x) max_x = ox;
-        p += 4;
-    }
-    sum = min_x + max_x;
-
-    // Second pass: draw each tile with mirrored x and OAM_FLIP_H
-    p = data;
-    while (p[0] != 128) {
-        ox = sum - (signed char)p[0];
-        oam_spr(x + (unsigned char)ox, y + p[1], p[2], p[3] | OAM_FLIP_H);
-        p += 4;
-    }
-}
-
-// Create a simple sprite with position and attributes
-unsigned char create_sprite(unsigned char x, unsigned char y, unsigned char tile, 
-                          unsigned char palette, unsigned char flip_h, 
-                          unsigned char flip_v, unsigned char behind) {
-    unsigned char attr = palette;
-    if (flip_h) attr |= OAM_FLIP_H;
-    if (flip_v) attr |= OAM_FLIP_V;
-    if (behind) attr |= OAM_BEHIND;
-    
-    oam_spr(x, y, tile, attr);
-    return oam_get();
-}
-
-// Update sprite position
-void update_sprite_pos(unsigned char index, unsigned char x, unsigned char y) {
-    (void)index; // Suppress unused parameter warning
-    oam_spr(x, y, 0, 0); // Use default attributes
-}
-
-// Draw a border around the specified area
-void draw_border(unsigned char x, unsigned char y, unsigned char width, unsigned char height) {
-    unsigned char row, col;
-    for(row = 0; row < height; row++) {
-        vram_adr(NTADR_A(x, y + row));
-        for(col = 0; col < width; col++) {
-            vram_put(TILE_BLANK);
-        }
+    while (data[0] != 128) {
+        oam_spr(x + (unsigned char)(6 - (signed char)data[0]), y + data[1], data[2], data[3] | OAM_FLIP_H);
+        data += 4;
     }
 }
 

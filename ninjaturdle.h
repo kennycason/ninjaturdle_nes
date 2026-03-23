@@ -66,6 +66,7 @@ unsigned char index;
 unsigned char index2;
 unsigned char room;
 unsigned char map;
+unsigned char coll_enemy; // 1 = enemy collision (always land on platforms)
 unsigned int scroll_x;
 unsigned int scroll_y;
 unsigned char scroll_count;
@@ -185,6 +186,11 @@ const unsigned char * enemy_anim[MAX_ENEMY];
 unsigned int enemy_thorn_delay[MAX_ENEMY]; // delay (frames) before spikes appear
 unsigned int enemy_thorn_timer[MAX_ENEMY]; // countdown timer
 unsigned char enemy_thorn_out[MAX_ENEMY];   // 1 when spikes are out
+// Shared enemy state (reused across types to save RAM)
+signed char enemy_vel_x[MAX_ENEMY]; // X velocity (ring worm, virus)
+signed char enemy_vel_y[MAX_ENEMY]; // Y velocity (ring worm, spider, virus)
+unsigned char enemy_origin_y[MAX_ENEMY]; // origin Y for spider (return position)
+unsigned char enemy_state[MAX_ENEMY]; // state machine (0=idle, 1=aggro, etc)
 
 #define ENEMY_WIDTH 13
 #define ENEMY_HEIGHT 13
