@@ -925,6 +925,11 @@ _level1_coins:
 	.byte	$02
 	.byte	$FF
 _level1_enemies:
+	.byte	$60
+	.byte	$00
+	.byte	$E0
+	.byte	$0E
+	.byte	$00
 	.byte	$70
 	.byte	$02
 	.byte	$00
@@ -939,6 +944,11 @@ _level1_enemies:
 	.byte	$06
 	.byte	$80
 	.byte	$0B
+	.byte	$00
+	.byte	$A0
+	.byte	$00
+	.byte	$F0
+	.byte	$0D
 	.byte	$00
 	.byte	$A0
 	.byte	$04

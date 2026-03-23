@@ -1000,29 +1000,19 @@ void check_spr_objects(void) {
 	for (index = 0; index < MAX_ENEMY; ++index) {
 		enemy_active[index] = 0;
 		if (enemy_y[index] != TURN_OFF) {
-			// Ring worm: once activated, manages its own screen position
-			if (enemy_type[index] == ENEMY_RINGWORM && enemy_state[index] == 1) {
-				enemy_active[index] = 1;
-			} else if (is_vertical) {
+			if (is_vertical) {
 				high_byte(temp5) = enemy_room[index];
 				low_byte(temp5) = enemy_actual_y[index];
 				temp1 = enemy_active[index] = get_position_vert();
-				if (temp1 == 0) {
-					continue;
-				}
+				if (temp1 == 0) continue;
 				enemy_y[index] = temp_y;
 				enemy_x[index] = enemy_actual_x[index];
-				if (enemy_type[index] == ENEMY_RINGWORM) enemy_state[index] = 1;
 			} else {
 				high_byte(temp5) = enemy_room[index];
 				low_byte(temp5) = enemy_actual_x[index];
 				temp1 = enemy_active[index] = get_position();
-				if (temp1 == 0) {
-					continue;
-				}
+				if (temp1 == 0) continue;
 				enemy_x[index] = temp_x;
-				// Ring worm: mark as activated on first on-screen appearance
-				if (enemy_type[index] == ENEMY_RINGWORM) enemy_state[index] = 1;
 			}
 
 			// Run enemy AI at 30fps (skip odd frames)
@@ -1203,23 +1193,27 @@ void enemy_moves(void) {
 	}
 	else if (enemy_type[index] == ENEMY_RINGWORM) {
 		enemy_anim[index] = EnemyRingWormSpr;
-		// X: bounce off screen edges (stay visible once activated)
-		temp1 = enemy_x[index] + enemy_vel_x[index];
-		if (temp1 < 4 || temp1 > 240)
-			enemy_vel_x[index] = -enemy_vel_x[index];
-		else {
-			enemy_x[index] = temp1;
-			enemy_actual_x[index] += enemy_vel_x[index];
-			if (enemy_vel_x[index] < 0 && enemy_actual_x[index] > 240) --enemy_room[index];
-			if (enemy_vel_x[index] > 0 && enemy_actual_x[index] < 16) ++enemy_room[index];
+		ENTITY1.width = 13; ENTITY1.height = 13;
+		// X: move + wall bounce (like worm)
+		ENTITY1.y = enemy_y[index];
+		if (enemy_vel_x[index] < 0) {
+			ENTITY1.x = enemy_x[index] - 1;
+			bg_collision_fast();
+			if (collision_L) enemy_vel_x[index] = 1;
+			else { if (enemy_actual_x[index] == 0) --enemy_room[index]; --enemy_actual_x[index]; }
+		} else {
+			ENTITY1.x = enemy_x[index] + 1;
+			bg_collision_fast();
+			if (collision_R) enemy_vel_x[index] = -1;
+			else { ++enemy_actual_x[index]; if (enemy_actual_x[index] == 0) ++enemy_room[index]; }
 		}
-		// Y: bounce off floor/ceiling tiles
+		// Y: move + screen edge bounce
 		temp1 = enemy_y[index] + enemy_vel_y[index];
-		if (temp1 < 8 || temp1 > 220)
+		if (temp1 < 16 || temp1 > 216)
 			enemy_vel_y[index] = -enemy_vel_y[index];
 		else {
 			enemy_y[index] = temp1;
-			enemy_actual_y[index] += enemy_vel_y[index];
+			enemy_actual_y[index] = temp1;
 		}
 	}
 	else if (enemy_type[index] == ENEMY_HOPWORM) {

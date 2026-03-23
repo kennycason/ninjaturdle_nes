@@ -25,20 +25,20 @@ const unsigned char NinjaSprR[]={
 // ---- COINS / ITEMS ----
 
 const unsigned char CoinSpr[]={
-	  3,  3,0x20,1,
+	  0,  0,0x20,1,
 	128
 };
 
 const unsigned char CornSelectedSpr[]={
-	  3,  3,0x20,2,
+	  0,  0,0x20,2,
 	128
 };
 
 const unsigned char BigCoinSpr[]={
-	  0xff,  0xff,0x21,0,
-	  0xff,  7,0x31,1,
-	  7,  0xff,0x22,2,
-	  7,  7,0x32,3,
+	  0,  0,0x21,0,
+	  0,  8,0x31,1,
+	  8,  0,0x22,2,
+	  8,  8,0x32,3,
 	128
 };
 
