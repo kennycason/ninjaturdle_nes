@@ -1019,6 +1019,9 @@ void check_spr_objects(void) {
 				enemy_x[index] = temp_x;
 			}
 
+			// Run enemy AI at 30fps (skip odd frames)
+			// Position updates still 60fps above
+			if (enemy_frames & 1) continue;
 			enemy_moves();
 		}
 	}
@@ -1194,33 +1197,30 @@ void enemy_moves(void) {
 	}
 	else if (enemy_type[index] == ENEMY_RINGWORM) {
 		enemy_anim[index] = EnemyRingWormSpr;
-		if (enemy_frames & 1) return; // half speed
-		ENTITY1.width = 13; ENTITY1.height = 13;
-		// X movement
-		ENTITY1.x = enemy_x[index] + enemy_vel_x[index];
-		ENTITY1.y = enemy_y[index];
-		bg_collision_fast();
-		if (collision_L || collision_R)
+		// X: bounce off screen edges (stay visible once activated)
+		temp1 = enemy_x[index] + enemy_vel_x[index];
+		if (temp1 < 4 || temp1 > 240)
 			enemy_vel_x[index] = -enemy_vel_x[index];
-		else
+		else {
+			enemy_x[index] = temp1;
 			enemy_actual_x[index] += enemy_vel_x[index];
-		// Y movement - check tile at proposed Y
-		temp5 = (unsigned int)(enemy_x[index] + 6) + scroll_x;
-		temp_x = temp5 & 0xff;
-		temp1 = (enemy_vel_y[index] > 0) ? enemy_y[index] + 14 : enemy_y[index] - 1;
-		temp1 += enemy_vel_y[index];
-		if (is_vertical) { temp6 = temp5; vert_set_room_y(temp1); }
-		else { temp_room = temp5 >> 8; temp_y = temp1; }
-		if (bg_collision_sub() & COLLISION_SOLID)
+			if (enemy_vel_x[index] < 0 && enemy_actual_x[index] > 240) --enemy_room[index];
+			if (enemy_vel_x[index] > 0 && enemy_actual_x[index] < 16) ++enemy_room[index];
+		}
+		// Y: bounce off floor/ceiling tiles
+		temp1 = enemy_y[index] + enemy_vel_y[index];
+		if (temp1 < 8 || temp1 > 220)
 			enemy_vel_y[index] = -enemy_vel_y[index];
-		else { enemy_actual_y[index] += enemy_vel_y[index]; enemy_y[index] += enemy_vel_y[index]; }
+		else {
+			enemy_y[index] = temp1;
+			enemy_actual_y[index] += enemy_vel_y[index];
+		}
 	}
 	else if (enemy_type[index] == ENEMY_HOPWORM) {
 		ENTITY1.x = enemy_x[index]; ENTITY1.y = enemy_y[index];
 		ENTITY1.width = 13; ENTITY1.height = 13;
 		enemy_dir[index] = (enemy_x[index] > ENTITY2.x) ? 0 : 1;
 		enemy_anim[index] = EnemyHopWormSprL;
-		if (enemy_frames & 1) return; // half speed
 		// Gravity
 		if (++enemy_vel_y[index] > 5) enemy_vel_y[index] = 5;
 		ENTITY1.y += enemy_vel_y[index];
@@ -1248,7 +1248,6 @@ void enemy_moves(void) {
 		ENTITY1.x = enemy_x[index]; ENTITY1.y = enemy_y[index];
 		ENTITY1.width = 13; ENTITY1.height = 13;
 		enemy_anim[index] = (enemy_frames & 0x08) ? EnemyPoodSprL1 : EnemyPoodSprL2;
-		if (enemy_frames & 1) return; // half speed
 		// Gravity
 		if (++enemy_vel_y[index] > 5) enemy_vel_y[index] = 5;
 		ENTITY1.y += enemy_vel_y[index];
@@ -1280,17 +1279,17 @@ void enemy_moves(void) {
 		temp1 = enemy_x[index] > ENTITY2.x ?
 			enemy_x[index] - ENTITY2.x : ENTITY2.x - enemy_x[index];
 		if (enemy_state[index] == 0) {
-			if (temp1 < 24) { enemy_state[index] = 1; enemy_vel_y[index] = 2; }
+			if (temp1 < 40) { enemy_state[index] = 1; enemy_vel_y[index] = 2; }
 		} else if (enemy_state[index] == 1) {
 			ENTITY1.y += enemy_vel_y[index];
-			if (enemy_vel_y[index] < 4) ++enemy_vel_y[index];
+			if (enemy_vel_y[index] < 5) ++enemy_vel_y[index];
 			coll_enemy = 1; temp1 = bg_coll_D(); coll_enemy = 0;
 			if (temp1) ENTITY1.y -= eject_D;
 			enemy_y[index] = ENTITY1.y; enemy_actual_y[index] = ENTITY1.y;
-			if (temp1 || ENTITY1.y > enemy_origin_y[index] + 80 || ENTITY1.y > 220)
+			if (temp1 || ENTITY1.y > 220)
 				enemy_state[index] = 2;
 		} else {
-			if (enemy_y[index] > enemy_origin_y[index]) --enemy_y[index];
+			if (enemy_y[index] > enemy_origin_y[index]) enemy_y[index] -= 2;
 			else enemy_state[index] = 0;
 		}
 	}
