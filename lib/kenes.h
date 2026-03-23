@@ -124,14 +124,10 @@ void fade_out_palette(unsigned char delay_frames) {
     }
 }
 
-// Single-pass H-flip with configurable mirror axis.
-// sum = min_x + max_x: 6 for 16x16/8x8, 22 for 32x32 boss.
-void oam_meta_spr_flip_h(unsigned char x, unsigned char y, const unsigned char *data) {
-    while (data[0] != 128) {
-        oam_spr(x + (unsigned char)(6 - (signed char)data[0]), y + data[1], data[2], data[3] | OAM_FLIP_H);
-        data += 4;
-    }
-}
+// Assembly-optimized H-flip sprite draw (in kenes.s)
+// ~4x faster than C version on 6502
+void __fastcall__ oam_meta_spr_flip_h(unsigned char x, unsigned char y, const unsigned char *data);
+void __fastcall__ oam_meta_spr_flip_h_boss(unsigned char x, unsigned char y, const unsigned char *data);
 
 // stub asm function call
 void __fastcall__ buffer_stub();

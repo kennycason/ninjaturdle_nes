@@ -627,13 +627,10 @@ void draw_sprites(void) {
 			if (enemy_dir[index2] == 1 &&
 			           enemy_type[index2] != ENEMY_THORNS &&
 			           enemy_type[index2] != ENEMY_RINGWORM) {
-				temp1 = (enemy_type[index2] == ENEMY_BOSS1) ? 22 : 6;
-				pointer = enemy_anim[index2];
-				while (pointer[0] != 128) {
-					oam_spr(temp_x + (unsigned char)((signed char)temp1 - (signed char)pointer[0]),
-					        temp_y + pointer[1], pointer[2], pointer[3] | OAM_FLIP_H);
-					pointer += 4;
-				}
+				if (enemy_type[index2] == ENEMY_BOSS1)
+					oam_meta_spr_flip_h_boss(temp_x, temp_y, enemy_anim[index2]);
+				else
+					oam_meta_spr_flip_h(temp_x, temp_y, enemy_anim[index2]);
 			} else {
 				oam_meta_spr(temp_x, temp_y, enemy_anim[index2]);
 			}
@@ -1008,8 +1005,6 @@ void check_spr_objects(void) {
 				low_byte(temp5) = enemy_actual_y[index];
 				temp1 = enemy_active[index] = get_position_vert();
 				if (temp1 == 0) {
-					// Ring worm keeps bouncing even off-screen
-					if (enemy_type[index] == ENEMY_RINGWORM) enemy_moves();
 					continue;
 				}
 				enemy_y[index] = temp_y;
@@ -1019,7 +1014,6 @@ void check_spr_objects(void) {
 				low_byte(temp5) = enemy_actual_x[index];
 				temp1 = enemy_active[index] = get_position();
 				if (temp1 == 0) {
-					if (enemy_type[index] == ENEMY_RINGWORM) enemy_moves();
 					continue;
 				}
 				enemy_x[index] = temp_x;
@@ -1200,6 +1194,7 @@ void enemy_moves(void) {
 	}
 	else if (enemy_type[index] == ENEMY_RINGWORM) {
 		enemy_anim[index] = EnemyRingWormSpr;
+		if (enemy_frames & 1) return; // half speed
 		ENTITY1.width = 13; ENTITY1.height = 13;
 		// X movement
 		ENTITY1.x = enemy_x[index] + enemy_vel_x[index];
@@ -1225,6 +1220,7 @@ void enemy_moves(void) {
 		ENTITY1.width = 13; ENTITY1.height = 13;
 		enemy_dir[index] = (enemy_x[index] > ENTITY2.x) ? 0 : 1;
 		enemy_anim[index] = EnemyHopWormSprL;
+		if (enemy_frames & 1) return; // half speed
 		// Gravity
 		if (++enemy_vel_y[index] > 5) enemy_vel_y[index] = 5;
 		ENTITY1.y += enemy_vel_y[index];
@@ -1252,6 +1248,7 @@ void enemy_moves(void) {
 		ENTITY1.x = enemy_x[index]; ENTITY1.y = enemy_y[index];
 		ENTITY1.width = 13; ENTITY1.height = 13;
 		enemy_anim[index] = (enemy_frames & 0x08) ? EnemyPoodSprL1 : EnemyPoodSprL2;
+		if (enemy_frames & 1) return; // half speed
 		// Gravity
 		if (++enemy_vel_y[index] > 5) enemy_vel_y[index] = 5;
 		ENTITY1.y += enemy_vel_y[index];
