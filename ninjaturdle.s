@@ -10381,9 +10381,9 @@ L0058:	inc     _index
 ;
 	lda     #$00
 	sta     _index
-L002D:	lda     _index
+L003C:	lda     _index
 	cmp     #$10
-	jcs     L002F
+	jcs     L003E
 ;
 ; coin_active[index] = 0;
 ;
@@ -10396,7 +10396,7 @@ L002D:	lda     _index
 	ldy     _index
 	lda     _coin_y,y
 	cmp     #$FF
-	jeq     L002E
+	jeq     L003D
 ;
 ; if (is_vertical) {
 ;
@@ -10432,7 +10432,7 @@ L000C:	jsr     pushax
 ;
 	ldy     _index
 	lda     _coin_active,y
-	beq     L002E
+	beq     L003D
 ;
 ; coin_y[index] = temp_y; // computed screen Y
 ;
@@ -10457,7 +10457,7 @@ L0010:	sta     ptr1
 ;
 ; } else {
 ;
-	jmp     L002E
+	jmp     L003D
 ;
 ; high_byte(temp5) = coin_room[index];
 ;
@@ -10492,16 +10492,16 @@ L0015:	jsr     pushax
 ;
 ; for (index = 0; index < MAX_COINS; ++index) {
 ;
-L002E:	inc     _index
-	jmp     L002D
+L003D:	inc     _index
+	jmp     L003C
 ;
 ; for (index = 0; index < MAX_ENEMY; ++index) {
 ;
-L002F:	lda     #$00
+L003E:	lda     #$00
 	sta     _index
-L0030:	lda     _index
+L003F:	lda     _index
 	cmp     #$10
-	bcc     L0033
+	bcc     L004B
 ;
 ; }
 ;
@@ -10509,7 +10509,7 @@ L0030:	lda     _index
 ;
 ; enemy_active[index] = 0;
 ;
-L0033:	ldy     _index
+L004B:	ldy     _index
 	lda     #$00
 	sta     _enemy_active,y
 ;
@@ -10518,12 +10518,29 @@ L0033:	ldy     _index
 	ldy     _index
 	lda     _enemy_y,y
 	cmp     #$FF
-	jeq     L0032
+	jeq     L0044
 ;
-; if (is_vertical) {
+; if (enemy_type[index] == ENEMY_RINGWORM && enemy_state[index] == 1) {
 ;
-	lda     _is_vertical
-	beq     L001E
+	ldy     _index
+	lda     _enemy_type,y
+	cmp     #$0D
+	bne     L001E
+	ldy     _index
+	lda     _enemy_state,y
+	cmp     #$01
+	bne     L001E
+;
+; enemy_active[index] = 1;
+;
+	ldy     _index
+	sta     _enemy_active,y
+;
+; } else if (is_vertical) {
+;
+	jmp     L0043
+L001E:	lda     _is_vertical
+	beq     L0026
 ;
 ; high_byte(temp5) = enemy_room[index];
 ;
@@ -10543,9 +10560,9 @@ L0033:	ldy     _index
 	ldx     #>(_enemy_active)
 	clc
 	adc     _index
-	bcc     L0021
+	bcc     L0029
 	inx
-L0021:	jsr     pushax
+L0029:	jsr     pushax
 	jsr     _get_position_vert
 	ldy     #$00
 	jsr     staspidx
@@ -10557,7 +10574,7 @@ L0021:	jsr     pushax
 ;
 ; continue;
 ;
-	beq     L0032
+	beq     L0044
 ;
 ; enemy_y[index] = temp_y;
 ;
@@ -10571,9 +10588,9 @@ L0021:	jsr     pushax
 	ldx     #>(_enemy_x)
 	clc
 	adc     _index
-	bcc     L0024
+	bcc     L002C
 	inx
-L0024:	sta     ptr1
+L002C:	sta     ptr1
 	stx     ptr1+1
 	ldy     _index
 	lda     _enemy_actual_x,y
@@ -10582,11 +10599,11 @@ L0024:	sta     ptr1
 ;
 ; } else {
 ;
-	jmp     L0031
+	jmp     L004A
 ;
 ; high_byte(temp5) = enemy_room[index];
 ;
-L001E:	ldy     _index
+L0026:	ldy     _index
 	lda     _enemy_room,y
 	sta     _temp5+1
 ;
@@ -10602,9 +10619,9 @@ L001E:	ldy     _index
 	ldx     #>(_enemy_active)
 	clc
 	adc     _index
-	bcc     L0029
+	bcc     L0034
 	inx
-L0029:	jsr     pushax
+L0034:	jsr     pushax
 	jsr     _get_position
 	ldy     #$00
 	jsr     staspidx
@@ -10616,7 +10633,7 @@ L0029:	jsr     pushax
 ;
 ; continue;
 ;
-	beq     L0032
+	beq     L0044
 ;
 ; enemy_x[index] = temp_x;
 ;
@@ -10624,11 +10641,21 @@ L0029:	jsr     pushax
 	lda     _temp_x
 	sta     _enemy_x,y
 ;
+; if (enemy_type[index] == ENEMY_RINGWORM) enemy_state[index] = 1;
+;
+L004A:	ldy     _index
+	lda     _enemy_type,y
+	cmp     #$0D
+	bne     L0043
+	ldy     _index
+	lda     #$01
+	sta     _enemy_state,y
+;
 ; if (enemy_frames & 1) continue;
 ;
-L0031:	lda     _enemy_frames
+L0043:	lda     _enemy_frames
 	and     #$01
-	bne     L0032
+	bne     L0044
 ;
 ; enemy_moves();
 ;
@@ -10636,8 +10663,8 @@ L0031:	lda     _enemy_frames
 ;
 ; for (index = 0; index < MAX_ENEMY; ++index) {
 ;
-L0032:	inc     _index
-	jmp     L0030
+L0044:	inc     _index
+	jmp     L003F
 
 .endproc
 

@@ -1000,7 +1000,10 @@ void check_spr_objects(void) {
 	for (index = 0; index < MAX_ENEMY; ++index) {
 		enemy_active[index] = 0;
 		if (enemy_y[index] != TURN_OFF) {
-			if (is_vertical) {
+			// Ring worm: once activated, manages its own screen position
+			if (enemy_type[index] == ENEMY_RINGWORM && enemy_state[index] == 1) {
+				enemy_active[index] = 1;
+			} else if (is_vertical) {
 				high_byte(temp5) = enemy_room[index];
 				low_byte(temp5) = enemy_actual_y[index];
 				temp1 = enemy_active[index] = get_position_vert();
@@ -1009,6 +1012,7 @@ void check_spr_objects(void) {
 				}
 				enemy_y[index] = temp_y;
 				enemy_x[index] = enemy_actual_x[index];
+				if (enemy_type[index] == ENEMY_RINGWORM) enemy_state[index] = 1;
 			} else {
 				high_byte(temp5) = enemy_room[index];
 				low_byte(temp5) = enemy_actual_x[index];
@@ -1017,6 +1021,8 @@ void check_spr_objects(void) {
 					continue;
 				}
 				enemy_x[index] = temp_x;
+				// Ring worm: mark as activated on first on-screen appearance
+				if (enemy_type[index] == ENEMY_RINGWORM) enemy_state[index] = 1;
 			}
 
 			// Run enemy AI at 30fps (skip odd frames)
