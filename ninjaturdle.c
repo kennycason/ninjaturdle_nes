@@ -292,7 +292,7 @@ void main(void) {
 				oam_clear();
 				scroll_x = 0;
 				set_scroll_x(scroll_x);
-				if (level < 10) {
+				if (level < 12) {
 					load_room();
 					game_mode = MODE_GAME;
 					ppu_on_all();
@@ -343,7 +343,17 @@ void main(void) {
 			
 			draw_sprites();
 			
-			if (pad1_new & PAD_START) {
+			if (pad1_new & PAD_SELECT) {
+				// Skip to next level while paused
+				if (level < 11) {
+					++level;
+					game_mode = MODE_SWITCH;
+					bright = 4;
+					bright_count = 0;
+					color_emphasis(COL_EMP_NORMAL);
+				}
+			}
+			else if (pad1_new & PAD_START) {
 				game_mode = MODE_GAME;
 				song = SONG_GAME;
 				music_play(song);
