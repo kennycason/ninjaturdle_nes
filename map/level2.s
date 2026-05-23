@@ -551,10 +551,6 @@ _level2_coins:
 	.byte	$02
 	.byte	$50
 	.byte	$05
-	.byte	$30
-	.byte	$02
-	.byte	$50
-	.byte	$05
 	.byte	$70
 	.byte	$02
 	.byte	$60
@@ -569,21 +565,9 @@ _level2_coins:
 	.byte	$05
 	.byte	$00
 	.byte	$02
-	.byte	$90
-	.byte	$01
-	.byte	$A0
-	.byte	$02
 	.byte	$A0
 	.byte	$00
 	.byte	$A0
-	.byte	$02
-	.byte	$C0
-	.byte	$02
-	.byte	$30
-	.byte	$02
-	.byte	$C0
-	.byte	$02
-	.byte	$90
 	.byte	$02
 	.byte	$C0
 	.byte	$03
@@ -591,15 +575,40 @@ _level2_coins:
 	.byte	$02
 	.byte	$FF
 _level2_enemies:
+	.byte	$10
+	.byte	$05
+	.byte	$10
+	.byte	$11
+	.byte	$00
+	.byte	$10
+	.byte	$06
+	.byte	$70
+	.byte	$11
+	.byte	$00
+	.byte	$40
+	.byte	$02
+	.byte	$40
+	.byte	$11
+	.byte	$00
+	.byte	$50
+	.byte	$01
+	.byte	$20
+	.byte	$0D
+	.byte	$00
+	.byte	$60
+	.byte	$03
+	.byte	$30
+	.byte	$0D
+	.byte	$00
+	.byte	$80
+	.byte	$05
+	.byte	$A0
+	.byte	$0D
+	.byte	$00
 	.byte	$A0
 	.byte	$07
 	.byte	$C0
 	.byte	$20
-	.byte	$00
-	.byte	$C0
-	.byte	$02
-	.byte	$10
-	.byte	$0B
 	.byte	$00
 	.byte	$C0
 	.byte	$04
