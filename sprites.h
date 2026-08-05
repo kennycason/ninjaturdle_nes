@@ -178,7 +178,52 @@ const unsigned char Boss1SprL[]={
     128
 };
 
-// BOSS 2 / MOTHER WORM sprite removed to save ROM space - re-add when needed
+// ---- BOSS 2 / MOTHER WORM (48x48, tiles 0xAB-0xFF area, face left) ----
+
+const unsigned char Boss2SprL[]={
+    // Row A (y=-1): top of center head
+    15,   0xff, 0xAC, 1,
+    23,   0xff, 0xAD, 1,
+
+    // Row B (y=7): three heads
+    0xff, 7,    0xBA, 1,
+    7,    7,    0xBB, 1,
+    15,   7,    0xBC, 1,
+    23,   7,    0xBD, 1,
+    31,   7,    0xBE, 1,
+    39,   7,    0xBF, 1,
+
+    // Row C (y=15): neck/upper body
+    0xff, 15,   0xCA, 1,
+    7,    15,   0xCB, 1,
+    15,   15,   0xCC, 1,
+    23,   15,   0xCD, 1,
+    31,   15,   0xCE, 1,
+    39,   15,   0xCF, 1,
+
+    // Row D (y=23): body
+    0xff, 23,   0xDA, 1,
+    7,    23,   0xDB, 1,
+    15,   23,   0xDC, 1,
+    23,   23,   0xDD, 1,
+    31,   23,   0xDE, 1,
+    39,   23,   0xDF, 1,
+
+    // Row E (y=31): lower body
+    7,    31,   0xEB, 1,
+    15,   31,   0xEC, 1,
+    23,   31,   0xED, 1,
+    31,   31,   0xEE, 1,
+
+    // Row F (y=39): base
+    0xff, 39,   0xFA, 1,
+    7,    39,   0xFB, 1,
+    15,   39,   0xFC, 1,
+    23,   39,   0xFD, 1,
+    31,   39,   0xFE, 1,
+    39,   39,   0xFF, 1,
+    128
+};
 
 // ---- PROJECTILES ----
 

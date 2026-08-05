@@ -642,7 +642,7 @@ void draw_sprites(void) {
 				else
 					oam_meta_spr_flip_h(temp_x, temp_y, enemy_anim[index2]);
 			} else {
-				oam_meta_spr(temp_x, temp_y, enemy_anim[index2]);
+				oam_meta_spr_clip(temp_x, temp_y, enemy_anim[index2]);
 			}
 		}
 	}
@@ -1067,41 +1067,48 @@ void enemy_moves(void) {
 		ENTITY1.width = 28;
 		ENTITY1.height = 4;
 		if (enemy_frames & 1) return;
-		// Face the ninja (once, at end of jump logic)
-		enemy_anim[index] = Boss1SprL;
-		enemy_dir[index] = (enemy_x[index] > ENTITY2.x) ? 0 : 1;
-		temp1 = (enemy_frames + (index << 3)) & 0x3f;
-		if (temp1 < 8) {
-			if (enemy_bullet_cooldown[index] == 0)
-				fire_enemy_bullet(index, BULLET_LINEAR);
-		} else if (temp1 < 14) {
-			enemy_y[index] -= 2;
-		} else if (temp1 < 24) {
-			enemy_y[index] -= 2;
-			if (temp1 == 20 && enemy_bullet_cooldown[index] == 0)
-				fire_enemy_bullet(index, BULLET_THROW);
-		} else if (temp1 < 26) {
-			--enemy_y[index];
+		if (enemy_state[index] == 0) {
+			enemy_anim[index] = Boss1SprL;
+			enemy_dir[index] = (enemy_x[index] > ENTITY2.x) ? 0 : 1;
+			temp1 = (enemy_frames + (index << 3)) & 0x3f;
+			if (temp1 < 8) {
+				if (enemy_bullet_cooldown[index] == 0)
+					fire_enemy_bullet(index, BULLET_LINEAR);
+			} else if (temp1 < 14) {
+				enemy_y[index] -= 2;
+			} else if (temp1 < 24) {
+				enemy_y[index] -= 2;
+				if (temp1 == 20 && enemy_bullet_cooldown[index] == 0)
+					fire_enemy_bullet(index, BULLET_THROW);
+			} else if (temp1 < 26) {
+				--enemy_y[index];
+			} else {
+				++enemy_y[index];
+				if (temp1 < 62) ++enemy_y[index];
+				ENTITY1.x = enemy_x[index];
+				ENTITY1.y = enemy_y[index] + 28;
+				ENTITY1.width = 28;
+				ENTITY1.height = 4;
+				if (bg_coll_D()) enemy_y[index] -= eject_D;
+			}
+			if (enemy_bullet_cooldown[index] > 0) --enemy_bullet_cooldown[index];
+			if (enemy_x[index] > ENTITY2.x) {
+				ENTITY1.x -= 1; bg_collision_fast();
+				if (collision_L) return;
+				if (enemy_actual_x[index] == 0) --enemy_room[index];
+				--enemy_actual_x[index];
+			} else if (enemy_x[index] < ENTITY2.x) {
+				ENTITY1.x += 1; bg_collision_fast();
+				if (collision_R) return;
+				++enemy_actual_x[index];
+				if (enemy_actual_x[index] == 0) ++enemy_room[index];
+			}
 		} else {
-			++enemy_y[index];
-			if (temp1 < 62) ++enemy_y[index];
-			ENTITY1.x = enemy_x[index];
-			ENTITY1.y = enemy_y[index] + 28;
-			ENTITY1.width = 28;
-			ENTITY1.height = 4;
-			if (bg_coll_D()) enemy_y[index] -= eject_D;
-		}
-		if (enemy_bullet_cooldown[index] > 0) --enemy_bullet_cooldown[index];
-		if (enemy_x[index] > ENTITY2.x) {
-			ENTITY1.x -= 1; bg_collision_fast();
-			if (collision_L) return;
-			if (enemy_actual_x[index] == 0) --enemy_room[index];
-			--enemy_actual_x[index];
-		} else if (enemy_x[index] < ENTITY2.x) {
-			ENTITY1.x += 1; bg_collision_fast();
-			if (collision_R) return;
-			++enemy_actual_x[index];
-			if (enemy_actual_x[index] == 0) ++enemy_room[index];
+			enemy_anim[index] = Boss2SprL;
+			if (enemy_bullet_cooldown[index] > 0) --enemy_bullet_cooldown[index];
+			temp1 = (enemy_frames + (index << 3)) & 0x3f;
+			if (temp1 == 0 && enemy_bullet_cooldown[index] == 0)
+				fire_enemy_bullet(index, BULLET_LINEAR);
 		}
 	}
 	else if (enemy_type[index] == ENEMY_WASP) {
@@ -2175,10 +2182,10 @@ void sprite_obj_init(void) {
 		if (temp1 < 11) {
 			enemy_anim[index] = enemy_init_anim[temp1];
 		}
-		// Boss2 uses boss1 sprite/AI as placeholder
 		if (enemy_type[index] == ENEMY_BOSS2) {
 			enemy_type[index] = ENEMY_BOSS1;
-			enemy_anim[index] = Boss1SprL;
+			enemy_anim[index] = Boss2SprL;
+			enemy_state[index] = 1;
 		}
 		// Type-specific extra init
 		if (enemy_type[index] == ENEMY_THORNS) {

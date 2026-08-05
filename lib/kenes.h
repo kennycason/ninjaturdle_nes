@@ -126,6 +126,7 @@ void fade_out_palette(unsigned char delay_frames) {
 
 // Assembly-optimized H-flip sprite draw (in kenes.s)
 // ~4x faster than C version on 6502
+void __fastcall__ oam_meta_spr_clip(unsigned char x, unsigned char y, const unsigned char *data);
 void __fastcall__ oam_meta_spr_flip_h(unsigned char x, unsigned char y, const unsigned char *data);
 void __fastcall__ oam_meta_spr_flip_h_boss(unsigned char x, unsigned char y, const unsigned char *data);
 

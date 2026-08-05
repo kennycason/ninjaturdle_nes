@@ -1,106 +1,129 @@
 ; kenes.s is .include'd from crt0.s, so all ZP symbols (TEMP, SPRID, PTR, SCRX, SCRY, OAM_BUF, sp) are already defined.
 
 .export _buffer_stub
+.export _oam_meta_spr_clip
 .export _oam_meta_spr_flip_h
 .export _oam_meta_spr_flip_h_boss
 
 .segment "CODE"
 
 _buffer_stub:
-	rts  ; Do nothing and return immediately
+	rts
 
 
 ;----------------------------------------------------------------------
-; void __fastcall__ oam_meta_spr_flip_h(unsigned char x, unsigned char y, const unsigned char *data);
-; Identical to oam_meta_spr but H-flips: x = (x+6) - x_offset, attr |= 0x40
-; For 16x16 meta-sprites (sum of min_x + max_x = 6)
+; void __fastcall__ oam_meta_spr_clip(unsigned char x, unsigned char y, const unsigned char *data);
+; Like oam_meta_spr but skips tiles whose X wraps past the screen edge.
 ;----------------------------------------------------------------------
-_oam_meta_spr_flip_h:
+_oam_meta_spr_clip:
 	sta <PTR
 	stx <PTR+1
 
 	ldy #1
 	lda (sp),y      ; x parameter
 	dey
-	clc
-	adc #6          ; base_x = x + 6
 	sta <SCRX
 	lda (sp),y      ; y parameter
 	sta <SCRY
 
 	ldx SPRID
 
-@loop:
-	lda (PTR),y     ; x offset from data
+@cloop:
+	lda (PTR),y     ; x offset
 	cmp #$80
-	beq @done
+	beq @cdone
+	bcs @cneg       ; negative offset — never wraps right
+	clc
+	adc <SCRX
+	bcs @cskip      ; positive offset overflowed, skip tile
+	sta OAM_BUF+3,x
+	bcc @ctile      ; always taken
 
-	; X flip: base_x - x_offset
-	eor #$FF        ; ~x_offset
-	sec             ; +1 for two's complement
-	adc <SCRX       ; SCRX + (~x_offset + 1) = SCRX - x_offset
+@cneg:
+	clc
+	adc <SCRX
 	sta OAM_BUF+3,x
 
+@ctile:
 	iny
 	lda (PTR),y     ; y offset
+	iny
 	clc
 	adc <SCRY
 	sta OAM_BUF+0,x
-
+	lda (PTR),y     ; tile
 	iny
-	lda (PTR),y     ; tile index
 	sta OAM_BUF+1,x
-
-	iny
 	lda (PTR),y     ; attribute
-	ora #$40        ; OAM_FLIP_H
-	sta OAM_BUF+2,x
-
 	iny
+	sta OAM_BUF+2,x
 	inx
 	inx
 	inx
 	inx
-	jmp @loop
+	jmp @cloop
 
-@done:
+@cskip:
+	iny
+	iny
+	iny
+	iny
+	jmp @cloop
+
+@cdone:
 	lda <sp
 	adc #1          ; carry is set here, adds 2
 	sta <sp
-	bcc @nocarry
+	bcc @cnocarry
 	inc <sp+1
-@nocarry:
+@cnocarry:
 	stx SPRID
 	rts
 
 
 ;----------------------------------------------------------------------
+; void __fastcall__ oam_meta_spr_flip_h(unsigned char x, unsigned char y, const unsigned char *data);
+; H-flips: x = (x+6) - x_offset, attr |= 0x40. For 16x16 meta-sprites.
+;----------------------------------------------------------------------
+_oam_meta_spr_flip_h:
+	sta <PTR
+	stx <PTR+1
+	ldy #1
+	lda (sp),y      ; x parameter
+	clc
+	adc #6
+	sta <SCRX
+	dey
+	jmp flip_shared
+
+;----------------------------------------------------------------------
 ; void __fastcall__ oam_meta_spr_flip_h_boss(unsigned char x, unsigned char y, const unsigned char *data);
-; Same as above but sum=22 for 32x32 boss sprites
+; Same but sum=22 for 32x32 boss sprites.
 ;----------------------------------------------------------------------
 _oam_meta_spr_flip_h_boss:
 	sta <PTR
 	stx <PTR+1
-
 	ldy #1
 	lda (sp),y      ; x parameter
-	dey
 	clc
-	adc #22         ; base_x = x + 22 (boss sum)
+	adc #22
 	sta <SCRX
-	lda (sp),y      ; y parameter
+	dey
+
+flip_shared:
+	lda (sp),y      ; y parameter (Y=0)
 	sta <SCRY
 
 	ldx SPRID
 
-@loop2:
+@floop:
 	lda (PTR),y     ; x offset from data
 	cmp #$80
-	beq @done2
+	beq @fdone
 
 	eor #$FF
 	sec
-	adc <SCRX
+	adc <SCRX       ; SCRX - x_offset
 	sta OAM_BUF+3,x
 
 	iny
@@ -110,7 +133,7 @@ _oam_meta_spr_flip_h_boss:
 	sta OAM_BUF+0,x
 
 	iny
-	lda (PTR),y     ; tile index
+	lda (PTR),y     ; tile
 	sta OAM_BUF+1,x
 
 	iny
@@ -123,14 +146,14 @@ _oam_meta_spr_flip_h_boss:
 	inx
 	inx
 	inx
-	jmp @loop2
+	jmp @floop
 
-@done2:
+@fdone:
 	lda <sp
-	adc #1
+	adc #1          ; carry set, adds 2
 	sta <sp
-	bcc @nocarry2
+	bcc @fnocarry
 	inc <sp+1
-@nocarry2:
+@fnocarry:
 	stx SPRID
 	rts

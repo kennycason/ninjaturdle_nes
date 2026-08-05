@@ -53,6 +53,7 @@
 	.export		_setup_pattern_tables
 	.export		_fade_in_palette
 	.export		_fade_out_palette
+	.import		_oam_meta_spr_clip
 	.import		_oam_meta_spr_flip_h
 	.import		_oam_meta_spr_flip_h_boss
 	.export		_NinjaSprR
@@ -71,6 +72,7 @@
 	.export		_EnemyPoodSprL1
 	.export		_EnemyPoodSprL2
 	.export		_Boss1SprL
+	.export		_Boss2SprL
 	.export		_TurdSpr
 	.export		_TurdLifeSpr
 	.export		_ExitSpr
@@ -600,6 +602,128 @@ _Boss1SprL:
 	.byte	$17
 	.byte	$17
 	.byte	$5F
+	.byte	$01
+	.byte	$80
+_Boss2SprL:
+	.byte	$0F
+	.byte	$FF
+	.byte	$AC
+	.byte	$01
+	.byte	$17
+	.byte	$FF
+	.byte	$AD
+	.byte	$01
+	.byte	$FF
+	.byte	$07
+	.byte	$BA
+	.byte	$01
+	.byte	$07
+	.byte	$07
+	.byte	$BB
+	.byte	$01
+	.byte	$0F
+	.byte	$07
+	.byte	$BC
+	.byte	$01
+	.byte	$17
+	.byte	$07
+	.byte	$BD
+	.byte	$01
+	.byte	$1F
+	.byte	$07
+	.byte	$BE
+	.byte	$01
+	.byte	$27
+	.byte	$07
+	.byte	$BF
+	.byte	$01
+	.byte	$FF
+	.byte	$0F
+	.byte	$CA
+	.byte	$01
+	.byte	$07
+	.byte	$0F
+	.byte	$CB
+	.byte	$01
+	.byte	$0F
+	.byte	$0F
+	.byte	$CC
+	.byte	$01
+	.byte	$17
+	.byte	$0F
+	.byte	$CD
+	.byte	$01
+	.byte	$1F
+	.byte	$0F
+	.byte	$CE
+	.byte	$01
+	.byte	$27
+	.byte	$0F
+	.byte	$CF
+	.byte	$01
+	.byte	$FF
+	.byte	$17
+	.byte	$DA
+	.byte	$01
+	.byte	$07
+	.byte	$17
+	.byte	$DB
+	.byte	$01
+	.byte	$0F
+	.byte	$17
+	.byte	$DC
+	.byte	$01
+	.byte	$17
+	.byte	$17
+	.byte	$DD
+	.byte	$01
+	.byte	$1F
+	.byte	$17
+	.byte	$DE
+	.byte	$01
+	.byte	$27
+	.byte	$17
+	.byte	$DF
+	.byte	$01
+	.byte	$07
+	.byte	$1F
+	.byte	$EB
+	.byte	$01
+	.byte	$0F
+	.byte	$1F
+	.byte	$EC
+	.byte	$01
+	.byte	$17
+	.byte	$1F
+	.byte	$ED
+	.byte	$01
+	.byte	$1F
+	.byte	$1F
+	.byte	$EE
+	.byte	$01
+	.byte	$FF
+	.byte	$27
+	.byte	$FA
+	.byte	$01
+	.byte	$07
+	.byte	$27
+	.byte	$FB
+	.byte	$01
+	.byte	$0F
+	.byte	$27
+	.byte	$FC
+	.byte	$01
+	.byte	$17
+	.byte	$27
+	.byte	$FD
+	.byte	$01
+	.byte	$1F
+	.byte	$27
+	.byte	$FE
+	.byte	$01
+	.byte	$27
+	.byte	$27
+	.byte	$FF
 	.byte	$01
 	.byte	$80
 _TurdSpr:
@@ -3395,7 +3519,7 @@ L003F:	adc     #<(_enemy_anim)
 ;
 	jmp     L0049
 ;
-; oam_meta_spr(temp_x, temp_y, enemy_anim[index2]);
+; oam_meta_spr_clip(temp_x, temp_y, enemy_anim[index2]);
 ;
 L0028:	jsr     decsp2
 	lda     _temp_x
@@ -3420,7 +3544,7 @@ L0040:	adc     #<(_enemy_anim)
 	tax
 	dey
 	lda     (ptr1),y
-	jsr     _oam_meta_spr
+	jsr     _oam_meta_spr_clip
 ;
 ; for (index = 0; index < MAX_ENEMY; ++index) {
 ;
@@ -7466,21 +7590,27 @@ L0003:	lda     #$01
 ;
 	lda     _enemy_frames
 	and     #$01
-	beq     L01B8
+	beq     L01CB
 ;
 ; }
 ;
 	rts
 ;
+; if (enemy_state[index] == 0) {
+;
+L01CB:	ldy     _index
+	tax
+	lda     _enemy_state,y
+	jne     L0199
+;
 ; enemy_anim[index] = Boss1SprL;
 ;
-L01B8:	tax
 	lda     _index
 	asl     a
-	bcc     L0170
+	bcc     L017D
 	inx
 	clc
-L0170:	adc     #<(_enemy_anim)
+L017D:	adc     #<(_enemy_anim)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_anim)
@@ -7498,19 +7628,19 @@ L0170:	adc     #<(_enemy_anim)
 	ldx     #>(_enemy_dir)
 	clc
 	adc     _index
-	bcc     L0008
+	bcc     L000A
 	inx
-L0008:	sta     ptr1
+L000A:	sta     ptr1
 	stx     ptr1+1
 	ldy     _index
 	lda     _enemy_x,y
 	cmp     _ENTITY2
-	bcc     L0184
-	beq     L0184
+	bcc     L0192
+	beq     L0192
 	lda     #$00
-	jmp     L0185
-L0184:	lda     #$01
-L0185:	ldy     #$00
+	jmp     L0193
+L0192:	lda     #$01
+L0193:	ldy     #$00
 	sta     (ptr1),y
 ;
 ; temp1 = (enemy_frames + (index << 3)) & 0x3f;
@@ -7527,13 +7657,13 @@ L0185:	ldy     #$00
 ; if (temp1 < 8) {
 ;
 	cmp     #$08
-	bcs     L0186
+	bcs     L0194
 ;
 ; if (enemy_bullet_cooldown[index] == 0)
 ;
 	ldy     _index
 	lda     _enemy_bullet_cooldown,y
-	jne     L000F
+	jne     L0011
 ;
 ; fire_enemy_bullet(index, BULLET_LINEAR);
 ;
@@ -7544,10 +7674,10 @@ L0185:	ldy     #$00
 ;
 ; } else if (temp1 < 14) {
 ;
-	jmp     L000F
-L0186:	lda     _temp1
+	jmp     L0011
+L0194:	lda     _temp1
 	cmp     #$0E
-	bcs     L0187
+	bcs     L0195
 ;
 ; enemy_y[index] -= 2;
 ;
@@ -7555,9 +7685,9 @@ L0186:	lda     _temp1
 	ldx     #>(_enemy_y)
 	clc
 	adc     _index
-	bcc     L0011
+	bcc     L0013
 	inx
-L0011:	sta     ptr1
+L0013:	sta     ptr1
 	stx     ptr1+1
 	lda     (ptr1),y
 	sec
@@ -7566,10 +7696,10 @@ L0011:	sta     ptr1
 ;
 ; } else if (temp1 < 24) {
 ;
-	jmp     L000F
-L0187:	lda     _temp1
+	jmp     L0011
+L0195:	lda     _temp1
 	cmp     #$18
-	bcs     L018A
+	bcs     L0198
 ;
 ; enemy_y[index] -= 2;
 ;
@@ -7577,9 +7707,9 @@ L0187:	lda     _temp1
 	ldx     #>(_enemy_y)
 	clc
 	adc     _index
-	bcc     L0014
+	bcc     L0016
 	inx
-L0014:	sta     ptr1
+L0016:	sta     ptr1
 	stx     ptr1+1
 	lda     (ptr1),y
 	sec
@@ -7590,10 +7720,10 @@ L0014:	sta     ptr1
 ;
 	lda     _temp1
 	cmp     #$14
-	jne     L000F
+	jne     L0011
 	ldy     _index
 	lda     _enemy_bullet_cooldown,y
-	jne     L000F
+	jne     L0011
 ;
 ; fire_enemy_bullet(index, BULLET_THROW);
 ;
@@ -7604,10 +7734,10 @@ L0014:	sta     ptr1
 ;
 ; } else if (temp1 < 26) {
 ;
-	jmp     L000F
-L018A:	lda     _temp1
+	jmp     L0011
+L0198:	lda     _temp1
 	cmp     #$1A
-	bcs     L001B
+	bcs     L001D
 ;
 ; --enemy_y[index];
 ;
@@ -7615,9 +7745,9 @@ L018A:	lda     _temp1
 	ldx     #>(_enemy_y)
 	clc
 	adc     _index
-	bcc     L001C
+	bcc     L001E
 	inx
-L001C:	sta     ptr1
+L001E:	sta     ptr1
 	stx     ptr1+1
 	lda     (ptr1),y
 	sec
@@ -7626,29 +7756,11 @@ L001C:	sta     ptr1
 ;
 ; } else {
 ;
-	jmp     L000F
+	jmp     L0011
 ;
 ; ++enemy_y[index];
 ;
-L001B:	lda     #<(_enemy_y)
-	ldx     #>(_enemy_y)
-	clc
-	adc     _index
-	bcc     L001E
-	inx
-L001E:	sta     ptr1
-	stx     ptr1+1
-	lda     #$01
-	clc
-	adc     (ptr1),y
-	sta     (ptr1),y
-;
-; if (temp1 < 62) ++enemy_y[index];
-;
-	lda     _temp1
-	cmp     #$3E
-	bcs     L001F
-	lda     #<(_enemy_y)
+L001D:	lda     #<(_enemy_y)
 	ldx     #>(_enemy_y)
 	clc
 	adc     _index
@@ -7661,9 +7773,27 @@ L0020:	sta     ptr1
 	adc     (ptr1),y
 	sta     (ptr1),y
 ;
+; if (temp1 < 62) ++enemy_y[index];
+;
+	lda     _temp1
+	cmp     #$3E
+	bcs     L0021
+	lda     #<(_enemy_y)
+	ldx     #>(_enemy_y)
+	clc
+	adc     _index
+	bcc     L0022
+	inx
+L0022:	sta     ptr1
+	stx     ptr1+1
+	lda     #$01
+	clc
+	adc     (ptr1),y
+	sta     (ptr1),y
+;
 ; ENTITY1.x = enemy_x[index];
 ;
-L001F:	ldy     _index
+L0021:	ldy     _index
 	lda     _enemy_x,y
 	sta     _ENTITY1
 ;
@@ -7689,14 +7819,14 @@ L001F:	ldy     _index
 ;
 	jsr     _bg_coll_D
 	tax
-	beq     L000F
+	beq     L0011
 	lda     #<(_enemy_y)
 	ldx     #>(_enemy_y)
 	clc
 	adc     _index
-	bcc     L0025
+	bcc     L0027
 	inx
-L0025:	sta     sreg
+L0027:	sta     sreg
 	stx     sreg+1
 	sta     ptr1
 	stx     ptr1+1
@@ -7708,16 +7838,16 @@ L0025:	sta     sreg
 ;
 ; if (enemy_bullet_cooldown[index] > 0) --enemy_bullet_cooldown[index];
 ;
-L000F:	ldy     _index
+L0011:	ldy     _index
 	lda     _enemy_bullet_cooldown,y
-	beq     L0026
+	beq     L0028
 	lda     #<(_enemy_bullet_cooldown)
 	ldx     #>(_enemy_bullet_cooldown)
 	clc
 	adc     _index
-	bcc     L0028
+	bcc     L002A
 	inx
-L0028:	sta     ptr1
+L002A:	sta     ptr1
 	stx     ptr1+1
 	ldy     #$00
 	lda     (ptr1),y
@@ -7727,11 +7857,11 @@ L0028:	sta     ptr1
 ;
 ; if (enemy_x[index] > ENTITY2.x) {
 ;
-L0026:	ldy     _index
+L0028:	ldy     _index
 	lda     _enemy_x,y
 	cmp     _ENTITY2
-	bcc     L0029
-	beq     L0029
+	bcc     L002B
+	beq     L002B
 ;
 ; ENTITY1.x -= 1; bg_collision_fast();
 ;
@@ -7741,7 +7871,7 @@ L0026:	ldy     _index
 ; if (collision_L) return;
 ;
 	lda     _collision_L
-	beq     L01B9
+	beq     L01CC
 ;
 ; }
 ;
@@ -7749,16 +7879,16 @@ L0026:	ldy     _index
 ;
 ; if (enemy_actual_x[index] == 0) --enemy_room[index];
 ;
-L01B9:	ldy     _index
+L01CC:	ldy     _index
 	lda     _enemy_actual_x,y
-	bne     L002C
+	bne     L002E
 	lda     #<(_enemy_room)
 	ldx     #>(_enemy_room)
 	clc
 	adc     _index
-	bcc     L002E
+	bcc     L0030
 	inx
-L002E:	sta     ptr1
+L0030:	sta     ptr1
 	stx     ptr1+1
 	ldy     #$00
 	lda     (ptr1),y
@@ -7768,13 +7898,13 @@ L002E:	sta     ptr1
 ;
 ; --enemy_actual_x[index];
 ;
-L002C:	lda     #<(_enemy_actual_x)
+L002E:	lda     #<(_enemy_actual_x)
 	ldx     #>(_enemy_actual_x)
 	clc
 	adc     _index
-	bcc     L002F
+	bcc     L0031
 	inx
-L002F:	sta     ptr1
+L0031:	sta     ptr1
 	stx     ptr1+1
 	ldy     #$00
 	lda     (ptr1),y
@@ -7785,24 +7915,24 @@ L002F:	sta     ptr1
 ; } else if (enemy_x[index] < ENTITY2.x) {
 ;
 	rts
-L0029:	ldy     _index
+L002B:	ldy     _index
 	lda     _enemy_x,y
 	cmp     _ENTITY2
-	bcc     L01BA
+	bcc     L01CD
 ;
-; }
+; else if (enemy_type[index] == ENEMY_WASP) {
 ;
 	rts
 ;
 ; ENTITY1.x += 1; bg_collision_fast();
 ;
-L01BA:	inc     _ENTITY1
+L01CD:	inc     _ENTITY1
 	jsr     _bg_collision_fast
 ;
 ; if (collision_R) return;
 ;
 	lda     _collision_R
-	beq     L01BB
+	beq     L01CE
 ;
 ; }
 ;
@@ -7810,13 +7940,13 @@ L01BA:	inc     _ENTITY1
 ;
 ; ++enemy_actual_x[index];
 ;
-L01BB:	lda     #<(_enemy_actual_x)
+L01CE:	lda     #<(_enemy_actual_x)
 	ldx     #>(_enemy_actual_x)
 	clc
 	adc     _index
-	bcc     L0034
+	bcc     L0036
 	inx
-L0034:	sta     ptr1
+L0036:	sta     ptr1
 	stx     ptr1+1
 	ldy     #$00
 	lda     #$01
@@ -7828,21 +7958,14 @@ L0034:	sta     ptr1
 ;
 	ldy     _index
 	lda     _enemy_actual_x,y
-	beq     L01BC
-;
-; }
-;
-	rts
-;
-; if (enemy_actual_x[index] == 0) ++enemy_room[index];
-;
-L01BC:	lda     #<(_enemy_room)
+	bne     L003E
+	lda     #<(_enemy_room)
 	ldx     #>(_enemy_room)
 	clc
 	adc     _index
-	bcc     L0037
+	bcc     L0039
 	inx
-L0037:	sta     ptr1
+L0039:	sta     ptr1
 	stx     ptr1+1
 	ldy     #$00
 	lda     #$01
@@ -7850,13 +7973,81 @@ L0037:	sta     ptr1
 	adc     (ptr1),y
 	sta     (ptr1),y
 ;
-; else if (enemy_type[index] == ENEMY_WASP) {
+; } else {
 ;
 	rts
+;
+; enemy_anim[index] = Boss2SprL;
+;
+L0199:	lda     _index
+	asl     a
+	bcc     L017E
+	ldx     #$01
+	clc
+L017E:	adc     #<(_enemy_anim)
+	sta     ptr1
+	txa
+	adc     #>(_enemy_anim)
+	sta     ptr1+1
+	lda     #<(_Boss2SprL)
+	ldy     #$00
+	sta     (ptr1),y
+	iny
+	lda     #>(_Boss2SprL)
+	sta     (ptr1),y
+;
+; if (enemy_bullet_cooldown[index] > 0) --enemy_bullet_cooldown[index];
+;
+	ldy     _index
+	lda     _enemy_bullet_cooldown,y
+	beq     L019B
+	lda     #<(_enemy_bullet_cooldown)
+	ldx     #>(_enemy_bullet_cooldown)
+	clc
+	adc     _index
+	bcc     L003D
+	inx
+L003D:	sta     ptr1
+	stx     ptr1+1
+	ldy     #$00
+	lda     (ptr1),y
+	sec
+	sbc     #$01
+	sta     (ptr1),y
+;
+; temp1 = (enemy_frames + (index << 3)) & 0x3f;
+;
+L019B:	lda     _index
+	asl     a
+	asl     a
+	asl     a
+	clc
+	adc     _enemy_frames
+	and     #$3F
+	sta     _temp1
+;
+; if (temp1 == 0 && enemy_bullet_cooldown[index] == 0)
+;
+	lda     _temp1
+	bne     L003E
+	ldy     _index
+	lda     _enemy_bullet_cooldown,y
+	bne     L003E
+;
+; fire_enemy_bullet(index, BULLET_LINEAR);
+;
+	lda     _index
+	jsr     pusha
+	lda     #$00
+	jmp     _fire_enemy_bullet
+;
+; else if (enemy_type[index] == ENEMY_WASP) {
+;
+L003E:	rts
 L0002:	ldy     _index
 	lda     _enemy_type,y
 	cmp     #$09
-	jne     L0039
+	jne     L0044
 ;
 ; ENTITY1.x = enemy_x[index];
 ;
@@ -7886,7 +8077,7 @@ L0002:	ldy     _index
 ;
 	lda     _enemy_frames
 	and     #$01
-	beq     L01BD
+	beq     L01CF
 ;
 ; }
 ;
@@ -7894,11 +8085,11 @@ L0002:	ldy     _index
 ;
 ; if (enemy_x[index] > ENTITY2.x) {
 ;
-L01BD:	ldy     _index
+L01CF:	ldy     _index
 	lda     _enemy_x,y
 	cmp     _ENTITY2
-	bcc     L003F
-	beq     L003F
+	bcc     L004A
+	beq     L004A
 ;
 ; ENTITY1.x -= 1;
 ;
@@ -7911,7 +8102,7 @@ L01BD:	ldy     _index
 ; if (collision_L) return;
 ;
 	lda     _collision_L
-	beq     L01BE
+	beq     L01D0
 ;
 ; }
 ;
@@ -7919,16 +8110,16 @@ L01BD:	ldy     _index
 ;
 ; if (enemy_actual_x[index] == 0) --enemy_room[index];
 ;
-L01BE:	ldy     _index
+L01D0:	ldy     _index
 	lda     _enemy_actual_x,y
-	bne     L0042
+	bne     L004D
 	lda     #<(_enemy_room)
 	ldx     #>(_enemy_room)
 	clc
 	adc     _index
-	bcc     L0044
+	bcc     L004F
 	inx
-L0044:	sta     ptr1
+L004F:	sta     ptr1
 	stx     ptr1+1
 	ldy     #$00
 	lda     (ptr1),y
@@ -7938,13 +8129,13 @@ L0044:	sta     ptr1
 ;
 ; --enemy_actual_x[index];
 ;
-L0042:	lda     #<(_enemy_actual_x)
+L004D:	lda     #<(_enemy_actual_x)
 	ldx     #>(_enemy_actual_x)
 	clc
 	adc     _index
-	bcc     L0045
+	bcc     L0050
 	inx
-L0045:	sta     ptr1
+L0050:	sta     ptr1
 	stx     ptr1+1
 	ldy     #$00
 	lda     (ptr1),y
@@ -7957,10 +8148,10 @@ L0045:	sta     ptr1
 	ldx     #$00
 	lda     _index
 	asl     a
-	bcc     L0171
+	bcc     L017F
 	inx
 	clc
-L0171:	adc     #<(_enemy_anim)
+L017F:	adc     #<(_enemy_anim)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_anim)
@@ -7980,10 +8171,10 @@ L0171:	adc     #<(_enemy_anim)
 ; else if (enemy_x[index] < ENTITY2.x) {
 ;
 	rts
-L003F:	ldy     _index
+L004A:	ldy     _index
 	lda     _enemy_x,y
 	cmp     _ENTITY2
-	bcc     L01BF
+	bcc     L01D1
 ;
 ; }
 ;
@@ -7991,7 +8182,7 @@ L003F:	ldy     _index
 ;
 ; ENTITY1.x += 1;
 ;
-L01BF:	inc     _ENTITY1
+L01D1:	inc     _ENTITY1
 ;
 ; bg_collision_fast();
 ;
@@ -8000,7 +8191,7 @@ L01BF:	inc     _ENTITY1
 ; if (collision_R) return;
 ;
 	lda     _collision_R
-	beq     L01C0
+	beq     L01D2
 ;
 ; }
 ;
@@ -8008,13 +8199,13 @@ L01BF:	inc     _ENTITY1
 ;
 ; ++enemy_actual_x[index];
 ;
-L01C0:	lda     #<(_enemy_actual_x)
+L01D2:	lda     #<(_enemy_actual_x)
 	ldx     #>(_enemy_actual_x)
 	clc
 	adc     _index
-	bcc     L004B
+	bcc     L0056
 	inx
-L004B:	sta     ptr1
+L0056:	sta     ptr1
 	stx     ptr1+1
 	ldy     #$00
 	lda     #$01
@@ -8027,14 +8218,14 @@ L004B:	sta     ptr1
 	ldy     _index
 	ldx     #$00
 	lda     _enemy_actual_x,y
-	bne     L018B
+	bne     L019E
 	lda     #<(_enemy_room)
 	ldx     #>(_enemy_room)
 	clc
 	adc     _index
-	bcc     L004E
+	bcc     L0059
 	inx
-L004E:	sta     ptr1
+L0059:	sta     ptr1
 	stx     ptr1+1
 	ldy     #$00
 	lda     #$01
@@ -8045,12 +8236,12 @@ L004E:	sta     ptr1
 ; enemy_anim[index] = EnemyWaspSprL;
 ;
 	ldx     #$00
-L018B:	lda     _index
+L019E:	lda     _index
 	asl     a
-	bcc     L0172
+	bcc     L0180
 	inx
 	clc
-L0172:	adc     #<(_enemy_anim)
+L0180:	adc     #<(_enemy_anim)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_anim)
@@ -8071,10 +8262,10 @@ L0172:	adc     #<(_enemy_anim)
 ; else if (enemy_type[index] == ENEMY_BOUNCE) {
 ;
 	rts
-L0039:	ldy     _index
+L0044:	ldy     _index
 	lda     _enemy_type,y
 	cmp     #$0A
-	jne     L0051
+	jne     L005C
 ;
 ; temp1 = (enemy_frames + (index << 3)) & 0x3f;
 ;
@@ -8092,27 +8283,27 @@ L0039:	ldy     _index
 	ldx     #$00
 	lda     _index
 	asl     a
-	bcc     L0173
+	bcc     L0181
 	inx
 	clc
-L0173:	adc     #<(_enemy_anim)
+L0181:	adc     #<(_enemy_anim)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_anim)
 	sta     ptr1+1
 	lda     _temp1
 	cmp     #$10
-	bcc     L0192
+	bcc     L01A5
 	cmp     #$2A
-	bcc     L0058
+	bcc     L0063
 	cmp     #$2C
-	bcs     L0058
-L0192:	lda     #<(_EnemyBounceSpr)
+	bcs     L0063
+L01A5:	lda     #<(_EnemyBounceSpr)
 	ldx     #>(_EnemyBounceSpr)
-	jmp     L0059
-L0058:	lda     #<(_EnemyBounceSpr2)
+	jmp     L0064
+L0063:	lda     #<(_EnemyBounceSpr2)
 	ldx     #>(_EnemyBounceSpr2)
-L0059:	ldy     #$00
+L0064:	ldy     #$00
 	sta     (ptr1),y
 	iny
 	txa
@@ -8122,9 +8313,9 @@ L0059:	ldy     #$00
 ;
 	lda     _temp1
 	cmp     #$10
-	bcc     L0196
+	bcc     L01A9
 	cmp     #$2C
-	bcs     L0196
+	bcs     L01A9
 ;
 ; --enemy_y[index];
 ;
@@ -8132,9 +8323,9 @@ L0059:	ldy     #$00
 	ldx     #>(_enemy_y)
 	clc
 	adc     _index
-	bcc     L005E
+	bcc     L0069
 	inx
-L005E:	sta     ptr1
+L0069:	sta     ptr1
 	stx     ptr1+1
 	dey
 	lda     (ptr1),y
@@ -8146,7 +8337,7 @@ L005E:	sta     ptr1
 ;
 	lda     _temp1
 	cmp     #$16
-	bcc     L01C1
+	bcc     L01D3
 ;
 ; else if (enemy_type[index] == ENEMY_WORM) {
 ;
@@ -8154,13 +8345,13 @@ L005E:	sta     ptr1
 ;
 ; if (temp1 < 22) --enemy_y[index];
 ;
-L01C1:	lda     #<(_enemy_y)
+L01D3:	lda     #<(_enemy_y)
 	ldx     #>(_enemy_y)
 	clc
 	adc     _index
-	bcc     L0060
+	bcc     L006B
 	inx
-L0060:	sta     ptr1
+L006B:	sta     ptr1
 	stx     ptr1+1
 	lda     (ptr1),y
 	sec
@@ -8170,9 +8361,9 @@ L0060:	sta     ptr1
 ; } else if (temp1 >= 44) {
 ;
 	rts
-L0196:	lda     _temp1
+L01A9:	lda     _temp1
 	cmp     #$2C
-	bcs     L01C2
+	bcs     L01D4
 ;
 ; }
 ;
@@ -8180,13 +8371,13 @@ L0196:	lda     _temp1
 ;
 ; ++enemy_y[index];
 ;
-L01C2:	lda     #<(_enemy_y)
+L01D4:	lda     #<(_enemy_y)
 	ldx     #>(_enemy_y)
 	clc
 	adc     _index
-	bcc     L0063
+	bcc     L006E
 	inx
-L0063:	sta     ptr1
+L006E:	sta     ptr1
 	stx     ptr1+1
 	ldy     #$00
 	lda     #$01
@@ -8198,14 +8389,14 @@ L0063:	sta     ptr1
 ;
 	lda     _temp1
 	cmp     #$3E
-	bcs     L0064
+	bcs     L006F
 	lda     #<(_enemy_y)
 	ldx     #>(_enemy_y)
 	clc
 	adc     _index
-	bcc     L0065
+	bcc     L0070
 	inx
-L0065:	sta     ptr1
+L0070:	sta     ptr1
 	stx     ptr1+1
 	lda     #$01
 	clc
@@ -8214,7 +8405,7 @@ L0065:	sta     ptr1
 ;
 ; ENTITY1.x = enemy_x[index]; ENTITY1.y = enemy_y[index];
 ;
-L0064:	ldy     _index
+L006F:	ldy     _index
 	lda     _enemy_x,y
 	sta     _ENTITY1
 	ldy     _index
@@ -8232,7 +8423,7 @@ L0064:	ldy     _index
 ;
 	jsr     _bg_coll_D
 	tax
-	bne     L01C3
+	bne     L01D5
 ;
 ; }
 ;
@@ -8240,13 +8431,13 @@ L0064:	ldy     _index
 ;
 ; if (bg_coll_D()) enemy_y[index] -= eject_D;
 ;
-L01C3:	lda     #<(_enemy_y)
+L01D5:	lda     #<(_enemy_y)
 	ldx     #>(_enemy_y)
 	clc
 	adc     _index
-	bcc     L0069
+	bcc     L0074
 	inx
-L0069:	sta     sreg
+L0074:	sta     sreg
 	stx     sreg+1
 	sta     ptr1
 	stx     ptr1+1
@@ -8259,10 +8450,10 @@ L0069:	sta     sreg
 ; else if (enemy_type[index] == ENEMY_WORM) {
 ;
 	rts
-L0051:	ldy     _index
+L005C:	ldy     _index
 	lda     _enemy_type,y
 	cmp     #$0B
-	jne     L006B
+	jne     L0076
 ;
 ; ENTITY1.x = enemy_x[index];
 ;
@@ -8289,7 +8480,7 @@ L0051:	ldy     _index
 ;
 	lda     _enemy_frames
 	and     #$01
-	beq     L01C4
+	beq     L01D6
 ;
 ; }
 ;
@@ -8297,15 +8488,15 @@ L0051:	ldy     _index
 ;
 ; if (enemy_dir[index] == 0) { // Moving left
 ;
-L01C4:	ldy     _index
+L01D6:	ldy     _index
 	lda     _enemy_dir,y
-	bne     L0197
+	bne     L01AA
 ;
 ; if (!has_ground_ahead(0)) {
 ;
 	jsr     _has_ground_ahead
 	tax
-	bne     L0072
+	bne     L007D
 ;
 ; enemy_dir[index] = 1;
 ;
@@ -8319,7 +8510,7 @@ L01C4:	ldy     _index
 ;
 ; ENTITY1.x -= 1;
 ;
-L0072:	dec     _ENTITY1
+L007D:	dec     _ENTITY1
 ;
 ; bg_collision_fast();
 ;
@@ -8328,7 +8519,7 @@ L0072:	dec     _ENTITY1
 ; if (collision_L) {
 ;
 	lda     _collision_L
-	beq     L0074
+	beq     L007F
 ;
 ; enemy_dir[index] = 1;
 ;
@@ -8342,16 +8533,16 @@ L0072:	dec     _ENTITY1
 ;
 ; if (enemy_actual_x[index] == 0) --enemy_room[index];
 ;
-L0074:	ldy     _index
+L007F:	ldy     _index
 	lda     _enemy_actual_x,y
-	bne     L0076
+	bne     L0081
 	lda     #<(_enemy_room)
 	ldx     #>(_enemy_room)
 	clc
 	adc     _index
-	bcc     L0078
+	bcc     L0083
 	inx
-L0078:	sta     ptr1
+L0083:	sta     ptr1
 	stx     ptr1+1
 	ldy     #$00
 	lda     (ptr1),y
@@ -8361,13 +8552,13 @@ L0078:	sta     ptr1
 ;
 ; --enemy_actual_x[index];
 ;
-L0076:	lda     #<(_enemy_actual_x)
+L0081:	lda     #<(_enemy_actual_x)
 	ldx     #>(_enemy_actual_x)
 	clc
 	adc     _index
-	bcc     L0079
+	bcc     L0084
 	inx
-L0079:	sta     ptr1
+L0084:	sta     ptr1
 	stx     ptr1+1
 	ldy     #$00
 	lda     (ptr1),y
@@ -8376,14 +8567,14 @@ L0079:	sta     ptr1
 ;
 ; } else { // Moving right
 ;
-	jmp     L016C
+	jmp     L0179
 ;
 ; if (!has_ground_ahead(1)) {
 ;
-L0197:	lda     #$01
+L01AA:	lda     #$01
 	jsr     _has_ground_ahead
 	tax
-	bne     L007B
+	bne     L0086
 ;
 ; enemy_dir[index] = 0;
 ;
@@ -8396,7 +8587,7 @@ L0197:	lda     #$01
 ;
 ; ENTITY1.x += 1;
 ;
-L007B:	inc     _ENTITY1
+L0086:	inc     _ENTITY1
 ;
 ; bg_collision_fast();
 ;
@@ -8405,7 +8596,7 @@ L007B:	inc     _ENTITY1
 ; if (collision_R) {
 ;
 	lda     _collision_R
-	beq     L007D
+	beq     L0088
 ;
 ; enemy_dir[index] = 0;
 ;
@@ -8419,13 +8610,13 @@ L007B:	inc     _ENTITY1
 ;
 ; ++enemy_actual_x[index];
 ;
-L007D:	lda     #<(_enemy_actual_x)
+L0088:	lda     #<(_enemy_actual_x)
 	ldx     #>(_enemy_actual_x)
 	clc
 	adc     _index
-	bcc     L007F
+	bcc     L008A
 	inx
-L007F:	sta     ptr1
+L008A:	sta     ptr1
 	stx     ptr1+1
 	ldy     #$00
 	lda     #$01
@@ -8438,30 +8629,30 @@ L007F:	sta     ptr1
 	ldy     _index
 	ldx     #$00
 	lda     _enemy_actual_x,y
-	bne     L0198
+	bne     L01AB
 	lda     #<(_enemy_room)
 	ldx     #>(_enemy_room)
 	clc
 	adc     _index
-	bcc     L0082
+	bcc     L008D
 	inx
-L0082:	sta     ptr1
+L008D:	sta     ptr1
 	stx     ptr1+1
 	ldy     #$00
 	lda     #$01
 	clc
 	adc     (ptr1),y
-L016C:	sta     (ptr1),y
+L0179:	sta     (ptr1),y
 ;
 ; enemy_anim[index] = EnemyWormSprL1;
 ;
 	ldx     #$00
-L0198:	lda     _index
+L01AB:	lda     _index
 	asl     a
-	bcc     L0174
+	bcc     L0182
 	inx
 	clc
-L0174:	adc     #<(_enemy_anim)
+L0182:	adc     #<(_enemy_anim)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_anim)
@@ -8474,21 +8665,21 @@ L0174:	adc     #<(_enemy_anim)
 ;
 ; else if (enemy_type[index] == ENEMY_THORNS) {
 ;
-	jmp     L01B6
-L006B:	ldy     _index
+	jmp     L01C9
+L0076:	ldy     _index
 	lda     _enemy_type,y
 	cmp     #$0C
-	jne     L0084
+	jne     L008F
 ;
 ; if (enemy_thorn_timer[index] > 0) {
 ;
 	ldx     #$00
 	lda     _index
 	asl     a
-	bcc     L0175
+	bcc     L0183
 	inx
 	clc
-L0175:	adc     #<(_enemy_thorn_timer)
+L0183:	adc     #<(_enemy_thorn_timer)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_thorn_timer)
@@ -8499,19 +8690,19 @@ L0175:	adc     #<(_enemy_thorn_timer)
 	dey
 	lda     (ptr1),y
 	cpx     #$00
-	bne     L01B5
+	bne     L01C8
 	cmp     #$00
-	beq     L01B7
+	beq     L01CA
 ;
 ; --enemy_thorn_timer[index];
 ;
-L01B5:	ldx     #$00
+L01C8:	ldx     #$00
 	lda     _index
 	asl     a
-	bcc     L0176
+	bcc     L0184
 	inx
 	clc
-L0176:	adc     #<(_enemy_thorn_timer)
+L0184:	adc     #<(_enemy_thorn_timer)
 	tay
 	txa
 	adc     #>(_enemy_thorn_timer)
@@ -8528,9 +8719,9 @@ L0176:	adc     #<(_enemy_thorn_timer)
 	lda     (ptr1),y
 	sec
 	sbc     #$01
-	bcs     L0199
+	bcs     L01AC
 	dex
-L0199:	sta     (sreg),y
+L01AC:	sta     (sreg),y
 	iny
 	txa
 	sta     (sreg),y
@@ -8538,12 +8729,12 @@ L0199:	sta     (sreg),y
 ; if (enemy_thorn_timer[index] == 0) {
 ;
 	ldx     #$00
-L01B7:	lda     _index
+L01CA:	lda     _index
 	asl     a
-	bcc     L0177
+	bcc     L0185
 	inx
 	clc
-L0177:	adc     #<(_enemy_thorn_timer)
+L0185:	adc     #<(_enemy_thorn_timer)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_thorn_timer)
@@ -8554,7 +8745,7 @@ L0177:	adc     #<(_enemy_thorn_timer)
 	dey
 	lda     (ptr1),y
 	cpx     #$00
-	beq     L01C5
+	beq     L01D7
 ;
 ; }
 ;
@@ -8562,8 +8753,8 @@ L0177:	adc     #<(_enemy_thorn_timer)
 ;
 ; if (enemy_thorn_timer[index] == 0) {
 ;
-L01C5:	cmp     #$00
-	beq     L01C6
+L01D7:	cmp     #$00
+	beq     L01D8
 ;
 ; }
 ;
@@ -8571,9 +8762,9 @@ L01C5:	cmp     #$00
 ;
 ; if (enemy_thorn_out[index]) {
 ;
-L01C6:	ldy     _index
+L01D8:	ldy     _index
 	lda     _enemy_thorn_out,y
-	beq     L008B
+	beq     L0096
 ;
 ; enemy_thorn_out[index] = 0;
 ;
@@ -8585,10 +8776,10 @@ L01C6:	ldy     _index
 ;
 	lda     _index
 	asl     a
-	bcc     L0178
+	bcc     L0186
 	inx
 	clc
-L0178:	adc     #<(_enemy_thorn_timer)
+L0186:	adc     #<(_enemy_thorn_timer)
 	sta     sreg
 	txa
 	adc     #>(_enemy_thorn_timer)
@@ -8596,10 +8787,10 @@ L0178:	adc     #<(_enemy_thorn_timer)
 	ldx     #$00
 	lda     _index
 	asl     a
-	bcc     L0179
+	bcc     L0187
 	inx
 	clc
-L0179:	adc     #<(_enemy_thorn_delay)
+L0187:	adc     #<(_enemy_thorn_delay)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_thorn_delay)
@@ -8608,14 +8799,14 @@ L0179:	adc     #<(_enemy_thorn_delay)
 	lda     (ptr1),y
 	iny
 	ora     (ptr1),y
-	beq     L008E
+	beq     L0099
 	ldx     #$00
 	lda     _index
 	asl     a
-	bcc     L017A
+	bcc     L0188
 	inx
 	clc
-L017A:	adc     #<(_enemy_thorn_delay)
+L0188:	adc     #<(_enemy_thorn_delay)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_thorn_delay)
@@ -8624,11 +8815,11 @@ L017A:	adc     #<(_enemy_thorn_delay)
 	tax
 	dey
 	lda     (ptr1),y
-	jmp     L019A
-L008E:	tax
+	jmp     L01AD
+L0099:	tax
 	lda     #$F0
 	dey
-L019A:	sta     (sreg),y
+L01AD:	sta     (sreg),y
 	iny
 	txa
 	sta     (sreg),y
@@ -8638,10 +8829,10 @@ L019A:	sta     (sreg),y
 	ldx     #$00
 	lda     _index
 	asl     a
-	bcc     L017B
+	bcc     L0189
 	inx
 	clc
-L017B:	adc     #<(_enemy_anim)
+L0189:	adc     #<(_enemy_anim)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_anim)
@@ -8654,11 +8845,11 @@ L017B:	adc     #<(_enemy_anim)
 ;
 ; } else {
 ;
-	jmp     L01B6
+	jmp     L01C9
 ;
 ; enemy_thorn_out[index] = 1;
 ;
-L008B:	ldy     _index
+L0096:	ldy     _index
 	lda     #$01
 	sta     _enemy_thorn_out,y
 ;
@@ -8666,10 +8857,10 @@ L008B:	ldy     _index
 ;
 	lda     _index
 	asl     a
-	bcc     L017C
+	bcc     L018A
 	inx
 	clc
-L017C:	adc     #<(_enemy_thorn_timer)
+L018A:	adc     #<(_enemy_thorn_timer)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_thorn_timer)
@@ -8686,10 +8877,10 @@ L017C:	adc     #<(_enemy_thorn_timer)
 	tax
 	lda     _index
 	asl     a
-	bcc     L017D
+	bcc     L018B
 	inx
 	clc
-L017D:	adc     #<(_enemy_anim)
+L018B:	adc     #<(_enemy_anim)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_anim)
@@ -8702,21 +8893,21 @@ L017D:	adc     #<(_enemy_anim)
 ;
 ; else if (enemy_type[index] == ENEMY_RINGWORM) {
 ;
-	jmp     L01B6
-L0084:	ldy     _index
+	jmp     L01C9
+L008F:	ldy     _index
 	lda     _enemy_type,y
 	cmp     #$0D
-	jne     L0093
+	jne     L009E
 ;
 ; enemy_anim[index] = EnemyRingWormSpr;
 ;
 	ldx     #$00
 	lda     _index
 	asl     a
-	bcc     L017E
+	bcc     L018C
 	inx
 	clc
-L017E:	adc     #<(_enemy_anim)
+L018C:	adc     #<(_enemy_anim)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_anim)
@@ -8746,12 +8937,12 @@ L017E:	adc     #<(_enemy_anim)
 	ldx     #>(_enemy_vel_x)
 	clc
 	adc     _index
-	bcc     L0097
+	bcc     L00A2
 	inx
-L0097:	ldy     #$00
+L00A2:	ldy     #$00
 	jsr     ldaidx
 	asl     a
-	bcc     L0096
+	bcc     L00A1
 ;
 ; ENTITY1.x = enemy_x[index] - 1;
 ;
@@ -8768,37 +8959,37 @@ L0097:	ldy     #$00
 ; if (collision_L) enemy_vel_x[index] = 1;
 ;
 	lda     _collision_L
-	beq     L009A
+	beq     L00A5
 	ldy     _index
 	lda     #$01
 	sta     _enemy_vel_x,y
 ;
 ; else { if (enemy_actual_x[index] == 0) --enemy_room[index]; --enemy_actual_x[index]; }
 ;
-	jmp     L00A1
-L009A:	ldy     _index
+	jmp     L00AC
+L00A5:	ldy     _index
 	lda     _enemy_actual_x,y
-	bne     L009D
+	bne     L00A8
 	lda     #<(_enemy_room)
 	ldx     #>(_enemy_room)
 	clc
 	adc     _index
-	bcc     L009F
+	bcc     L00AA
 	inx
-L009F:	sta     ptr1
+L00AA:	sta     ptr1
 	stx     ptr1+1
 	ldy     #$00
 	lda     (ptr1),y
 	sec
 	sbc     #$01
 	sta     (ptr1),y
-L009D:	lda     #<(_enemy_actual_x)
+L00A8:	lda     #<(_enemy_actual_x)
 	ldx     #>(_enemy_actual_x)
 	clc
 	adc     _index
-	bcc     L00A0
+	bcc     L00AB
 	inx
-L00A0:	sta     ptr1
+L00AB:	sta     ptr1
 	stx     ptr1+1
 	ldy     #$00
 	lda     (ptr1),y
@@ -8807,11 +8998,11 @@ L00A0:	sta     ptr1
 ;
 ; } else {
 ;
-	jmp     L016E
+	jmp     L017B
 ;
 ; ENTITY1.x = enemy_x[index] + 1;
 ;
-L0096:	ldy     _index
+L00A1:	ldy     _index
 	lda     _enemy_x,y
 	clc
 	adc     #$01
@@ -8824,21 +9015,21 @@ L0096:	ldy     _index
 ; if (collision_R) enemy_vel_x[index] = -1;
 ;
 	lda     _collision_R
-	beq     L00A4
+	beq     L00AF
 	ldy     _index
 	lda     #$FF
 	sta     _enemy_vel_x,y
 ;
 ; else { ++enemy_actual_x[index]; if (enemy_actual_x[index] == 0) ++enemy_room[index]; }
 ;
-	jmp     L00A1
-L00A4:	lda     #<(_enemy_actual_x)
+	jmp     L00AC
+L00AF:	lda     #<(_enemy_actual_x)
 	ldx     #>(_enemy_actual_x)
 	clc
 	adc     _index
-	bcc     L00A7
+	bcc     L00B2
 	inx
-L00A7:	sta     ptr1
+L00B2:	sta     ptr1
 	stx     ptr1+1
 	ldy     #$00
 	lda     #$01
@@ -8847,30 +9038,30 @@ L00A7:	sta     ptr1
 	sta     (ptr1),y
 	ldy     _index
 	lda     _enemy_actual_x,y
-	bne     L00A1
+	bne     L00AC
 	lda     #<(_enemy_room)
 	ldx     #>(_enemy_room)
 	clc
 	adc     _index
-	bcc     L00AA
+	bcc     L00B5
 	inx
-L00AA:	sta     ptr1
+L00B5:	sta     ptr1
 	stx     ptr1+1
 	ldy     #$00
 	lda     #$01
 	clc
 	adc     (ptr1),y
-L016E:	sta     (ptr1),y
+L017B:	sta     (ptr1),y
 ;
 ; temp1 = enemy_y[index] + enemy_vel_y[index];
 ;
-L00A1:	lda     #<(_enemy_vel_y)
+L00AC:	lda     #<(_enemy_vel_y)
 	ldx     #>(_enemy_vel_y)
 	clc
 	adc     _index
-	bcc     L00AC
+	bcc     L00B7
 	inx
-L00AC:	ldy     #$00
+L00B7:	ldy     #$00
 	jsr     ldaidx
 	clc
 	ldy     _index
@@ -8880,28 +9071,28 @@ L00AC:	ldy     #$00
 ; if (temp1 < 16 || temp1 > 216)
 ;
 	cmp     #$10
-	bcc     L019B
+	bcc     L01AE
 	lda     _temp1
 	cmp     #$D9
-	bcc     L00AD
+	bcc     L00B8
 ;
 ; enemy_vel_y[index] = -enemy_vel_y[index];
 ;
-L019B:	lda     #<(_enemy_vel_y)
+L01AE:	lda     #<(_enemy_vel_y)
 	ldx     #>(_enemy_vel_y)
 	clc
 	adc     _index
-	bcc     L00B0
+	bcc     L00BB
 	inx
-L00B0:	sta     sreg
+L00BB:	sta     sreg
 	stx     sreg+1
 	lda     #<(_enemy_vel_y)
 	ldx     #>(_enemy_vel_y)
 	clc
 	adc     _index
-	bcc     L00B1
+	bcc     L00BC
 	inx
-L00B1:	ldy     #$00
+L00BC:	ldy     #$00
 	jsr     ldaidx
 	eor     #$FF
 	clc
@@ -8915,7 +9106,7 @@ L00B1:	ldy     #$00
 ;
 ; enemy_y[index] = temp1;
 ;
-L00AD:	ldy     _index
+L00B8:	ldy     _index
 	lda     _temp1
 	sta     _enemy_y,y
 ;
@@ -8928,10 +9119,10 @@ L00AD:	ldy     _index
 ; else if (enemy_type[index] == ENEMY_HOPWORM) {
 ;
 	rts
-L0093:	ldy     _index
+L009E:	ldy     _index
 	lda     _enemy_type,y
 	cmp     #$0E
-	jne     L00B7
+	jne     L00C2
 ;
 ; ENTITY1.x = enemy_x[index]; ENTITY1.y = enemy_y[index];
 ;
@@ -8954,19 +9145,19 @@ L0093:	ldy     _index
 	ldx     #>(_enemy_dir)
 	clc
 	adc     _index
-	bcc     L00BB
+	bcc     L00C6
 	inx
-L00BB:	sta     ptr1
+L00C6:	sta     ptr1
 	stx     ptr1+1
 	ldy     _index
 	lda     _enemy_x,y
 	cmp     _ENTITY2
-	bcc     L019D
-	beq     L019D
+	bcc     L01B0
+	beq     L01B0
 	lda     #$00
-	jmp     L019E
-L019D:	lda     #$01
-L019E:	ldy     #$00
+	jmp     L01B1
+L01B0:	lda     #$01
+L01B1:	ldy     #$00
 	sta     (ptr1),y
 ;
 ; enemy_anim[index] = EnemyHopWormSprL;
@@ -8974,10 +9165,10 @@ L019E:	ldy     #$00
 	ldx     #$00
 	lda     _index
 	asl     a
-	bcc     L017F
+	bcc     L018D
 	inx
 	clc
-L017F:	adc     #<(_enemy_anim)
+L018D:	adc     #<(_enemy_anim)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_anim)
@@ -8994,9 +9185,9 @@ L017F:	adc     #<(_enemy_anim)
 	ldx     #>(_enemy_vel_y)
 	clc
 	adc     _index
-	bcc     L00C0
+	bcc     L00CB
 	inx
-L00C0:	sta     ptr1
+L00CB:	sta     ptr1
 	stx     ptr1+1
 	dey
 	lda     #$01
@@ -9005,22 +9196,22 @@ L00C0:	sta     ptr1
 	sta     (ptr1),y
 	sec
 	sbc     #$06
-	bvs     L00C1
+	bvs     L00CC
 	eor     #$80
-L00C1:	bpl     L00BF
+L00CC:	bpl     L00CA
 	ldy     _index
 	lda     #$05
 	sta     _enemy_vel_y,y
 ;
 ; ENTITY1.y += enemy_vel_y[index];
 ;
-L00BF:	lda     #<(_enemy_vel_y)
+L00CA:	lda     #<(_enemy_vel_y)
 	ldx     #>(_enemy_vel_y)
 	clc
 	adc     _index
-	bcc     L00C3
+	bcc     L00CE
 	inx
-L00C3:	ldy     #$00
+L00CE:	ldy     #$00
 	jsr     ldaidx
 	clc
 	adc     _ENTITY1+1
@@ -9037,19 +9228,19 @@ L00C3:	ldy     #$00
 	ldx     #>(_enemy_vel_y)
 	clc
 	adc     _index
-	bcc     L019F
+	bcc     L01B2
 	inx
-L019F:	jsr     ldaidx
+L01B2:	jsr     ldaidx
 	sec
 	sbc     #$01
-	bvs     L00C6
+	bvs     L00D1
 	eor     #$80
-L00C6:	asl     a
+L00D1:	asl     a
 	tya
-	bcc     L01A3
+	bcc     L01B6
 	jsr     _bg_coll_D
 	tax
-	beq     L01A3
+	beq     L01B6
 ;
 ; ENTITY1.y -= eject_D; enemy_vel_y[index] = 0; enemy_state[index] = 0;
 ;
@@ -9066,7 +9257,7 @@ L00C6:	asl     a
 ;
 ; coll_enemy = 0;
 ;
-L01A3:	sta     _coll_enemy
+L01B6:	sta     _coll_enemy
 ;
 ; enemy_y[index] = ENTITY1.y; enemy_actual_y[index] = ENTITY1.y;
 ;
@@ -9081,7 +9272,7 @@ L01A3:	sta     _coll_enemy
 ;
 	ldy     _index
 	lda     _enemy_state,y
-	bne     L00CE
+	bne     L00D9
 ;
 ; if (((enemy_frames + (index << 3)) & 0x3f) == 0) { enemy_state[index] = 1; enemy_vel_y[index] = -6; }
 ;
@@ -9092,7 +9283,7 @@ L01A3:	sta     _coll_enemy
 	clc
 	adc     _enemy_frames
 	and     #$3F
-	beq     L01C7
+	beq     L01D9
 ;
 ; else if (enemy_type[index] == ENEMY_POOD) {
 ;
@@ -9100,7 +9291,7 @@ L01A3:	sta     _coll_enemy
 ;
 ; if (((enemy_frames + (index << 3)) & 0x3f) == 0) { enemy_state[index] = 1; enemy_vel_y[index] = -6; }
 ;
-L01C7:	ldy     _index
+L01D9:	ldy     _index
 	lda     #$01
 	sta     _enemy_state,y
 	ldy     _index
@@ -9113,7 +9304,7 @@ L01C7:	ldy     _index
 ;
 ; ENTITY1.x = enemy_x[index]; ENTITY1.y = enemy_y[index];
 ;
-L00CE:	ldy     _index
+L00D9:	ldy     _index
 	lda     _enemy_x,y
 	sta     _ENTITY1
 	ldy     _index
@@ -9124,7 +9315,7 @@ L00CE:	ldy     _index
 ;
 	ldy     _index
 	lda     _enemy_dir,y
-	bne     L01A4
+	bne     L01B7
 ;
 ; ENTITY1.x -= 1; bg_collision_fast();
 ;
@@ -9134,7 +9325,7 @@ L00CE:	ldy     _index
 ; if (!collision_L) { if (enemy_actual_x[index] == 0) --enemy_room[index]; --enemy_actual_x[index]; }
 ;
 	lda     _collision_L
-	beq     L01C8
+	beq     L01DA
 ;
 ; else if (enemy_type[index] == ENEMY_POOD) {
 ;
@@ -9142,29 +9333,29 @@ L00CE:	ldy     _index
 ;
 ; if (!collision_L) { if (enemy_actual_x[index] == 0) --enemy_room[index]; --enemy_actual_x[index]; }
 ;
-L01C8:	ldy     _index
+L01DA:	ldy     _index
 	lda     _enemy_actual_x,y
-	bne     L00DA
+	bne     L00E5
 	lda     #<(_enemy_room)
 	ldx     #>(_enemy_room)
 	clc
 	adc     _index
-	bcc     L00DC
+	bcc     L00E7
 	inx
-L00DC:	sta     ptr1
+L00E7:	sta     ptr1
 	stx     ptr1+1
 	ldy     #$00
 	lda     (ptr1),y
 	sec
 	sbc     #$01
 	sta     (ptr1),y
-L00DA:	lda     #<(_enemy_actual_x)
+L00E5:	lda     #<(_enemy_actual_x)
 	ldx     #>(_enemy_actual_x)
 	clc
 	adc     _index
-	bcc     L00DD
+	bcc     L00E8
 	inx
-L00DD:	sta     ptr1
+L00E8:	sta     ptr1
 	stx     ptr1+1
 	ldy     #$00
 	lda     (ptr1),y
@@ -9178,13 +9369,13 @@ L00DD:	sta     ptr1
 ;
 ; ENTITY1.x += 1; bg_collision_fast();
 ;
-L01A4:	inc     _ENTITY1
+L01B7:	inc     _ENTITY1
 	jsr     _bg_collision_fast
 ;
 ; if (!collision_R) { ++enemy_actual_x[index]; if (enemy_actual_x[index] == 0) ++enemy_room[index]; }
 ;
 	lda     _collision_R
-	beq     L01C9
+	beq     L01DB
 ;
 ; }
 ;
@@ -9192,13 +9383,13 @@ L01A4:	inc     _ENTITY1
 ;
 ; if (!collision_R) { ++enemy_actual_x[index]; if (enemy_actual_x[index] == 0) ++enemy_room[index]; }
 ;
-L01C9:	lda     #<(_enemy_actual_x)
+L01DB:	lda     #<(_enemy_actual_x)
 	ldx     #>(_enemy_actual_x)
 	clc
 	adc     _index
-	bcc     L00E0
+	bcc     L00EB
 	inx
-L00E0:	sta     ptr1
+L00EB:	sta     ptr1
 	stx     ptr1+1
 	ldy     #$00
 	lda     #$01
@@ -9207,7 +9398,7 @@ L00E0:	sta     ptr1
 	sta     (ptr1),y
 	ldy     _index
 	lda     _enemy_actual_x,y
-	beq     L01CA
+	beq     L01DC
 ;
 ; }
 ;
@@ -9215,13 +9406,13 @@ L00E0:	sta     ptr1
 ;
 ; if (!collision_R) { ++enemy_actual_x[index]; if (enemy_actual_x[index] == 0) ++enemy_room[index]; }
 ;
-L01CA:	lda     #<(_enemy_room)
+L01DC:	lda     #<(_enemy_room)
 	ldx     #>(_enemy_room)
 	clc
 	adc     _index
-	bcc     L00E3
+	bcc     L00EE
 	inx
-L00E3:	sta     ptr1
+L00EE:	sta     ptr1
 	stx     ptr1+1
 	ldy     #$00
 	lda     #$01
@@ -9232,10 +9423,10 @@ L00E3:	sta     ptr1
 ; else if (enemy_type[index] == ENEMY_POOD) {
 ;
 	rts
-L00B7:	ldy     _index
+L00C2:	ldy     _index
 	lda     _enemy_type,y
 	cmp     #$0F
-	jne     L00E5
+	jne     L00F0
 ;
 ; ENTITY1.x = enemy_x[index]; ENTITY1.y = enemy_y[index];
 ;
@@ -9257,23 +9448,23 @@ L00B7:	ldy     _index
 	ldx     #$00
 	lda     _index
 	asl     a
-	bcc     L0180
+	bcc     L018E
 	inx
 	clc
-L0180:	adc     #<(_enemy_anim)
+L018E:	adc     #<(_enemy_anim)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_anim)
 	sta     ptr1+1
 	lda     _enemy_frames
 	and     #$08
-	beq     L00E9
+	beq     L00F4
 	lda     #<(_EnemyPoodSprL1)
 	ldx     #>(_EnemyPoodSprL1)
-	jmp     L00EA
-L00E9:	lda     #<(_EnemyPoodSprL2)
+	jmp     L00F5
+L00F4:	lda     #<(_EnemyPoodSprL2)
 	ldx     #>(_EnemyPoodSprL2)
-L00EA:	ldy     #$00
+L00F5:	ldy     #$00
 	sta     (ptr1),y
 	iny
 	txa
@@ -9285,9 +9476,9 @@ L00EA:	ldy     #$00
 	ldx     #>(_enemy_vel_y)
 	clc
 	adc     _index
-	bcc     L00EC
+	bcc     L00F7
 	inx
-L00EC:	sta     ptr1
+L00F7:	sta     ptr1
 	stx     ptr1+1
 	dey
 	lda     #$01
@@ -9296,22 +9487,22 @@ L00EC:	sta     ptr1
 	sta     (ptr1),y
 	sec
 	sbc     #$06
-	bvs     L00ED
+	bvs     L00F8
 	eor     #$80
-L00ED:	bpl     L00EB
+L00F8:	bpl     L00F6
 	ldy     _index
 	lda     #$05
 	sta     _enemy_vel_y,y
 ;
 ; ENTITY1.y += enemy_vel_y[index];
 ;
-L00EB:	lda     #<(_enemy_vel_y)
+L00F6:	lda     #<(_enemy_vel_y)
 	ldx     #>(_enemy_vel_y)
 	clc
 	adc     _index
-	bcc     L00EF
+	bcc     L00FA
 	inx
-L00EF:	ldy     #$00
+L00FA:	ldy     #$00
 	jsr     ldaidx
 	clc
 	adc     _ENTITY1+1
@@ -9328,19 +9519,19 @@ L00EF:	ldy     #$00
 	ldx     #>(_enemy_vel_y)
 	clc
 	adc     _index
-	bcc     L01A5
+	bcc     L01B8
 	inx
-L01A5:	jsr     ldaidx
+L01B8:	jsr     ldaidx
 	sec
 	sbc     #$01
-	bvs     L00F2
+	bvs     L00FD
 	eor     #$80
-L00F2:	asl     a
+L00FD:	asl     a
 	tya
-	bcc     L01A9
+	bcc     L01BC
 	jsr     _bg_coll_D
 	tax
-	beq     L01A9
+	beq     L01BC
 	lda     _eject_D
 	eor     #$FF
 	sec
@@ -9352,7 +9543,7 @@ L00F2:	asl     a
 ;
 ; coll_enemy = 0;
 ;
-L01A9:	sta     _coll_enemy
+L01BC:	sta     _coll_enemy
 ;
 ; enemy_y[index] = ENTITY1.y; enemy_actual_y[index] = ENTITY1.y;
 ;
@@ -9368,32 +9559,32 @@ L01A9:	sta     _coll_enemy
 	ldy     _index
 	lda     _enemy_x,y
 	cmp     _ENTITY2
-	bcc     L01AA
-	beq     L01AA
+	bcc     L01BD
+	beq     L01BD
 	ldy     _index
 	lda     _enemy_x,y
 	sec
 	sbc     _ENTITY2
-	jmp     L01AB
-L01AA:	lda     _ENTITY2
+	jmp     L01BE
+L01BD:	lda     _ENTITY2
 	sec
 	ldy     _index
 	sbc     _enemy_x,y
-L01AB:	sta     _temp1
+L01BE:	sta     _temp1
 ;
 ; if (temp1 < 64) enemy_state[index] = 1;
 ;
 	cmp     #$40
-	bcs     L00FE
+	bcs     L0109
 	ldy     _index
 	lda     #$01
 	sta     _enemy_state,y
 ;
 ; if (enemy_state[index] == 0) return;
 ;
-L00FE:	ldy     _index
+L0109:	ldy     _index
 	lda     _enemy_state,y
-	bne     L01CB
+	bne     L01DD
 ;
 ; }
 ;
@@ -9401,23 +9592,23 @@ L00FE:	ldy     _index
 ;
 ; enemy_dir[index] = (enemy_x[index] > ENTITY2.x) ? 0 : 1;
 ;
-L01CB:	lda     #<(_enemy_dir)
+L01DD:	lda     #<(_enemy_dir)
 	ldx     #>(_enemy_dir)
 	clc
 	adc     _index
-	bcc     L0102
+	bcc     L010D
 	inx
-L0102:	sta     ptr1
+L010D:	sta     ptr1
 	stx     ptr1+1
 	ldy     _index
 	lda     _enemy_x,y
 	cmp     _ENTITY2
-	bcc     L01AC
-	beq     L01AC
+	bcc     L01BF
+	beq     L01BF
 	lda     #$00
-	jmp     L01AD
-L01AC:	lda     #$01
-L01AD:	ldy     #$00
+	jmp     L01C0
+L01BF:	lda     #$01
+L01C0:	ldy     #$00
 	sta     (ptr1),y
 ;
 ; ENTITY1.x = enemy_x[index]; ENTITY1.y = enemy_y[index];
@@ -9433,7 +9624,7 @@ L01AD:	ldy     #$00
 ;
 	ldy     _index
 	lda     _enemy_dir,y
-	bne     L01AE
+	bne     L01C1
 ;
 ; ENTITY1.x -= 1; bg_collision_fast();
 ;
@@ -9443,30 +9634,30 @@ L01AD:	ldy     #$00
 ; if (!collision_L) { if (enemy_actual_x[index] == 0) --enemy_room[index]; --enemy_actual_x[index]; }
 ;
 	lda     _collision_L
-	bne     L010F
+	bne     L011A
 	ldy     _index
 	lda     _enemy_actual_x,y
-	bne     L010B
+	bne     L0116
 	lda     #<(_enemy_room)
 	ldx     #>(_enemy_room)
 	clc
 	adc     _index
-	bcc     L010D
+	bcc     L0118
 	inx
-L010D:	sta     ptr1
+L0118:	sta     ptr1
 	stx     ptr1+1
 	ldy     #$00
 	lda     (ptr1),y
 	sec
 	sbc     #$01
 	sta     (ptr1),y
-L010B:	lda     #<(_enemy_actual_x)
+L0116:	lda     #<(_enemy_actual_x)
 	ldx     #>(_enemy_actual_x)
 	clc
 	adc     _index
-	bcc     L010E
+	bcc     L0119
 	inx
-L010E:	sta     ptr1
+L0119:	sta     ptr1
 	stx     ptr1+1
 	ldy     #$00
 	lda     (ptr1),y
@@ -9475,24 +9666,24 @@ L010E:	sta     ptr1
 ;
 ; } else {
 ;
-	jmp     L016F
+	jmp     L017C
 ;
 ; ENTITY1.x += 1; bg_collision_fast();
 ;
-L01AE:	inc     _ENTITY1
+L01C1:	inc     _ENTITY1
 	jsr     _bg_collision_fast
 ;
 ; if (!collision_R) { ++enemy_actual_x[index]; if (enemy_actual_x[index] == 0) ++enemy_room[index]; }
 ;
 	lda     _collision_R
-	bne     L010F
+	bne     L011A
 	lda     #<(_enemy_actual_x)
 	ldx     #>(_enemy_actual_x)
 	clc
 	adc     _index
-	bcc     L0111
+	bcc     L011C
 	inx
-L0111:	sta     ptr1
+L011C:	sta     ptr1
 	stx     ptr1+1
 	ldy     #$00
 	lda     #$01
@@ -9501,33 +9692,33 @@ L0111:	sta     ptr1
 	sta     (ptr1),y
 	ldy     _index
 	lda     _enemy_actual_x,y
-	bne     L010F
+	bne     L011A
 	lda     #<(_enemy_room)
 	ldx     #>(_enemy_room)
 	clc
 	adc     _index
-	bcc     L0114
+	bcc     L011F
 	inx
-L0114:	sta     ptr1
+L011F:	sta     ptr1
 	stx     ptr1+1
 	ldy     #$00
 	lda     #$01
 	clc
 	adc     (ptr1),y
-L016F:	sta     (ptr1),y
+L017C:	sta     (ptr1),y
 ;
 ; if (enemy_vel_y[index] == 0 && ((enemy_frames + (index << 3)) & 0x7f) == 0) enemy_vel_y[index] = -6;
 ;
-L010F:	lda     #<(_enemy_vel_y)
+L011A:	lda     #<(_enemy_vel_y)
 	ldx     #>(_enemy_vel_y)
 	clc
 	adc     _index
-	bcc     L0116
+	bcc     L0121
 	inx
-L0116:	ldy     #$00
+L0121:	ldy     #$00
 	jsr     ldaidx
 	cmp     #$00
-	bne     L0115
+	bne     L0120
 	lda     _index
 	asl     a
 	asl     a
@@ -9535,28 +9726,28 @@ L0116:	ldy     #$00
 	clc
 	adc     _enemy_frames
 	and     #$7F
-	bne     L0115
+	bne     L0120
 	ldy     _index
 	lda     #$FA
 	sta     _enemy_vel_y,y
 ;
 ; else if (enemy_type[index] == ENEMY_SPIDER) {
 ;
-L0115:	rts
-L00E5:	ldy     _index
+L0120:	rts
+L00F0:	ldy     _index
 	lda     _enemy_type,y
 	cmp     #$11
-	jne     L011D
+	jne     L0128
 ;
 ; enemy_anim[index] = EnemySpiderSpr;
 ;
 	ldx     #$00
 	lda     _index
 	asl     a
-	bcc     L0181
+	bcc     L018F
 	inx
 	clc
-L0181:	adc     #<(_enemy_anim)
+L018F:	adc     #<(_enemy_anim)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_anim)
@@ -9588,8 +9779,8 @@ L0181:	adc     #<(_enemy_anim)
 	ldy     _index
 	lda     _enemy_x,y
 	cmp     _ENTITY2
-	bcc     L01B0
-	beq     L01B0
+	bcc     L01C3
+	beq     L01C3
 ;
 ; enemy_x[index] - ENTITY2.x : ENTITY2.x - enemy_x[index];
 ;
@@ -9597,24 +9788,24 @@ L0181:	adc     #<(_enemy_anim)
 	lda     _enemy_x,y
 	sec
 	sbc     _ENTITY2
-	jmp     L01B1
-L01B0:	lda     _ENTITY2
+	jmp     L01C4
+L01C3:	lda     _ENTITY2
 	sec
 	ldy     _index
 	sbc     _enemy_x,y
-L01B1:	sta     _temp1
+L01C4:	sta     _temp1
 ;
 ; if (enemy_state[index] == 0) {
 ;
 	ldy     _index
 	lda     _enemy_state,y
-	bne     L0126
+	bne     L0131
 ;
 ; if (temp1 < 40) { enemy_state[index] = 1; enemy_vel_y[index] = 2; }
 ;
 	lda     _temp1
 	cmp     #$28
-	bcc     L01CC
+	bcc     L01DE
 ;
 ; else if (enemy_type[index] == ENEMY_FLYBUG) {
 ;
@@ -9622,7 +9813,7 @@ L01B1:	sta     _temp1
 ;
 ; if (temp1 < 40) { enemy_state[index] = 1; enemy_vel_y[index] = 2; }
 ;
-L01CC:	ldy     _index
+L01DE:	ldy     _index
 	lda     #$01
 	sta     _enemy_state,y
 	ldy     _index
@@ -9632,10 +9823,10 @@ L01CC:	ldy     _index
 ; } else if (enemy_state[index] == 1) {
 ;
 	rts
-L0126:	ldy     _index
+L0131:	ldy     _index
 	lda     _enemy_state,y
 	cmp     #$01
-	jne     L012C
+	jne     L0137
 ;
 ; ENTITY1.y += enemy_vel_y[index];
 ;
@@ -9643,9 +9834,9 @@ L0126:	ldy     _index
 	ldx     #>(_enemy_vel_y)
 	clc
 	adc     _index
-	bcc     L012E
+	bcc     L0139
 	inx
-L012E:	ldy     #$00
+L0139:	ldy     #$00
 	jsr     ldaidx
 	clc
 	adc     _ENTITY1+1
@@ -9657,21 +9848,21 @@ L012E:	ldy     #$00
 	ldx     #>(_enemy_vel_y)
 	clc
 	adc     _index
-	bcc     L01B2
+	bcc     L01C5
 	inx
-L01B2:	jsr     ldaidx
+L01C5:	jsr     ldaidx
 	sec
 	sbc     #$05
-	bvc     L0131
+	bvc     L013C
 	eor     #$80
-L0131:	bpl     L01B3
+L013C:	bpl     L01C6
 	lda     #<(_enemy_vel_y)
 	ldx     #>(_enemy_vel_y)
 	clc
 	adc     _index
-	bcc     L0132
+	bcc     L013D
 	inx
-L0132:	sta     ptr1
+L013D:	sta     ptr1
 	stx     ptr1+1
 	lda     #$01
 	clc
@@ -9680,7 +9871,7 @@ L0132:	sta     ptr1
 ;
 ; coll_enemy = 1; temp1 = bg_coll_D(); coll_enemy = 0;
 ;
-L01B3:	lda     #$01
+L01C6:	lda     #$01
 	sta     _coll_enemy
 	jsr     _bg_coll_D
 	sta     _temp1
@@ -9690,7 +9881,7 @@ L01B3:	lda     #$01
 ; if (temp1) ENTITY1.y -= eject_D;
 ;
 	lda     _temp1
-	beq     L0133
+	beq     L013E
 	lda     _eject_D
 	eor     #$FF
 	sec
@@ -9699,7 +9890,7 @@ L01B3:	lda     #$01
 ;
 ; enemy_y[index] = ENTITY1.y; enemy_actual_y[index] = ENTITY1.y;
 ;
-L0133:	ldy     _index
+L013E:	ldy     _index
 	lda     _ENTITY1+1
 	sta     _enemy_y,y
 	ldy     _index
@@ -9709,36 +9900,36 @@ L0133:	ldy     _index
 ; if (temp1 || ENTITY1.y > 220)
 ;
 	lda     _temp1
-	bne     L01B4
+	bne     L01C7
 	lda     _ENTITY1+1
 	cmp     #$DD
-	bcc     L0136
+	bcc     L0141
 ;
 ; enemy_state[index] = 2;
 ;
-L01B4:	ldy     _index
+L01C7:	ldy     _index
 	lda     #$02
 	sta     _enemy_state,y
 ;
 ; } else {
 ;
-L0136:	rts
+L0141:	rts
 ;
 ; if (enemy_y[index] > enemy_origin_y[index]) enemy_y[index] -= 2;
 ;
-L012C:	ldy     _index
+L0137:	ldy     _index
 	lda     _enemy_y,y
 	ldy     _index
 	cmp     _enemy_origin_y,y
-	bcc     L013B
-	beq     L013B
+	bcc     L0146
+	beq     L0146
 	lda     #<(_enemy_y)
 	ldx     #>(_enemy_y)
 	clc
 	adc     _index
-	bcc     L013E
+	bcc     L0149
 	inx
-L013E:	sta     ptr1
+L0149:	sta     ptr1
 	stx     ptr1+1
 	ldy     #$00
 	lda     (ptr1),y
@@ -9749,27 +9940,27 @@ L013E:	sta     ptr1
 ; else enemy_state[index] = 0;
 ;
 	rts
-L013B:	ldy     _index
+L0146:	ldy     _index
 	lda     #$00
 	sta     _enemy_state,y
 ;
 ; else if (enemy_type[index] == ENEMY_FLYBUG) {
 ;
 	rts
-L011D:	ldy     _index
+L0128:	ldy     _index
 	lda     _enemy_type,y
 	cmp     #$12
-	bne     L0142
+	bne     L014D
 ;
 ; enemy_anim[index] = EnemyFlyBugSprL;
 ;
 	ldx     #$00
 	lda     _index
 	asl     a
-	bcc     L0182
+	bcc     L0190
 	inx
 	clc
-L0182:	adc     #<(_enemy_anim)
+L0190:	adc     #<(_enemy_anim)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_anim)
@@ -9785,14 +9976,14 @@ L0182:	adc     #<(_enemy_anim)
 ;
 	ldy     _index
 	lda     _enemy_dir,y
-	bne     L0144
+	bne     L014F
 	lda     #<(_enemy_actual_x)
 	ldx     #>(_enemy_actual_x)
 	clc
 	adc     _index
-	bcc     L0146
+	bcc     L0151
 	inx
-L0146:	sta     ptr1
+L0151:	sta     ptr1
 	stx     ptr1+1
 	ldy     #$00
 	lda     (ptr1),y
@@ -9802,7 +9993,7 @@ L0146:	sta     ptr1
 	ldy     _index
 	lda     _enemy_x,y
 	cmp     #$08
-	bcs     L014C
+	bcs     L0157
 	ldy     _index
 	lda     #$01
 	sta     _enemy_dir,y
@@ -9810,13 +10001,13 @@ L0146:	sta     ptr1
 ; else { ++enemy_actual_x[index]; if (enemy_x[index] > 232) enemy_dir[index] = 0; }
 ;
 	rts
-L0144:	lda     #<(_enemy_actual_x)
+L014F:	lda     #<(_enemy_actual_x)
 	ldx     #>(_enemy_actual_x)
 	clc
 	adc     _index
-	bcc     L014B
+	bcc     L0156
 	inx
-L014B:	sta     ptr1
+L0156:	sta     ptr1
 	stx     ptr1+1
 	ldy     #$00
 	lda     #$01
@@ -9826,28 +10017,28 @@ L014B:	sta     ptr1
 	ldy     _index
 	lda     _enemy_x,y
 	cmp     #$E9
-	bcc     L0150
+	bcc     L015B
 	ldy     _index
 	lda     #$00
 	sta     _enemy_dir,y
 ;
 ; else if (enemy_type[index] == ENEMY_VIRUS) {
 ;
-L014C:	rts
-L0142:	ldy     _index
+L0157:	rts
+L014D:	ldy     _index
 	lda     _enemy_type,y
 	cmp     #$13
-	bne     L0150
+	bne     L015B
 ;
 ; enemy_anim[index] = EnemyVirusSprL;
 ;
 	ldx     #$00
 	lda     _index
 	asl     a
-	bcc     L0183
+	bcc     L0191
 	inx
 	clc
-L0183:	adc     #<(_enemy_anim)
+L0191:	adc     #<(_enemy_anim)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_anim)
@@ -9857,11 +10048,11 @@ L0183:	adc     #<(_enemy_anim)
 	sta     (ptr1),y
 	iny
 	lda     #>(_EnemyVirusSprL)
-L01B6:	sta     (ptr1),y
+L01C9:	sta     (ptr1),y
 ;
 ; }
 ;
-L0150:	rts
+L015B:	rts
 
 .endproc
 
@@ -10621,10 +10812,10 @@ L0032:	inc     _index
 	ldx     #$00
 	lda     _level
 	asl     a
-	bcc     L006C
+	bcc     L006D
 	inx
 	clc
-L006C:	adc     #<(_Coins_list)
+L006D:	adc     #<(_Coins_list)
 	sta     ptr1
 	txa
 	adc     #>(_Coins_list)
@@ -10641,9 +10832,9 @@ L006C:	adc     #<(_Coins_list)
 	tya
 	sta     _index
 	sta     _index2
-L0077:	lda     _index
+L0078:	lda     _index
 	cmp     #$10
-	jcs     L0078
+	jcs     L0079
 ;
 ; coin_x[index] = 0;
 ;
@@ -10670,7 +10861,7 @@ L0077:	lda     _index
 ; if (temp1 == TURN_OFF) break;
 ;
 	cmp     #$FF
-	jeq     L0078
+	jeq     L0079
 ;
 ; ++index2;
 ;
@@ -10760,15 +10951,15 @@ L0011:	sta     ptr1
 ; for(index = 0,index2 = 0;index < MAX_COINS; ++index) {
 ;
 	inc     _index
-	jmp     L0077
+	jmp     L0078
 ;
 ; for(++index;index < MAX_COINS; ++index) {
 ;
-L0078:	inc     _index
+L0079:	inc     _index
 	ldx     #$00
 	lda     _index
 	cmp     #$10
-	bcs     L0079
+	bcs     L007A
 ;
 ; coin_y[index] = TURN_OFF;
 ;
@@ -10778,16 +10969,16 @@ L0078:	inc     _index
 ;
 ; for(++index;index < MAX_COINS; ++index) {
 ;
-	jmp     L0078
+	jmp     L0079
 ;
 ; pointer = Enemy_list[level];
 ;
-L0079:	lda     _level
+L007A:	lda     _level
 	asl     a
-	bcc     L006D
+	bcc     L006E
 	inx
 	clc
-L006D:	adc     #<(_Enemy_list)
+L006E:	adc     #<(_Enemy_list)
 	sta     ptr1
 	txa
 	adc     #>(_Enemy_list)
@@ -10809,13 +11000,13 @@ L0018:	lda     _pointer
 	stx     ptr1+1
 	lda     (ptr1),y
 	cmp     #$FF
-	beq     L007A
+	beq     L007B
 	inc     _index2
 	jmp     L0018
 ;
 ; temp1 = index2; // bytes before sentinel
 ;
-L007A:	lda     _index2
+L007B:	lda     _index2
 	sta     _temp1
 ;
 ; enemy_stride = (temp1 % 5 == 0) ? 5 : 4;
@@ -10829,9 +11020,9 @@ L007A:	lda     _index2
 	cmp     #$00
 	bne     L001D
 	lda     #$05
-	jmp     L007B
+	jmp     L007C
 L001D:	lda     #$04
-L007B:	ldy     #$03
+L007C:	ldy     #$03
 	sta     (sp),y
 ;
 ; for(index = 0,index2 = 0;index < MAX_ENEMY; ++index) {
@@ -10839,9 +11030,9 @@ L007B:	ldy     #$03
 	lda     #$00
 	sta     _index
 	sta     _index2
-L007C:	lda     _index
+L007D:	lda     _index
 	cmp     #$10
-	jcs     L007F
+	jcs     L0080
 ;
 ; enemy_x[index] = 0;
 ;
@@ -10868,7 +11059,7 @@ L007C:	lda     _index
 ; if (temp1 == TURN_OFF) break;
 ;
 	cmp     #$FF
-	jeq     L007F
+	jeq     L0080
 ;
 ; ++index2;
 ;
@@ -10966,7 +11157,7 @@ L002E:	sta     ptr1
 	iny
 	lda     (sp),y
 	cmp     #$05
-	bne     L007D
+	bne     L007E
 ;
 ; param = pointer[index2];
 ;
@@ -10989,7 +11180,7 @@ L002E:	sta     ptr1
 ;
 ; param = 4; // default delay seconds for thorns in legacy data
 ;
-L007D:	lda     #$04
+L007E:	lda     #$04
 	dey
 	sta     (sp),y
 ;
@@ -11018,10 +11209,10 @@ L0031:	ldy     _index
 	tax
 	lda     _index
 	asl     a
-	bcc     L006E
+	bcc     L006F
 	inx
 	clc
-L006E:	adc     #<(_enemy_thorn_delay)
+L006F:	adc     #<(_enemy_thorn_delay)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_thorn_delay)
@@ -11037,10 +11228,10 @@ L006E:	adc     #<(_enemy_thorn_delay)
 	tax
 	lda     _index
 	asl     a
-	bcc     L006F
+	bcc     L0070
 	inx
 	clc
-L006F:	adc     #<(_enemy_thorn_timer)
+L0070:	adc     #<(_enemy_thorn_timer)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_thorn_timer)
@@ -11078,10 +11269,10 @@ L006F:	adc     #<(_enemy_thorn_timer)
 	ldx     #$00
 	lda     _index
 	asl     a
-	bcc     L0070
+	bcc     L0071
 	inx
 	clc
-L0070:	adc     #<(_enemy_anim)
+L0071:	adc     #<(_enemy_anim)
 	sta     sreg
 	txa
 	adc     #>(_enemy_anim)
@@ -11089,10 +11280,10 @@ L0070:	adc     #<(_enemy_anim)
 	ldx     #$00
 	lda     _temp1
 	asl     a
-	bcc     L0071
+	bcc     L0072
 	inx
 	clc
-L0071:	adc     #<(_enemy_init_anim)
+L0072:	adc     #<(_enemy_init_anim)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_init_anim)
@@ -11120,32 +11311,38 @@ L003A:	ldy     _index
 	lda     #$10
 	sta     _enemy_type,y
 ;
-; enemy_anim[index] = Boss1SprL;
+; enemy_anim[index] = Boss2SprL;
 ;
 	ldx     #$00
 	lda     _index
 	asl     a
-	bcc     L0072
+	bcc     L0073
 	inx
 	clc
-L0072:	adc     #<(_enemy_anim)
+L0073:	adc     #<(_enemy_anim)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_anim)
 	sta     ptr1+1
-	lda     #<(_Boss1SprL)
+	lda     #<(_Boss2SprL)
 	ldy     #$00
 	sta     (ptr1),y
 	iny
-	lda     #>(_Boss1SprL)
+	lda     #>(_Boss2SprL)
 	sta     (ptr1),y
+;
+; enemy_state[index] = 1;
+;
+	ldy     _index
+	lda     #$01
+	sta     _enemy_state,y
 ;
 ; if (enemy_type[index] == ENEMY_THORNS) {
 ;
 L003B:	ldy     _index
 	lda     _enemy_type,y
 	cmp     #$0C
-	bne     L003E
+	bne     L003F
 ;
 ; delay_frames = (unsigned int)param * 60;
 ;
@@ -11159,9 +11356,9 @@ L003B:	ldy     _index
 ; if (delay_frames == 0) delay_frames = 4 * 60;
 ;
 	cpx     #$00
-	bne     L0040
+	bne     L0041
 	cmp     #$00
-	bne     L0083
+	bne     L0084
 	tay
 	lda     #$F0
 	sta     (sp),y
@@ -11171,13 +11368,13 @@ L003B:	ldy     _index
 ;
 ; enemy_thorn_delay[index] = delay_frames;
 ;
-L0040:	ldx     #$00
-L0083:	lda     _index
+L0041:	ldx     #$00
+L0084:	lda     _index
 	asl     a
-	bcc     L0073
+	bcc     L0074
 	inx
 	clc
-L0073:	adc     #<(_enemy_thorn_delay)
+L0074:	adc     #<(_enemy_thorn_delay)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_thorn_delay)
@@ -11197,10 +11394,10 @@ L0073:	adc     #<(_enemy_thorn_delay)
 	ldx     #$00
 	lda     _index
 	asl     a
-	bcc     L0074
+	bcc     L0075
 	inx
 	clc
-L0074:	adc     #<(_enemy_thorn_timer)
+L0075:	adc     #<(_enemy_thorn_timer)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_thorn_timer)
@@ -11215,11 +11412,11 @@ L0074:	adc     #<(_enemy_thorn_timer)
 ;
 ; } else if (enemy_type[index] == ENEMY_RINGWORM) {
 ;
-	jmp     L0082
-L003E:	ldy     _index
+	jmp     L0083
+L003F:	ldy     _index
 	lda     _enemy_type,y
 	cmp     #$0D
-	bne     L0043
+	bne     L0044
 ;
 ; enemy_vel_x[index] = 1;
 ;
@@ -11234,11 +11431,11 @@ L003E:	ldy     _index
 ;
 ; } else if (enemy_type[index] == ENEMY_SPIDER) {
 ;
-	jmp     L007E
-L0043:	ldy     _index
+	jmp     L007F
+L0044:	ldy     _index
 	lda     _enemy_type,y
 	cmp     #$11
-	bne     L007E
+	bne     L007F
 ;
 ; enemy_origin_y[index] = enemy_y[index];
 ;
@@ -11246,26 +11443,26 @@ L0043:	ldy     _index
 	ldx     #>(_enemy_origin_y)
 	clc
 	adc     _index
-	bcc     L004A
+	bcc     L004B
 	inx
-L004A:	sta     ptr1
+L004B:	sta     ptr1
 	stx     ptr1+1
 	ldy     _index
 	lda     _enemy_y,y
 	ldy     #$00
-L0082:	sta     (ptr1),y
+L0083:	sta     (ptr1),y
 ;
 ; for(index = 0,index2 = 0;index < MAX_ENEMY; ++index) {
 ;
-L007E:	inc     _index
-	jmp     L007C
+L007F:	inc     _index
+	jmp     L007D
 ;
 ; for(++index;index < MAX_ENEMY; ++index) {
 ;
-L007F:	inc     _index
+L0080:	inc     _index
 	lda     _index
 	cmp     #$10
-	bcs     L004D
+	bcs     L004E
 ;
 ; enemy_y[index] = TURN_OFF;
 ;
@@ -11289,10 +11486,10 @@ L007F:	inc     _index
 	tax
 	lda     _index
 	asl     a
-	bcc     L0075
+	bcc     L0076
 	inx
 	clc
-L0075:	adc     #<(_enemy_thorn_timer)
+L0076:	adc     #<(_enemy_thorn_timer)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_thorn_timer)
@@ -11308,10 +11505,10 @@ L0075:	adc     #<(_enemy_thorn_timer)
 	tax
 	lda     _index
 	asl     a
-	bcc     L0076
+	bcc     L0077
 	inx
 	clc
-L0076:	adc     #<(_enemy_thorn_delay)
+L0077:	adc     #<(_enemy_thorn_delay)
 	sta     ptr1
 	txa
 	adc     #>(_enemy_thorn_delay)
@@ -11324,11 +11521,11 @@ L0076:	adc     #<(_enemy_thorn_delay)
 ;
 ; for(++index;index < MAX_ENEMY; ++index) {
 ;
-	jmp     L007F
+	jmp     L0080
 ;
 ; }
 ;
-L004D:	jmp     incsp4
+L004E:	jmp     incsp4
 
 .endproc
 

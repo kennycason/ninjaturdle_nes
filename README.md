@@ -92,7 +92,7 @@ This lib extends **Shiru's `neslib`** and **Doug Fraker's `nesdoug`**. Those lib
 | 18 | 147 | virus | 0x86 (8x8) | ✓ |
 | 19 | 148 | scropion | 0x87 (8x8) | ✓ |
 | 20 | 149 | poop monster | 0x28-2B,38-3B | ✓ |
-| 23 | 152 | mother worm | - | sprite removed |
+| 23 | 152 | mother worm | 0xAB-0xAE,0xBA-0xBF,0xCA-0xCF,0xDA-0xDF,0xEB-0xEE,0xFA-0xFF | ✓ |
 ```
 
 
